@@ -292,10 +292,9 @@
 
     .start-btn {
       background-color: #22c55e !important;
-      font-size: 1.1rem !important;
-      padding: 14px 20px !important;
-      width: 100%;
-      margin-top: 10px;
+      font-size: 1rem !important;
+      padding: 10px 16px !important;
+      color: white;
     }
 
     .viewer-badge {
@@ -331,7 +330,7 @@
     <input type="text" id="player-name" placeholder="Enter Your Name">
 
     <div id="create-section" style="display:flex; flex-direction:column; gap:10px;">
-      <p style="margin: 0; font-size: 0.85rem; color: var(--text-light);">Max Players: <strong>3 Players</strong></p>
+      <p style="margin: 0; font-size: 0.85rem; color: var(--text-light);">Supports 2 to 3 Players</p>
       <button class="action-btn" onclick="handleCreateRoom()">Generate Room Code</button>
     </div>
 
@@ -352,7 +351,7 @@
       <h2 style="margin:0;">Room Code: <span id="lobby-room-id" style="color:var(--accent);">-</span></h2>
       <p id="lobby-message" style="margin:10px 0;">Connecting to lobby...</p>
       <div id="connected-players-list" style="font-weight:bold; margin-bottom:10px;"></div>
-      <button id="start-game-btn" class="start-btn hidden" onclick="startMatch()">Start Game 🚀</button>
+      <button id="start-game-lobby-btn" class="start-btn hidden" onclick="startMatch()">Start Game 🚀</button>
     </div>
   </div>
 
@@ -369,6 +368,7 @@
 
     <div class="status-panel">
       <div><strong>Turn:</strong> <span id="current-player">-</span></div>
+      <button id="start-game-screen-btn" class="start-btn" onclick="initGame()">Start / Reset Match 🚀</button>
       <div id="scores-display"><strong>Scores:</strong> -</div>
     </div>
 
@@ -414,7 +414,6 @@
       { label: '10', value: 10 }, { label: 'J', value: 11 }, { label: 'Q', value: 12 }, { label: 'K', value: 13 }
     ];
 
-    const MAX_PLAYERS = 3;
     let currentRoomId = '';
     let isHost = false;
     let isViewer = false;
@@ -423,7 +422,7 @@
     let draggedIndex = null;
 
     let gameState = {
-      players: [],
+      activePlayers: [],
       viewers: [],
       turnIndex: 0,
       drawPile: [],
@@ -462,11 +461,7 @@
       isHost = true;
       isViewer = false;
 
-      gameState.players = [{ name: playerName, hand: [], score: 0 }];
-      for (let i = 1; i < MAX_PLAYERS; i++) {
-        gameState.players.push({ name: `Waiting...`, hand: [], score: 0 });
-      }
-
+      gameState.activePlayers = [{ name: playerName, hand: [], score: 0 }];
       setupPeerHost(currentRoomId);
     }
 
@@ -491,7 +486,7 @@
       peer = new Peer('sentu-room-' + roomId);
 
       peer.on('open', () => {
-        openLobby(gameState.players[0].name, roomId);
+        openLobby(gameState.activePlayers[0].name, roomId);
       });
 
       peer.on('connection', (connection) => {
@@ -501,9 +496,8 @@
             if (data.role === 'viewer') {
               gameState.viewers.push(data.name);
             } else {
-              const emptySlot = gameState.players.find(p => p.name === 'Waiting...');
-              if (emptySlot) {
-                emptySlot.name = data.name;
+              if (!gameState.activePlayers.some(p => p.name === data.name)) {
+                gameState.activePlayers.push({ name: data.name, hand: [], score: 0 });
               }
             }
             updateLobbyUI();
@@ -533,8 +527,8 @@
     }
 
     function updateLobbyUI() {
-      const playerNames = gameState.players.map(p => p.name).filter(n => n !== 'Waiting...').join(', ');
-      let statusText = `Players (3 max): ${playerNames || 'Waiting...'}`;
+      const playerNames = gameState.activePlayers.map(p => p.name).join(', ');
+      let statusText = `Players Connected: ${playerNames || 'Waiting...'}`;
 
       if (gameState.viewers.length > 0) {
         statusText += `<br>Viewers: ${gameState.viewers.join(', ')}`;
@@ -543,13 +537,18 @@
       document.getElementById('connected-players-list').innerHTML = statusText;
 
       if (isHost) {
-        document.getElementById('lobby-message').innerText = 'You are Host! Start match when ready.';
-        document.getElementById('start-game-btn').classList.remove('hidden');
+        document.getElementById('lobby-message').innerText = gameState.activePlayers.length >= 2 
+          ? 'At least 2 players joined! You can start match now.' 
+          : 'Waiting for at least 1 more player...';
+        
+        if(gameState.activePlayers.length >= 2) {
+          document.getElementById('start-game-lobby-btn').classList.remove('hidden');
+        }
       } else {
         document.getElementById('lobby-message').innerText = isViewer 
-          ? 'Joined as Viewer! Waiting for Host to start game...' 
-          : 'Joined as Player! Waiting for Host to start game...';
-        document.getElementById('start-game-btn').classList.add('hidden');
+          ? 'Joined as Viewer! Waiting for Host to start...' 
+          : 'Joined as Player! Waiting for Host to start...';
+        document.getElementById('start-game-lobby-btn').classList.add('hidden');
       }
     }
 
@@ -564,6 +563,7 @@
         document.getElementById('role-badge').classList.remove('hidden');
         document.getElementById('discard-btn').disabled = true;
         document.getElementById('off-btn').disabled = true;
+        document.getElementById('start-game-screen-btn').classList.add('hidden');
         document.getElementById('cards-header').innerText = "Game View (Spectating)";
       }
 
@@ -614,14 +614,16 @@
 
     function initGame() {
       const deck = createDeck();
-      for (let i = 0; i < MAX_PLAYERS; i++) {
-        gameState.players[i].hand = deck.splice(0, 10);
+      for (let i = 0; i < gameState.activePlayers.length; i++) {
+        gameState.activePlayers[i].hand = deck.splice(0, 10);
       }
       gameState.drawPile = deck;
       gameState.discardPile = [gameState.drawPile.pop()];
+      gameState.turnIndex = 0;
+      gameState.hasDrawnThisTurn = false;
+      gameState.selectedCardIndex = null;
       renderBoard();
     }
-
     function getCardCenterSVG(card) {
       const color = card.isRed ? '#d00000' : '#000000';
       if (['J', 'Q', 'K'].includes(card.label)) {
@@ -679,7 +681,7 @@
           e.preventDefault();
           const targetIndex = parseInt(card.getAttribute('data-index'));
           if (draggedIndex !== null && draggedIndex !== targetIndex) {
-            const hand = gameState.players[gameState.turnIndex].hand;
+            const hand = gameState.activePlayers[gameState.turnIndex].hand;
             const movedCard = hand.splice(draggedIndex, 1)[0];
             hand.splice(targetIndex, 0, movedCard);
             draggedIndex = null;
@@ -696,14 +698,14 @@
         gameState.drawPile = gameState.discardPile.sort(() => Math.random() - 0.5);
         gameState.discardPile = [top];
       }
-      gameState.players[gameState.turnIndex].hand.push(gameState.drawPile.pop());
+      gameState.activePlayers[gameState.turnIndex].hand.push(gameState.drawPile.pop());
       gameState.hasDrawnThisTurn = true;
       renderBoard();
     }
 
     function drawFromDiscard() {
       if (isViewer || gameState.hasDrawnThisTurn || gameState.discardPile.length === 0) return;
-      gameState.players[gameState.turnIndex].hand.push(gameState.discardPile.pop());
+      gameState.activePlayers[gameState.turnIndex].hand.push(gameState.discardPile.pop());
       gameState.hasDrawnThisTurn = true;
       renderBoard();
     }
@@ -717,29 +719,30 @@
 
     function discardSelectedCard() {
       if (isViewer || gameState.selectedCardIndex === null || !gameState.hasDrawnThisTurn) return;
-      const currentPlayer = gameState.players[gameState.turnIndex];
+      const currentPlayer = gameState.activePlayers[gameState.turnIndex];
       const discardedCard = currentPlayer.hand.splice(gameState.selectedCardIndex, 1)[0];
       
       gameState.discardPile.push(discardedCard);
       gameState.selectedCardIndex = null;
       gameState.hasDrawnThisTurn = false;
-      gameState.turnIndex = (gameState.turnIndex + 1) % MAX_PLAYERS;
+      gameState.turnIndex = (gameState.turnIndex + 1) % gameState.activePlayers.length;
       renderBoard();
     }
 
     function declareOff() {
       if(isViewer) return;
-      const player = gameState.players[gameState.turnIndex];
+      const player = gameState.activePlayers[gameState.turnIndex];
       alert(`${player.name} declared OFF! Round ended.`);
-      gameState.turnIndex = 0;
       initGame();
     }
 
     function renderBoard() {
-      document.getElementById('current-player').innerText = gameState.players[gameState.turnIndex].name;
+      if (gameState.activePlayers.length === 0) return;
+      
+      document.getElementById('current-player').innerText = gameState.activePlayers[gameState.turnIndex].name;
       document.getElementById('draw-count').innerText = `(${gameState.drawPile.length})`;
       
-      const scoreStr = gameState.players.map((p, i) => `${p.name}: ${p.score}`).join(' | ');
+      const scoreStr = gameState.activePlayers.map((p) => `${p.name}: ${p.score}`).join(' | ');
       document.getElementById('scores-display').innerHTML = `<strong>Scores:</strong> ${scoreStr}`;
 
       const topDiscardEl = document.getElementById('top-discard');
@@ -752,7 +755,7 @@
 
       const handEl = document.getElementById('player-hand');
       handEl.innerHTML = '';
-      const currentHand = gameState.players[gameState.turnIndex].hand;
+      const currentHand = gameState.activePlayers[gameState.turnIndex].hand || [];
 
       currentHand.forEach((card, idx) => {
         const cardWrapper = document.createElement('div');
@@ -770,3 +773,5 @@
   </script>
 </body>
 </html>
+
+    
