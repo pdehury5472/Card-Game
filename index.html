@@ -55,7 +55,6 @@
       align-items: center;
     }
 
-    /* Minimal Top Bar */
     .top-bar {
       display: flex;
       justify-content: space-between;
@@ -66,33 +65,20 @@
       margin-bottom: 4px;
     }
 
-    .top-bar h1 {
-      margin: 0;
-      font-size: 1.1rem;
-      color: var(--accent);
-    }
-
-    .theme-bar {
-      display: flex;
-      gap: 6px;
-    }
-
+    .top-bar h1 { margin: 0; font-size: 1.1rem; color: var(--accent); }
+    .theme-bar { display: flex; gap: 6px; }
     .theme-dot {
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      cursor: pointer;
-      border: 1px solid #aaa;
+      width: 18px; height: 18px; border-radius: 50%;
+      cursor: pointer; border: 1px solid #aaa;
     }
 
-    /* Menu Section */
     .menu-card {
       background: var(--panel-bg);
-      padding: 12px;
+      padding: 14px;
       border-radius: 8px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
       width: 100%;
       max-width: 360px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
@@ -101,220 +87,207 @@
       margin-bottom: auto;
     }
 
-    .tab-buttons {
-      display: flex;
-      gap: 6px;
-    }
-
+    .tab-buttons { display: flex; gap: 6px; }
     .tab-btn {
-      flex: 1;
-      background: rgba(0, 0, 0, 0.05);
-      color: var(--text-light);
-      padding: 6px;
+      flex: 1; background: rgba(0, 0, 0, 0.05);
+      color: var(--text-light); padding: 6px;
       border: 1px solid rgba(0, 0, 0, 0.1);
-      border-radius: 4px;
-      font-weight: bold;
-      cursor: pointer;
-      font-size: 0.8rem;
+      border-radius: 4px; font-weight: bold;
+      cursor: pointer; font-size: 0.8rem;
     }
-
-    .tab-btn.active {
-      background: var(--accent);
-      color: #fff;
-    }
+    .tab-btn.active { background: var(--accent); color: #fff; }
 
     .menu-card input, .menu-card select {
-      padding: 8px;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-      font-size: 0.85rem;
-      width: 100%;
+      padding: 8px; border-radius: 4px;
+      border: 1px solid #ccc; font-size: 0.85rem; width: 100%;
     }
 
-    /* Compact Game Canvas (No Scroll) */
     .game-board {
-      width: 100%;
-      max-width: 500px;
+      width: 100%; max-width: 500px;
       height: calc(100vh - 40px);
-      display: none;
-      flex-direction: column;
-      justify-content: space-between;
-      gap: 4px;
+      display: none; flex-direction: column;
+      justify-content: space-between; gap: 4px;
     }
 
     .status-panel {
       background: var(--panel-bg);
-      padding: 6px 10px;
-      border-radius: 6px;
+      padding: 6px 10px; border-radius: 6px;
+      display: flex; justify-content: space-between;
+      align-items: center; font-size: 0.75rem;
+    }
+
+    /* Avatar Grid Setup */
+    .players-avatar-bar {
       display: flex;
-      justify-content: space-between;
+      justify-content: space-around;
       align-items: center;
-      font-size: 0.75rem;
+      background: var(--panel-bg);
+      padding: 6px;
+      border-radius: 8px;
     }
 
-    .piles {
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      margin: 2px 0;
-    }
-
-    .pile {
-      width: 65px;
-      height: 90px;
-      border: 2px dashed rgba(0, 0, 0, 0.2);
-      border-radius: 6px;
+    .player-avatar-card {
       display: flex;
       flex-direction: column;
-      justify-content: center;
       align-items: center;
+      position: relative;
+    }
+
+    .avatar-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #ccc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      border: 2px solid transparent;
+    }
+
+    .player-avatar-card.active .avatar-icon {
+      border-color: #22c55e;
+      box-shadow: 0 0 8px #22c55e;
+    }
+
+    .player-name-tag {
+      font-size: 0.65rem;
+      font-weight: bold;
+      margin-top: 2px;
+    }
+
+    .bell-btn {
+      position: absolute;
+      top: -4px;
+      right: -8px;
+      background: #eab308;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      font-size: 0.6rem;
       cursor: pointer;
-      background: rgba(0,0,0,0.02);
-      font-size: 0.7rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+
+    .piles { display: flex; justify-content: center; gap: 15px; margin: 2px 0; }
+    .pile {
+      width: 65px; height: 90px;
+      border: 2px dashed rgba(0, 0, 0, 0.2);
+      border-radius: 6px; display: flex;
+      flex-direction: column; justify-content: center;
+      align-items: center; cursor: pointer;
+      background: rgba(0,0,0,0.02); font-size: 0.7rem;
+      position: relative;
+    }
+
+    .pile.drag-over {
+      border-color: #22c55e;
+      background: rgba(34, 197, 94, 0.15);
     }
 
     .card {
-      width: 60px;
-      height: 88px;
+      width: 60px; height: 88px;
       background-color: var(--card-bg);
       color: var(--card-text);
       border: 1px solid var(--card-border);
-      border-radius: 4px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 2px;
-      font-weight: bold;
+      border-radius: 4px; display: flex;
+      flex-direction: column; justify-content: space-between;
+      padding: 2px; font-weight: bold;
       box-shadow: -2px 2px 4px rgba(0,0,0,0.15);
-      user-select: none;
-      position: relative;
-      cursor: grab;
-      flex-shrink: 0;
+      user-select: none; position: relative;
+      cursor: grab; flex-shrink: 0;
     }
 
     .card .corner {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      font-size: 0.7rem;
-      line-height: 0.8;
+      display: flex; flex-direction: column;
+      align-items: center; font-size: 0.7rem; line-height: 0.8;
     }
-
     .card .inner-frame {
       border: 1px solid var(--inner-border);
-      height: 60%;
-      margin: 1px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      background: #fafafa;
+      height: 60%; margin: 1px; display: flex;
+      align-items: center; justify-content: center;
+      overflow: hidden; background: #fafafa;
     }
-
-    .card .inner-frame svg { width: 100%; height: 100%; }
     .card .center-suit { font-size: 1.2rem; }
     .card.bottom-corner { transform: rotate(180deg); }
     .card.red { color: #d00000; }
-    
-    .card.selected { 
-      border: 2px solid var(--accent); 
-      transform: translateY(-8px); 
+    .card.selected {
+      border: 2px solid var(--accent);
+      transform: translateY(-8px);
       box-shadow: 0 0 8px var(--accent);
     }
 
-    /* Hand container setup */
     .hand-container {
-      overflow-x: auto;
-      padding: 10px 5px;
-      background: var(--panel-bg);
-      border-radius: 6px;
-      height: 110px;
-      display: flex;
-      align-items: center;
+      overflow-x: auto; padding: 10px 5px;
+      background: var(--panel-bg); border-radius: 6px;
+      min-height: 110px; display: flex; flex-direction: column; gap: 8px;
     }
-
-    .hand { display: flex; align-items: center; }
-    .hand .card { margin-right: -24px; }
-    .hand .card:last-child { margin-right: 0; }
-
-    /* Quick Messages & Chat Box */
-    .chat-box {
-      background: var(--panel-bg);
-      border-radius: 6px;
+    
+    .sets-wrapper { display: flex; gap: 10px; overflow-x: auto; width: 100%; }
+    .card-set-group {
+      display: flex;
+      background: rgba(0,0,0,0.04);
       padding: 4px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
+      border-radius: 6px;
+      border: 1px solid rgba(0,0,0,0.1);
     }
+    
+    .card-set-group .card { margin-right: -32px; }
+    .card-set-group .card:last-child { margin-right: 0; }
 
-    .quick-msg-bar {
-      display: flex;
-      gap: 4px;
-      overflow-x: auto;
-      padding-bottom: 2px;
+    .chat-box {
+      background: var(--panel-bg); border-radius: 6px;
+      padding: 4px; display: flex; flex-direction: column; gap: 4px;
     }
-
+    .quick-msg-bar { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 2px; }
     .quick-btn {
-      background: rgba(0, 0, 0, 0.05);
-      color: var(--text-light);
-      border: 1px solid rgba(0, 0, 0, 0.1);
-      padding: 4px 8px;
-      border-radius: 12px;
-      font-size: 0.7rem;
-      white-space: nowrap;
-      cursor: pointer;
+      background: rgba(0, 0, 0, 0.05); color: var(--text-light);
+      border: 1px solid rgba(0, 0, 0, 0.1); padding: 4px 8px;
+      border-radius: 12px; font-size: 0.7rem;
+      white-space: nowrap; cursor: pointer;
     }
-
-    .like-btn {
-      background: #3b82f6 !important;
-      color: white !important;
-      font-weight: bold;
-    }
-
+    .like-btn { background: #3b82f6 !important; color: white !important; font-weight: bold; }
     .chat-display {
-      font-size: 0.75rem;
-      background: rgba(255, 255, 255, 0.5);
-      padding: 4px 8px;
-      border-radius: 4px;
-      height: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      overflow: hidden;
+      font-size: 0.75rem; background: rgba(255, 255, 255, 0.5);
+      padding: 4px 8px; border-radius: 4px; height: 24px;
+      display: flex; align-items: center; justify-content: space-between; overflow: hidden;
     }
 
-    .controls {
-      display: flex;
-      gap: 6px;
-    }
-
+    .controls { display: flex; gap: 6px; flex-wrap: wrap; }
     button {
-      background-color: var(--accent);
-      color: #ffffff;
-      border: none;
-      padding: 8px 10px;
-      font-weight: bold;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 0.75rem;
-      flex: 1;
+      background-color: var(--accent); color: #ffffff;
+      border: none; padding: 8px 10px; font-weight: bold;
+      border-radius: 4px; cursor: pointer; font-size: 0.75rem; flex: 1;
     }
-
+    .aux-btn { background-color: #64748b; }
     .viewer-badge {
-      background: #8b5cf6;
-      color: white;
-      padding: 1px 6px;
-      border-radius: 8px;
-      font-size: 0.65rem;
+      background: #8b5cf6; color: white;
+      padding: 1px 6px; border-radius: 8px; font-size: 0.65rem;
     }
-
     button:disabled { opacity: 0.4; cursor: not-allowed; }
     .hidden { display: none !important; }
+
+    /* Modal for Scoreboard */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5); display: flex;
+      align-items: center; justify-content: center; z-index: 100;
+    }
+    .modal-body {
+      background: white; padding: 16px; border-radius: 8px;
+      width: 90%; max-width: 320px; text-align: center;
+    }
+    .modal-table { width: 100%; margin: 10px 0; border-collapse: collapse; }
+    .modal-table th, .modal-table td { border: 1px solid #ddd; padding: 6px; font-size: 0.8rem; }
   </style>
 </head>
 <body class="theme-skyblue">
 
-  <!-- Minimal Top Bar -->
   <div class="top-bar">
     <h1>ସେଣ୍ଟୁ</h1>
     <div class="theme-bar">
@@ -324,7 +297,6 @@
     </div>
   </div>
 
-  <!-- Setup Menu -->
   <div class="menu-card" id="room-menu">
     <div class="tab-buttons">
       <button class="tab-btn active" id="tab-create" onclick="switchMode('create')">Create Room</button>
@@ -332,13 +304,19 @@
     </div>
 
     <input type="text" id="player-name" placeholder="Your Name">
+    <select id="avatar-select">
+      <option value="🦊">🦊 Fox Avatar</option>
+      <option value="🐯">🐯 Tiger Avatar</option>
+      <option value="🐼">🐼 Panda Avatar</option>
+      <option value="🦁">🦁 Lion Avatar</option>
+    </select>
 
     <div id="create-section" style="display:flex; flex-direction:column; gap:8px;">
       <button onclick="handleCreateRoom()">Create & Go To Table 🚀</button>
     </div>
 
     <div id="join-section" class="hidden" style="display:flex; flex-direction:column; gap:8px;">
-      <input type="number" id="join-room-id" placeholder="4-Digit Code">
+      <input type="text" id="join-room-id" placeholder="4-Letter Code" style="text-transform:uppercase">
       <select id="join-role-select">
         <option value="player">Player 🎮</option>
         <option value="viewer">Viewer 👁️</option>
@@ -347,52 +325,64 @@
     </div>
   </div>
 
-  <!-- Single-Screen Game Table -->
   <div class="game-board" id="game-board">
     <div class="status-panel">
       <div>Room: <strong id="display-room-id">-</strong></div>
       <div>User: <strong id="display-player-name" style="color:var(--accent);">-</strong> <span id="role-badge" class="viewer-badge hidden">Viewer</span></div>
+      <button onclick="toggleScoreModal()" style="padding:2px 6px; flex:none;">🏆 Scores</button>
       <button onclick="shareRoomLink()" style="padding:2px 6px; flex:none;">🔗 Link</button>
     </div>
 
-    <div class="status-panel">
-      <div>Turn: <strong id="current-player">-</strong></div>
-      <div id="scores-display">Scores: -</div>
-    </div>
+    <!-- Avatar Bar -->
+    <div class="players-avatar-bar" id="avatar-bar"></div>
 
     <div class="piles">
       <div class="pile" id="draw-pile" onclick="drawFromDeck()">
         <span>Deck</span>
-        <strong id="draw-count">(42)</strong>
+        <strong id="draw-count">(0)</strong>
       </div>
-      <div class="pile" id="discard-pile" onclick="drawFromDiscard()">
+      <div class="pile" id="discard-pile" onclick="drawFromDiscard()" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
         <span>Discard</span>
         <div id="top-discard"></div>
       </div>
     </div>
 
-    <!-- Quick Message Box -->
     <div class="chat-box">
       <div class="quick-msg-bar">
         <button class="quick-btn like-btn" onclick="sendQuickMessage('👍 Like')">👍 Like</button>
         <button class="quick-btn" onclick="sendQuickMessage('ଶୀଘ୍ର ଛାଡ଼େ')">ଶୀଘ୍ର ଛାଡ଼େ</button>
         <button class="quick-btn" onclick="sendQuickMessage('ଛାଡ଼ିବୁ ନି କି')">ଛାଡ଼ିବୁ ନି କି</button>
         <button class="quick-btn" onclick="sendQuickMessage('ତୁ ପାରିବୁ ନି')">ତୁ ପାରିବୁ ନି</button>
-        <button class="quick-btn" onclick="sendQuickMessage('କଣ କରୁଛୁ ଯେ')">କଣ କରୁଛୁ ଯେ</button>
       </div>
-      <div class="chat-display" id="chat-display">
+      <div class="chat-display">
         <span id="chat-msg" style="font-style:italic; color:#666;">No messages yet...</span>
       </div>
     </div>
 
+    <!-- Hand & Card Serial Display -->
     <div class="hand-container">
-      <div class="hand" id="player-hand"></div>
+      <div class="sets-wrapper" id="sets-wrapper"></div>
     </div>
 
     <div class="controls">
+      <button class="aux-btn" onclick="sortHandBySuit()">Sort Suits</button>
+      <button class="aux-btn" onclick="sortHandByRank()">Sort Rank</button>
+      <button class="aux-btn" onclick="groupSelectedCards()">Group Set (3/4)</button>
       <button id="discard-btn" onclick="discardSelectedCard()" disabled>Discard</button>
       <button id="off-btn" onclick="declareOff()">Declare OFF</button>
-      <button onclick="leaveRoom()" style="background:#ff4d4d; color:white;">Exit</button>
+      <button onclick="leaveRoom()" style="background:#ff4d4d; color:white; flex:0 0 100%;">Exit</button>
+    </div>
+  </div>
+
+  <!-- Score Board Modal -->
+  <div class="modal-overlay hidden" id="score-modal">
+    <div class="modal-body">
+      <h3>Global Scoreboard</h3>
+      <table class="modal-table">
+        <thead><tr><th>Player</th><th>Avatar</th><th>Score</th></tr></thead>
+        <tbody id="scoreboard-rows"></tbody>
+      </table>
+      <button onclick="toggleScoreModal()">Close</button>
     </div>
   </div>
 
@@ -408,17 +398,31 @@
     let currentRoomId = '';
     let isHost = false;
     let isViewer = false;
+    let myPeerId = '';
+    let localPlayerName = '';
+    let localAvatar = '🦊';
     let peer = null;
-    let conn = null;
+    let connections = [];
 
     let gameState = {
-      activePlayers: [],
+      players: [], 
       turnIndex: 0,
       drawPile: [],
       discardPile: [],
-      selectedCardIndex: null,
       hasDrawnThisTurn: false
     };
+
+    let localSelectedCardIndices = [];
+    let localGroups = []; // Stores indices sets [[0,1,2], [3,4,5,6]]
+
+    window.addEventListener('load', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const roomParam = urlParams.get('room');
+      if (roomParam) {
+        switchMode('join');
+        document.getElementById('join-room-id').value = roomParam.toUpperCase();
+      }
+    });
 
     function setTheme(themeName) { document.body.className = themeName; }
 
@@ -436,33 +440,254 @@
       }
     }
 
+    function initPeer(idPrefix, callback) {
+      const cleanId = idPrefix ? idPrefix.toLowerCase().replace(/[^a-z0-9]/g, '') : null;
+      peer = new Peer(cleanId ? `sentu-room-${cleanId}` : null);
+
+      peer.on('open', (id) => {
+        myPeerId = id;
+        callback(true);
+      });
+
+      peer.on('error', (err) => {
+        alert('Network connection error: ' + err.type);
+        callback(false);
+      });
+    }
+
     function handleCreateRoom() {
-      const playerName = document.getElementById('player-name').value.trim() || 'Host';
-      currentRoomId = Math.floor(1000 + Math.random() * 9000).toString();
+      localPlayerName = document.getElementById('player-name').value.trim() || 'Host';
+      localAvatar = document.getElementById('avatar-select').value;
+      currentRoomId = Math.random().toString(36).substring(2, 6).toUpperCase();
       isHost = true;
       isViewer = false;
 
-      gameState.activePlayers = [{ name: playerName, hand: [], score: 0 }];
-      goToTable(playerName);
+      initPeer(currentRoomId, (success) => {
+        if (!success) return;
+        gameState.players = [{ peerId: myPeerId, name: localPlayerName, avatar: localAvatar, hand: [], score: 0, isViewer: false }];
+        
+        peer.on('connection', (conn) => {
+          connections.push(conn);
+          conn.on('data', (data) => handleHostIncomingData(data, conn));
+          conn.on('close', () => {
+            connections = connections.filter(c => c !== conn);
+            gameState.players = gameState.players.filter(p => p.peerId !== conn.peer);
+            broadcastState();
+          });
+        });
+
+        goToTable();
+        startNewRound();
+      });
     }
 
     function handleJoinRoom() {
-      const playerName = document.getElementById('player-name').value.trim() || 'Guest';
-      const roomId = document.getElementById('join-room-id').value.trim();
+      localPlayerName = document.getElementById('player-name').value.trim() || 'Guest';
+      localAvatar = document.getElementById('avatar-select').value;
+      const code = document.getElementById('join-room-id').value.trim().toUpperCase();
       const role = document.getElementById('join-role-select').value;
 
-      if (!roomId) return alert('Enter 4-Digit Room Code');
+      if (!code) return alert('Enter 4-Letter Room Code');
 
-      currentRoomId = roomId;
+      currentRoomId = code;
       isHost = false;
       isViewer = (role === 'viewer');
 
-      if (!isViewer) gameState.activePlayers.push({ name: playerName, hand: [], score: 0 });
-      goToTable(playerName);
+      initPeer(null, (success) => {
+        if (!success) return;
+        const hostPeerId = `sentu-room-${currentRoomId.toLowerCase()}`;
+        const conn = peer.connect(hostPeerId);
+        connections = [conn];
+
+        conn.on('open', () => {
+          conn.send({
+            type: 'JOIN',
+            payload: { peerId: myPeerId, name: localPlayerName, avatar: localAvatar, isViewer: isViewer }
+          });
+          goToTable();
+        });
+
+        conn.on('data', (data) => handleClientIncomingData(data));
+      });
     }
 
-    function goToTable(playerName) {
-      document.getElementById('display-player-name').innerText = playerName;
+    function handleHostIncomingData(data, conn) {
+      if (data.type === 'JOIN') {
+        const existing = gameState.players.find(p => p.peerId === data.payload.peerId);
+        if (!existing) {
+          gameState.players.push({
+            peerId: data.payload.peerId,
+            name: data.payload.name,
+            avatar: data.payload.avatar,
+            hand: [],
+            score: 0,
+            isViewer: data.payload.isViewer
+          });
+          if (gameState.drawPile.length > 0 && !data.payload.isViewer) {
+            const newPlayer = gameState.players[gameState.players.length - 1];
+            newPlayer.hand = gameState.drawPile.splice(0, 10);
+          }
+        }
+        broadcastState();
+      } else if (data.type === 'ACTION') {
+        executeAction(data.payload.action, data.payload.peerId, data.payload.params);
+      } else if (data.type === 'NUDGE') {
+        broadcastMessage({ type: 'CHAT', payload: { name: 'SYSTEM', text: `🔔 ${data.payload.from} reminded ${data.payload.to} to play their move!` } });
+      } else if (data.type === 'CHAT') {
+        broadcastMessage(data);
+      }
+    }
+
+    function handleClientIncomingData(data) {
+      if (data.type === 'STATE_UPDATE') {
+        gameState = data.payload;
+        renderBoard();
+      } else if (data.type === 'CHAT') {
+        displayMessage(data.payload.name, data.payload.text);
+      }
+    }
+
+    function sendActionToHost(action, params = {}) {
+      if (isHost) {
+        executeAction(action, myPeerId, params);
+      } else if (connections[0]) {
+        connections[0].send({ type: 'ACTION', payload: { action, peerId: myPeerId, params } });
+      }
+    }
+
+    function broadcastState() {
+      if (!isHost) return;
+      connections.forEach(c => c.send({ type: 'STATE_UPDATE', payload: gameState }));
+      renderBoard();
+    }
+
+    function broadcastMessage(chatData) {
+      if (isHost) {
+        connections.forEach(c => c.send(chatData));
+        displayMessage(chatData.payload.name, chatData.payload.text);
+      }
+    }
+
+    function executeAction(action, peerId, params) {
+      const activePlayers = gameState.players.filter(p => !p.isViewer);
+      if (activePlayers.length === 0) return;
+      const currentTurnPlayer = activePlayers[gameState.turnIndex];
+
+      if (action === 'DRAW_DECK') {
+        if (currentTurnPlayer.peerId !== peerId || gameState.hasDrawnThisTurn) return;
+        if (gameState.drawPile.length === 0) {
+          if (gameState.discardPile.length <= 1) return;
+          const top = gameState.discardPile.pop();
+          gameState.drawPile = gameState.discardPile.sort(() => Math.random() - 0.5);
+          gameState.discardPile = [top];
+        }
+        currentTurnPlayer.hand.push(gameState.drawPile.pop());
+        gameState.hasDrawnThisTurn = true;
+      } 
+      else if (action === 'DRAW_DISCARD') {
+        if (currentTurnPlayer.peerId !== peerId || gameState.hasDrawnThisTurn || gameState.discardPile.length === 0) return;
+        currentTurnPlayer.hand.push(gameState.discardPile.pop());
+        gameState.hasDrawnThisTurn = true;
+      } 
+      else if (action === 'DISCARD') {
+        if (currentTurnPlayer.peerId !== peerId || !gameState.hasDrawnThisTurn) return;
+        const cardIdx = params.cardIndex;
+        if (cardIdx < 0 || cardIdx >= currentTurnPlayer.hand.length) return;
+
+        const discarded = currentTurnPlayer.hand.splice(cardIdx, 1)[0];
+        gameState.discardPile.push(discarded);
+        gameState.hasDrawnThisTurn = false;
+        gameState.turnIndex = (gameState.turnIndex + 1) % activePlayers.length;
+      } 
+      else if (action === 'DECLARE_OFF') {
+        if (currentTurnPlayer.peerId !== peerId) return;
+        currentTurnPlayer.score += 25;
+        alert(`${currentTurnPlayer.name} declared OFF! Round restarted.`);
+        startNewRound();
+        return;
+      }
+
+      broadcastState();
+    }
+
+    function startNewRound() {
+      if (!isHost) return;
+      const deck = createDeck();
+      const active = gameState.players.filter(p => !p.isViewer);
+
+      active.forEach(p => { p.hand = deck.splice(0, 10); });
+      gameState.drawPile = deck;
+      gameState.discardPile = [gameState.drawPile.pop()];
+      gameState.turnIndex = 0;
+      gameState.hasDrawnThisTurn = false;
+      broadcastState();
+    }
+
+    /* Drag & Drop Discarding Controls */
+    function handleDragStart(e, idx) {
+      e.dataTransfer.setData('text/plain', idx);
+    }
+    function handleDragOver(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
+    function handleDragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+    function handleDrop(e) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('drag-over');
+      const cardIdx = parseInt(e.dataTransfer.getData('text/plain'), 10);
+      if (!isNaN(cardIdx)) {
+        sendActionToHost('DISCARD', { cardIndex: cardIdx });
+        localSelectedCardIndices = [];
+      }
+    }
+
+    /* Sorting and Grouping Logic */
+    function sortHandBySuit() {
+      const me = gameState.players.find(p => p.peerId === myPeerId);
+      if (!me) return;
+      me.hand.sort((a, b) => a.suit.localeCompare(b.suit) || a.value - b.value);
+      localGroups = [];
+      renderBoard();
+    }
+
+    function sortHandByRank() {
+      const me = gameState.players.find(p => p.peerId === myPeerId);
+      if (!me) return;
+      me.hand.sort((a, b) => a.value - b.value || a.suit.localeCompare(b.suit));
+      localGroups = [];
+      renderBoard();
+    }
+
+    function groupSelectedCards() {
+      if (localSelectedCardIndices.length < 3) {
+        return alert("Select at least 3 or 4 cards to form a group/set!");
+      }
+      localGroups.push([...localSelectedCardIndices]);
+      localSelectedCardIndices = [];
+      renderBoard();
+    }
+
+    function sendNudge(targetName) {
+      if (isHost) {
+        broadcastMessage({ type: 'CHAT', payload: { name: 'SYSTEM', text: `🔔 ${localPlayerName} reminded ${targetName} to play move!` } });
+      } else {
+        connections[0].send({ type: 'NUDGE', payload: { from: localPlayerName, to: targetName } });
+      }
+    }
+
+    function toggleScoreModal() {
+      const modal = document.getElementById('score-modal');
+      modal.classList.toggle('hidden');
+
+      if (!modal.classList.contains('hidden')) {
+        const tbody = document.getElementById('scoreboard-rows');
+        tbody.innerHTML = '';
+        gameState.players.forEach(p => {
+          tbody.innerHTML += `<tr><td>${p.name}</td><td>${p.avatar}</td><td>${p.score}</td></tr>`;
+        });
+      }
+    }
+
+    function goToTable() {
+      document.getElementById('display-player-name').innerText = localPlayerName;
       document.getElementById('display-room-id').innerText = currentRoomId;
       document.getElementById('room-menu').classList.add('hidden');
       document.getElementById('game-board').style.display = 'flex';
@@ -472,27 +697,26 @@
         document.getElementById('discard-btn').disabled = true;
         document.getElementById('off-btn').disabled = true;
       }
-
-      initGame();
     }
 
     function sendQuickMessage(text) {
-      const name = document.getElementById('display-player-name').innerText;
+      const chatPayload = { type: 'CHAT', payload: { name: localPlayerName, text } };
+      if (isHost) broadcastMessage(chatPayload);
+      else if (connections[0]) connections[0].send(chatPayload);
+    }
+
+    function displayMessage(name, text) {
       document.getElementById('chat-msg').innerHTML = `<strong>${name}:</strong> ${text}`;
     }
 
-    function leaveRoom() {
-      document.getElementById('room-menu').classList.remove('hidden');
-      document.getElementById('game-board').style.display = 'none';
-      document.getElementById('role-badge').classList.add('hidden');
-      isHost = false;
-      isViewer = false;
-    }
+    function leaveRoom() { if (peer) peer.destroy(); location.reload(); }
 
     function shareRoomLink() {
       const shareUrl = `${window.location.origin}${window.location.pathname}?room=${currentRoomId}`;
-      if (navigator.clipboard) navigator.clipboard.writeText(shareUrl);
-      alert('Room Code copied!');
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(shareUrl);
+        alert('Room Code & Link copied!');
+      }
     }
 
     function createDeck() {
@@ -505,26 +729,34 @@
       return deck.sort(() => Math.random() - 0.5);
     }
 
-    function initGame() {
-      const deck = createDeck();
-      if (gameState.activePlayers.length === 0) {
-        gameState.activePlayers = [{ name: 'Player 1', hand: [], score: 0 }, { name: 'Player 2', hand: [], score: 0 }];
-      }
-      for (let i = 0; i < gameState.activePlayers.length; i++) {
-        gameState.activePlayers[i].hand = deck.splice(0, 10);
-      }
-      gameState.drawPile = deck;
-      gameState.discardPile = [gameState.drawPile.pop()];
-      gameState.turnIndex = 0;
-      gameState.hasDrawnThisTurn = false;
-      gameState.selectedCardIndex = null;
+    function drawFromDeck() { if (!isViewer) sendActionToHost('DRAW_DECK'); }
+    function drawFromDiscard() { if (!isViewer) sendActionToHost('DRAW_DISCARD'); }
+
+    function toggleSelectCard(index) {
+      if (isViewer) return;
+      const pos = localSelectedCardIndices.indexOf(index);
+      if (pos > -1) localSelectedCardIndices.splice(pos, 1);
+      else localSelectedCardIndices.push(index);
+
+      document.getElementById('discard-btn').disabled = (localSelectedCardIndices.length !== 1);
       renderBoard();
     }
+
+    function discardSelectedCard() {
+      if (isViewer || localSelectedCardIndices.length !== 1) return;
+      sendActionToHost('DISCARD', { cardIndex: localSelectedCardIndices[0] });
+      localSelectedCardIndices = [];
+    }
+
+    function declareOff() { if (!isViewer) sendActionToHost('DECLARE_OFF'); }
 
     function generateCardHTML(card, index, isSelected = false) {
       if (!card) return '';
       return `
-        <div class="card ${card.isRed ? 'red' : ''} ${isSelected ? 'selected' : ''}" data-index="${index}">
+        <div class="card ${card.isRed ? 'red' : ''} ${isSelected ? 'selected' : ''}" 
+             draggable="true" 
+             ondragstart="handleDragStart(event, ${index})" 
+             data-index="${index}">
           <div class="corner"><span>${card.label}</span><span>${card.suit}</span></div>
           <div class="inner-frame"><div class="center-suit">${card.suit}</div></div>
           <div class="corner bottom-corner"><span>${card.label}</span><span>${card.suit}</span></div>
@@ -532,60 +764,30 @@
       `;
     }
 
-    function drawFromDeck() {
-      if (isViewer || gameState.hasDrawnThisTurn) return;
-      if (gameState.drawPile.length === 0) {
-        const top = gameState.discardPile.pop();
-        gameState.drawPile = gameState.discardPile.sort(() => Math.random() - 0.5);
-        gameState.discardPile = [top];
-      }
-      gameState.activePlayers[gameState.turnIndex].hand.push(gameState.drawPile.pop());
-      gameState.hasDrawnThisTurn = true;
-      renderBoard();
-    }
-
-    function drawFromDiscard() {
-      if (isViewer || gameState.hasDrawnThisTurn || gameState.discardPile.length === 0) return;
-      gameState.activePlayers[gameState.turnIndex].hand.push(gameState.discardPile.pop());
-      gameState.hasDrawnThisTurn = true;
-      renderBoard();
-    }
-
-    function selectCard(index) {
-      if (isViewer) return;
-      gameState.selectedCardIndex = index;
-      document.getElementById('discard-btn').disabled = !gameState.hasDrawnThisTurn;
-      renderBoard();
-    }
-
-    function discardSelectedCard() {
-      if (isViewer || gameState.selectedCardIndex === null || !gameState.hasDrawnThisTurn) return;
-      const currentPlayer = gameState.activePlayers[gameState.turnIndex];
-      const discardedCard = currentPlayer.hand.splice(gameState.selectedCardIndex, 1)[0];
-      
-      gameState.discardPile.push(discardedCard);
-      gameState.selectedCardIndex = null;
-      gameState.hasDrawnThisTurn = false;
-      gameState.turnIndex = (gameState.turnIndex + 1) % gameState.activePlayers.length;
-      renderBoard();
-    }
-
-    function declareOff() {
-      if(isViewer) return;
-      const player = gameState.activePlayers[gameState.turnIndex];
-      alert(`${player.name} declared OFF!`);
-      initGame();
-    }
-
     function renderBoard() {
-      if (gameState.activePlayers.length === 0) return;
-      
-      document.getElementById('current-player').innerText = gameState.activePlayers[gameState.turnIndex].name;
-      document.getElementById('draw-count').innerText = `(${gameState.drawPile.length})`;
-      
-      const scoreStr = gameState.activePlayers.map((p) => `${p.name}: ${p.score}`).join(' | ');
-      document.getElementById('scores-display').innerHTML = `Scores: ${scoreStr}`;
+      const activePlayers = gameState.players.filter(p => !p.isViewer);
+      if (activePlayers.length === 0) return;
 
+      const currentTurnPlayer = activePlayers[gameState.turnIndex];
+      const isMyTurn = currentTurnPlayer && currentTurnPlayer.peerId === myPeerId;
+
+      document.getElementById('draw-count').innerText = `(${gameState.drawPile.length})`;
+
+      // Render Avatars Bar & Turn Bell
+      const avatarBar = document.getElementById('avatar-bar');
+      avatarBar.innerHTML = '';
+      activePlayers.forEach((p, idx) => {
+        const isCurrent = (idx === gameState.turnIndex);
+        avatarBar.innerHTML += `
+          <div class="player-avatar-card ${isCurrent ? 'active' : ''}">
+            <div class="avatar-icon">${p.avatar || '👤'}</div>
+            <div class="player-name-tag">${p.name}</div>
+            ${isCurrent && p.peerId !== myPeerId ? `<button class="bell-btn" onclick="sendNudge('${p.name}')">🔔</button>` : ''}
+          </div>
+        `;
+      });
+
+      // Discard Pile
       const topDiscardEl = document.getElementById('top-discard');
       if (gameState.discardPile.length > 0) {
         const topCard = gameState.discardPile[gameState.discardPile.length - 1];
@@ -594,19 +796,48 @@
         topDiscardEl.innerHTML = 'Empty';
       }
 
-      const handEl = document.getElementById('player-hand');
-      handEl.innerHTML = '';
-      const currentHand = gameState.activePlayers[gameState.turnIndex].hand || [];
+      // Render Local Hand & Groups (Sets vs Other Cards)
+      const setsWrapper = document.getElementById('sets-wrapper');
+      setsWrapper.innerHTML = '';
 
-      currentHand.forEach((card, idx) => {
-        const cardWrapper = document.createElement('div');
-        const isSelected = gameState.selectedCardIndex === idx;
-        cardWrapper.innerHTML = generateCardHTML(card, idx, isSelected);
-        
-        const cardElement = cardWrapper.firstElementChild;
-        cardElement.onclick = () => selectCard(idx);
-        handEl.appendChild(cardElement);
+      const me = gameState.players.find(p => p.peerId === myPeerId);
+      const myHand = me ? me.hand : [];
+
+      let groupedIndices = new Set();
+      localGroups.forEach((group) => {
+        const setDiv = document.createElement('div');
+        setDiv.className = 'card-set-group';
+        group.forEach(idx => {
+          if (myHand[idx]) {
+            groupedIndices.add(idx);
+            const isSelected = localSelectedCardIndices.includes(idx);
+            const cardWrapper = document.createElement('div');
+            cardWrapper.innerHTML = generateCardHTML(myHand[idx], idx, isSelected);
+            const cardEl = cardWrapper.firstElementChild;
+            cardEl.onclick = () => toggleSelectCard(idx);
+            setDiv.appendChild(cardEl);
+          }
+        });
+        setsWrapper.appendChild(setDiv);
       });
+
+      // Render standard/other ungrouped cards
+      const otherDiv = document.createElement('div');
+      otherDiv.className = 'card-set-group';
+      myHand.forEach((card, idx) => {
+        if (!groupedIndices.has(idx)) {
+          const isSelected = localSelectedCardIndices.includes(idx);
+          const cardWrapper = document.createElement('div');
+          cardWrapper.innerHTML = generateCardHTML(card, idx, isSelected);
+          const cardEl = cardWrapper.firstElementChild;
+          cardEl.onclick = () => toggleSelectCard(idx);
+          otherDiv.appendChild(cardEl);
+        }
+      });
+      setsWrapper.appendChild(otherDiv);
+
+      document.getElementById('discard-btn').disabled = !isMyTurn || !gameState.hasDrawnThisTurn || localSelectedCardIndices.length !== 1;
+      document.getElementById('off-btn').disabled = !isMyTurn;
     }
   </script>
 </body>
