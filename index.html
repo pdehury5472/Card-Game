@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="or">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ସେଣ୍ଟୁ - Classic Card Game</title>
+  <style>
+    :root {
+      --bg-color: #e0f2fe; /* Default Sky Blue */
+      --card-bg: #ffffff;
+      --card-border: #cccccc;
+      --card-text: #1a1a1a;
+      --accent: #0284c7;
+      --text-light: #0f172a;
+      --panel-bg: rgba(224, 242, 254, 0.9);
+      --inner-border: #0284c7;
+    }
+
+    body.theme-pink { 
+      --bg-color: #fbe4e8; 
+      --accent: #d63384; 
+      --text-light: #495057; 
+      --panel-bg: rgba(255, 240, 245, 0.9);
+      --inner-border: #d63384;
+    }
+    body.theme-white { 
+      --bg-color: #ffffff; 
+      --accent: #212529; 
+      --text-light: #212529; 
+      --panel-bg: rgba(245, 245, 245, 0.9);
+      --inner-border: #333333;
+    }
+    body.theme-skyblue { 
+      --bg-color: #e0f2fe; 
+      --accent: #0284c7; 
+      --text-light: #0f172a; 
+      --panel-bg: rgba(224, 242, 254, 0.9);
+      --inner-border: #0284c7;
+    }
+
+    * { box-sizing: border-box; touch-action: manipulation; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-light);
+      margin: 0;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      transition: background-color 0.3s;
+    }
+
+    .theme-bar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .theme-dot {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid #aaa;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    /* Menu Card */
+    .menu-card {
+      background: var(--panel-bg);
+      padding: 20px;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+      max-width: 360px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+      text-align: center;
+    }
+
+    .tab-buttons {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.05);
+      color: var(--text-light);
+      padding: 10px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .tab-btn.active {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .menu-card input {
+      padding: 12px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+
+    .lobby-status {
+      background: rgba(0,0,0,0.05);
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+
+    .game-board {
+      width: 100%;
+      max-width: 600px;
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .status-panel, .controls {
+      background: var(--panel-bg);
+      padding: 12px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 0.9rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+
+    /* Classic Court Card Visuals */
+    .card {
+      width: 78px;
+      height: 115px;
+      background-color: var(--card-bg);
+      color: var(--card-text);
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 4px;
+      font-weight: bold;
+      box-shadow: -2px 3px 6px rgba(0,0,0,0.15);
+      user-select: none;
+      position: relative;
+      cursor: grab;
+      flex-shrink: 0;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card .corner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 0.85rem;
+      line-height: 0.85;
+      font-family: 'Arial', sans-serif;
+    }
+
+    .card .inner-frame {
+      border: 1px solid var(--inner-border);
+      height: 65%;
+      margin: 1px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: #fafafa;
+    }
+
+    .card .inner-frame svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .card .center-suit { font-size: 1.8rem; }
+    .card.bottom-corner { transform: rotate(180deg); }
+    .card.red { color: #d00000; }
+    
+    .card.selected { 
+      border: 2px solid var(--accent); 
+      transform: translateY(-12px); 
+      box-shadow: 0 0 10px var(--accent);
+    }
+
+    .piles {
+      display: flex;
+      justify-content: center;
+      gap: 25px;
+      margin: 10px 0;
+    }
+
+    .pile {
+      width: 85px;
+      height: 122px;
+      border: 2px dashed rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      background: rgba(0,0,0,0.02);
+    }
+
+    .hand-container {
+      overflow-x: auto;
+      padding: 15px 10px;
+      background: var(--panel-bg);
+      border-radius: 8px;
+      min-height: 145px;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .hand {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+    }
+
+    .hand .card { margin-right: -32px; }
+    .hand .card:last-child { margin-right: 0; }
+
+    .sticker-bar {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      font-size: 1.5rem;
+      background: var(--panel-bg);
+      padding: 8px;
+      border-radius: 8px;
+    }
+
+    .sticker-btn { cursor: pointer; transition: transform 0.1s; }
+    .sticker-btn:active { transform: scale(1.3); }
+
+    .sticker-pop {
+      position: fixed;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 5rem;
+      animation: popup 1s forwards;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    @keyframes popup {
+      0% { opacity: 0; transform: translate(-50%, -40%) scale(0.5); }
+      50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+      100% { opacity: 0; transform: translate(-50%, -60%) scale(1); }
+    }
+
+    button {
+      background-color: var(--accent);
+      color: #ffffff;
+      border: none;
+      padding: 10px 14px;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    .start-btn {
+      background-color: #22c55e !important;
+      font-size: 1.1rem !important;
+      padding: 14px 20px !important;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body class="theme-skyblue">
+
+  <!-- Color Themes Switcher -->
+  <div class="theme-bar">
+    <div class="theme-dot" style="background:#e0f2fe;" title="Sky Blue" onclick="setTheme('theme-skyblue')"></div>
+    <div class="theme-dot" style="background:#fbe4e8;" title="Pink" onclick="setTheme('theme-pink')"></div>
+    <div class="theme-dot" style="background:#ffffff;" title="White" onclick="setTheme('theme-white')"></div>
+  </div>
+
+  <h1 style="margin: 5px 0; color: var(--accent);">ସେଣ୍ଟୁ</h1>
+
+  <!-- Create / Join Room Menu -->
+  <div class="menu-card" id="room-menu">
+    <div class="tab-buttons">
+      <button class="tab-btn active" id="tab-create" onclick="switchMode('create')">Create Room</button>
+      <button class="tab-btn" id="tab-join" onclick="switchMode('join')">Join Room</button>
+    </div>
+
+    <input type="text" id="player-name" placeholder="Enter Your Name">
+
+    <div id="create-section">
+      <button style="width:100%; margin-top:10px;" onclick="handleCreateRoom()">Create Lobby</button>
+    </div>
+
+    <div id="join-section" class="hidden" style="display:flex; flex-direction:column; gap:10px;">
+      <input type="text" id="join-room-id" placeholder="Enter Room ID">
+      <input type="password" id="join-room-pass" placeholder="Enter Passcode">
+      <button onclick="handleJoinRoom()">Join Lobby</button>
+    </div>
+
+    <!-- Lobby / Waiting Area -->
+    <div id="lobby-section" class="lobby-status hidden">
+      <h3>Room Code: <span id="lobby-room-id" style="color:var(--accent);">-</span></h3>
+      <p id="lobby-message">Waiting for players to join...</p>
+      <button id="start-game-btn" class="start-btn hidden" onclick="startMatch()">Start Game 🚀</button>
+    </div>
+  </div>
+
+  <!-- Main Game Interface -->
+  <div class="game-board" id="game-board">
+    <div class="status-panel">
+      <div><strong>Room ID:</strong> <span id="display-room-id">-</span></div>
+      <div><strong>Player:</strong> <span id="display-player-name" style="color:var(--accent);">-</span></div>
+      <button onclick="shareRoomLink()" style="padding: 4px 8px; font-size: 0.75rem;">🔗 Share Link</button>
+    </div>
+
+    <div class="status-panel">
+      <div><strong>Turn:</strong> <span id="current-player">-</span></div>
+      <div><strong>Scores:</strong> A:<span id="score-0">0</span> B:<span id="score-1">0</span> C:<span id="score-2">0</span></div>
+    </div>
+
+    <div class="piles">
+      <div class="pile" id="draw-pile" onclick="drawFromDeck()">
+        <small>Draw Deck</small>
+        <small id="draw-count">(42)</small>
+      </div>
+      <div class="pile" id="discard-pile" onclick="drawFromDiscard()">
+        <small>Discard</small>
+        <div id="top-discard"></div>
+      </div>
+    </div>
+
+    <div class="sticker-bar">
+      <span class="sticker-btn" onclick="sendSticker('😂')">😂</span>
+      <span class="sticker-btn" onclick="sendSticker('😎')">😎</span>
+      <span class="sticker-btn" onclick="sendSticker('🤡')">🤡</span>
+      <span class="sticker-btn" onclick="sendSticker('🔥')">🔥</span>
+      <span class="sticker-btn" onclick="sendSticker('💣')">💣</span>
+    </div>
+
+    <h3 style="margin:5px 0;">Your Cards (Swipe to reorder)</h3>
+    <div class="hand-container" id="hand-container">
+      <div class="hand" id="player-hand"></div>
+    </div>
+
+    <div class="controls">
+      <button id="discard-btn" onclick="discardSelectedCard()" disabled>Discard Selected</button>
+      <button id="off-btn" onclick="declareOff()">Declare OFF</button>
+      <button onclick="leaveRoom()" style="background:#ff4d4d; color:white;">Exit</button>
+    </div>
+  </div>
+
+  <div id="sticker-display"></div>
+
+  <script>
+    const SUITS = ['♠', '♥', '♦', '♣'];
+    const RANKS = [
+      { label: 'A', value: 1 }, { label: '2', value: 2 }, { label: '3', value: 3 },
+      { label: '4', value: 4 }, { label: '5', value: 5 }, { label: '6', value: 6 },
+      { label: '7', value: 7 }, { label: '8', value: 8 }, { label: '9', value: 9 },
+      { label: '10', value: 10 }, { label: 'J', value: 11 }, { label: 'Q', value: 12 }, { label: 'K', value: 13 }
+    ];
+
+    let currentRoomId = '';
+    let isHost = false;
+    let draggedIndex = null;
+
+    let gameState = {
+      players: [
+        { name: '', hand: [], score: 0 },
+        { name: 'Player B', hand: [], score: 0 },
+        { name: 'Player C', hand: [], score: 0 }
+      ],
+      turnIndex: 0,
+      drawPile: [],
+      discardPile: [],
+      selectedCardIndex: null,
+      hasDrawnThisTurn: false
+    };
+
+    window.onload = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      if(urlParams.has('room')) {
+        switchMode('join');
+        document.getElementById('join-room-id').value = urlParams.get('room');
+      }
+    };
+
+    function setTheme(themeName) {
+      document.body.className = themeName;
+    }
+
+    function switchMode(mode) {
+      if (mode === 'create') {
+        document.getElementById('tab-create').classList.add('active');
+        document.getElementById('tab-join').classList.remove('active');
+        document.getElementById('create-section').classList.remove('hidden');
+        document.getElementById('join-section').classList.add('hidden');
+      } else {
+        document.getElementById('tab-join').classList.add('active');
+        document.getElementById('tab-create').classList.remove('active');
+        document.getElementById('join-section').classList.remove('hidden');
+        document.getElementById('create-section').classList.add('hidden');
+      }
+    }
+
+    function handleCreateRoom() {
+      const playerName = document.getElementById('player-name').value.trim() || 'Host Player';
+      currentRoomId = Math.floor(1000 + Math.random() * 9000).toString();
+      isHost = true;
+
+      openLobby(playerName, currentRoomId);
+    }
+
+    function handleJoinRoom() {
+      const playerName = document.getElementById('player-name').value.trim() || 'Player 2';
+      const roomId = document.getElementById('join-room-id').value.trim();
+      const pass = document.getElementById('join-room-pass').value.trim();
+
+      if (!roomId || !pass) {
+        alert('Please enter both Room ID and Passcode');
+        return;
+      }
+      currentRoomId = roomId;
+      isHost = false;
+
+      openLobby(playerName, currentRoomId);
+    }
+
+    function openLobby(name, roomId) {
+      gameState.players[0].name = name;
+      document.getElementById('lobby-room-id').innerText = roomId;
+      document.getElementById('create-section').classList.add('hidden');
+      document.getElementById('join-section').classList.add('hidden');
+      document.getElementById('lobby-section').classList.remove('hidden');
+
+      if (isHost) {
+        document.getElementById('lobby-message').innerText = 'You are the Host! Click below to start when ready.';
+        document.getElementById('start-game-btn').classList.remove('hidden');
+      } else {
+        document.getElementById('lobby-message').innerText = 'Waiting for the host to start the game...';
+        document.getElementById('start-game-btn').classList.add('hidden');
+      }
+    }
+
+    function startMatch() {
+      document.getElementById('display-player-name').innerText = gameState.players[0].name;
+      document.getElementById('display-room-id').innerText = currentRoomId;
+      document.getElementById('room-menu').classList.add('hidden');
+      document.getElementById('game-board').style.display = 'flex';
+      initGame();
+    }
+
+    function leaveRoom() {
+      document.getElementById('room-menu').classList.remove('hidden');
+      document.getElementById('lobby-section').classList.add('hidden');
+      document.getElementById('create-section').classList.remove('hidden');
+      document.getElementById('game-board').style.display = 'none';
+      isHost = false;
+    }
+
+    function shareRoomLink() {
+      const shareUrl = `${window.location.origin}${window.location.pathname}?room=${currentRoomId}`;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(shareUrl);
+        alert('Room Link copied to clipboard!');
+      } else {
+        alert(`Share Link: ${shareUrl}`);
+      }
+    }
+
+    function sendSticker(emoji) {
+      const display = document.getElementById('sticker-display');
+      display.innerHTML = `<div class="sticker-pop">${emoji}</div>`;
+      setTimeout(() => display.innerHTML = '', 1000);
+    }
+
+    function createDeck() {
+      let deck = [];
+      for (let suit of SUITS) {
+        for (let rank of RANKS) {
+          deck.push({ 
+            suit, 
+            label: rank.label, 
+            value: rank.value, 
+            isRed: suit === '♥' || suit === '♦' 
+          });
+        }
+      }
+      return deck.sort(() => Math.random() - 0.5);
+    }
+
+    function initGame() {
+      const deck = createDeck();
+      for (let i = 0; i < 3; i++) {
+        gameState.players[i].hand = deck.splice(0, 10);
+      }
+      gameState.drawPile = deck;
+      gameState.discardPile = [gameState.drawPile.pop()];
+      renderBoard();
+    }
+
+    function getCardCenterSVG(card) {
+      const color = card.isRed ? '#d00000' : '#000000';
+      if (['J', 'Q', 'K'].includes(card.label)) {
+        return `
+          <svg viewBox="0 0 100 130">
+            <rect width="100" height="130" fill="#fffbf0" />
+            <path d="M 20,25 C 30,10 70,10 80,25 C 85,45 85,85 80,105 C 70,120 30,120 20,105 Z" fill="none" stroke="${color}" stroke-width="2"/>
+            <path d="M 35,35 L 65,35 L 65,60 L 35,60 Z" fill="#0284c7" stroke="#ffd700" stroke-width="2"/>
+            <path d="M 35,70 L 65,70 L 65,95 L 35,95 Z" fill="#d00000" stroke="#ffd700" stroke-width="2"/>
+            <polygon points="30,20 50,10 70,20 60,30 40,30" fill="#ffd700" stroke="#000" stroke-width="1"/>
+            <polygon points="30,110 50,120 70,110 60,100 40,100" fill="#ffd700" stroke="#000" stroke-width="1"/>
+            <circle cx="50" cy="47" r="6" fill="#ffd700" />
+            <circle cx="50" cy="83" r="6" fill="#ffd700" />
+            <text x="50" y="52" font-size="12" text-anchor="middle" fill="#000">${card.suit}</text>
+            <text x="50" y="88" font-size="12" text-anchor="middle" fill="#000">${card.suit}</text>
+          </svg>
+        `;
+      }
+      return `<div class="center-suit">${card.suit}</div>`;
+    }
+
+    function generateCardHTML(card, index, isSelected = false) {
+      if (!card) return '';
+      return `
+        <div class="card ${card.isRed ? 'red' : ''} ${isSelected ? 'selected' : ''}" 
+             draggable="true" 
+             data-index="${index}">
+          <div class="corner">
+            <span>${card.label}</span>
+            <span>${card.suit}</span>
+          </div>
+          <div class="inner-frame">
+            ${getCardCenterSVG(card)}
+          </div>
+          <div class="corner bottom-corner">
+            <span>${card.label}</span>
+            <span>${card.suit}</span>
+          </div>
+        </div>
+      `;
+    }
+
+    function attachDragListeners() {
+      const cards = document.querySelectorAll('.hand .card');
+      cards.forEach(card => {
+        card.addEventListener('dragstart', (e) => {
+          draggedIndex = parseInt(card.getAttribute('data-index'));
+          e.dataTransfer.effectAllowed = 'move';
+        });
+
+        card.addEventListener('dragover', (e) => {
+          e.preventDefault();
+        });
+
+        card.addEventListener('drop', (e) => {
+          e.preventDefault();
+          const targetIndex = parseInt(card.getAttribute('data-index'));
+          if (draggedIndex !== null && draggedIndex !== targetIndex) {
+            const hand = gameState.players[gameState.turnIndex].hand;
+            const movedCard = hand.splice(draggedIndex, 1)[0];
+            hand.splice(targetIndex, 0, movedCard);
+            draggedIndex = null;
+            renderBoard();
+          }
+        });
+      });
+    }
+
+    function drawFromDeck() {
+      if (gameState.hasDrawnThisTurn) return;
+      if (gameState.drawPile.length === 0) {
+        const top = gameState.discardPile.pop();
+        gameState.drawPile = gameState.discardPile.sort(() => Math.random() - 0.5);
+        gameState.discardPile = [top];
+      }
+      gameState.players[gameState.turnIndex].hand.push(gameState.drawPile.pop());
+      gameState.hasDrawnThisTurn = true;
+      renderBoard();
+    }
+
+    function drawFromDiscard() {
+      if (gameState.hasDrawnThisTurn || gameState.discardPile.length === 0) return;
+      gameState.players[gameState.turnIndex].hand.push(gameState.discardPile.pop());
+      gameState.hasDrawnThisTurn = true;
+      renderBoard();
+    }
+
+    function selectCard(index) {
+      gameState.selectedCardIndex = index;
+      document.getElementById('discard-btn').disabled = !gameState.hasDrawnThisTurn;
+      renderBoard();
+    }
+
+    function discardSelectedCard() {
+      if (gameState.selectedCardIndex === null || !gameState.hasDrawnThisTurn) return;
+      const currentPlayer = gameState.players[gameState.turnIndex];
+      const discardedCard = currentPlayer.hand.splice(gameState.selectedCardIndex, 1)[0];
+      
+      gameState.discardPile.push(discardedCard);
+      gameState.selectedCardIndex = null;
+      gameState.hasDrawnThisTurn = false;
+      gameState.turnIndex = (gameState.turnIndex + 1) % 3;
+      renderBoard();
+    }
+
+    function declareOff() {
+      const player = gameState.players[gameState.turnIndex];
+      alert(`${player.name} declared OFF! Round ended.`);
+      gameState.turnIndex = 0;
+      initGame();
+    }
+
+    function renderBoard() {
+      document.getElementById('current-player').innerText = gameState.players[gameState.turnIndex].name;
+      document.getElementById('draw-count').innerText = `(${gameState.drawPile.length})`;
+      
+      gameState.players.forEach((p, i) => {
+        document.getElementById(`score-${i}`).innerText = p.score;
+      });
+
+      const topDiscardEl = document.getElementById('top-discard');
+      if (gameState.discardPile.length > 0) {
+        const topCard = gameState.discardPile[gameState.discardPile.length - 1];
+        topDiscardEl.innerHTML = generateCardHTML(topCard, 'discard');
+      } else {
+        topDiscardEl.innerHTML = 'Empty';
+      }
+
+      const handEl = document.getElementById('player-hand');
+      handEl.innerHTML = '';
+      const currentHand = gameState.players[gameState.turnIndex].hand;
+
+      currentHand.forEach((card, idx) => {
+        const cardWrapper = document.createElement('div');
+        const isSelected = gameState.selectedCardIndex === idx;
+        cardWrapper.innerHTML = generateCardHTML(card, idx, isSelected);
+        
+        const cardElement = cardWrapper.firstElementChild;
+        cardElement.onclick = () => selectCard(idx);
+        
+        handEl.appendChild(cardElement);
+      });
+
+      attachDragListeners();
+    }
+  </script>
+</body>
+</html>
