@@ -41,61 +41,81 @@
 
     * { box-sizing: border-box; touch-action: manipulation; }
 
-    body {
+    html, body {
+      height: 100vh;
+      max-height: 100vh;
+      overflow: hidden;
+      margin: 0;
+      padding: 6px;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-color: var(--bg-color);
       color: var(--text-light);
-      margin: 0;
-      padding: 10px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      min-height: 100vh;
-      transition: background-color 0.3s;
+    }
+
+    /* Minimal Top Bar */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      max-width: 500px;
+      height: 28px;
+      margin-bottom: 4px;
+    }
+
+    .top-bar h1 {
+      margin: 0;
+      font-size: 1.1rem;
+      color: var(--accent);
     }
 
     .theme-bar {
       display: flex;
-      gap: 12px;
-      margin-bottom: 10px;
-    }
-    .theme-dot {
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      cursor: pointer;
-      border: 2px solid #aaa;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      gap: 6px;
     }
 
+    .theme-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 1px solid #aaa;
+    }
+
+    /* Menu Section */
     .menu-card {
       background: var(--panel-bg);
-      padding: 20px;
-      border-radius: 12px;
+      padding: 12px;
+      border-radius: 8px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 8px;
       width: 100%;
       max-width: 360px;
-      box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
       text-align: center;
+      margin-top: auto;
+      margin-bottom: auto;
     }
 
     .tab-buttons {
       display: flex;
-      gap: 10px;
-      margin-bottom: 5px;
+      gap: 6px;
     }
 
     .tab-btn {
       flex: 1;
       background: rgba(0, 0, 0, 0.05);
       color: var(--text-light);
-      padding: 10px;
+      padding: 6px;
       border: 1px solid rgba(0, 0, 0, 0.1);
-      border-radius: 6px;
+      border-radius: 4px;
       font-weight: bold;
       cursor: pointer;
+      font-size: 0.8rem;
     }
 
     .tab-btn.active {
@@ -104,82 +124,85 @@
     }
 
     .menu-card input, .menu-card select {
-      padding: 12px;
-      border-radius: 6px;
+      padding: 8px;
+      border-radius: 4px;
       border: 1px solid #ccc;
-      font-size: 1rem;
+      font-size: 0.85rem;
       width: 100%;
     }
 
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 5px;
-      font-weight: bold;
-      font-size: 0.9rem;
-    }
-
-    .lobby-status {
-      background: rgba(255, 255, 255, 0.6);
-      padding: 15px;
-      border-radius: 8px;
-      border: 1px solid rgba(0,0,0,0.1);
-    }
-
+    /* Compact Game Canvas (No Scroll) */
     .game-board {
       width: 100%;
-      max-width: 600px;
+      max-width: 500px;
+      height: calc(100vh - 40px);
       display: none;
       flex-direction: column;
-      gap: 12px;
+      justify-content: space-between;
+      gap: 4px;
     }
 
-    .status-panel, .controls {
+    .status-panel {
       background: var(--panel-bg);
-      padding: 12px;
-      border-radius: 8px;
+      padding: 6px 10px;
+      border-radius: 6px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      flex-wrap: wrap;
-      gap: 8px;
-      font-size: 0.9rem;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      font-size: 0.75rem;
     }
 
-    .card {
-      width: 78px;
-      height: 115px;
-      background-color: var(--card-bg);
-      color: var(--card-text);
-      border: 1px solid var(--card-border);
+    .piles {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin: 2px 0;
+    }
+
+    .pile {
+      width: 65px;
+      height: 90px;
+      border: 2px dashed rgba(0, 0, 0, 0.2);
       border-radius: 6px;
       display: flex;
       flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      background: rgba(0,0,0,0.02);
+      font-size: 0.7rem;
+    }
+
+    .card {
+      width: 60px;
+      height: 88px;
+      background-color: var(--card-bg);
+      color: var(--card-text);
+      border: 1px solid var(--card-border);
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
       justify-content: space-between;
-      padding: 4px;
+      padding: 2px;
       font-weight: bold;
-      box-shadow: -2px 3px 6px rgba(0,0,0,0.15);
+      box-shadow: -2px 2px 4px rgba(0,0,0,0.15);
       user-select: none;
       position: relative;
       cursor: grab;
       flex-shrink: 0;
-      transition: transform 0.2s, box-shadow 0.2s;
     }
 
     .card .corner {
       display: flex;
       flex-direction: column;
       align-items: center;
-      font-size: 0.85rem;
-      line-height: 0.85;
-      font-family: 'Arial', sans-serif;
+      font-size: 0.7rem;
+      line-height: 0.8;
     }
 
     .card .inner-frame {
       border: 1px solid var(--inner-border);
-      height: 65%;
+      height: 60%;
       margin: 1px;
       display: flex;
       align-items: center;
@@ -188,122 +211,101 @@
       background: #fafafa;
     }
 
-    .card .inner-frame svg {
-      width: 100%;
-      height: 100%;
-    }
-
-    .card .center-suit { font-size: 1.8rem; }
+    .card .inner-frame svg { width: 100%; height: 100%; }
+    .card .center-suit { font-size: 1.2rem; }
     .card.bottom-corner { transform: rotate(180deg); }
     .card.red { color: #d00000; }
     
     .card.selected { 
       border: 2px solid var(--accent); 
-      transform: translateY(-12px); 
-      box-shadow: 0 0 10px var(--accent);
+      transform: translateY(-8px); 
+      box-shadow: 0 0 8px var(--accent);
     }
 
-    .piles {
-      display: flex;
-      justify-content: center;
-      gap: 25px;
-      margin: 10px 0;
-    }
-
-    .pile {
-      width: 85px;
-      height: 122px;
-      border: 2px dashed rgba(0, 0, 0, 0.2);
-      border-radius: 8px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      cursor: pointer;
-      background: rgba(0,0,0,0.02);
-    }
-
+    /* Hand container setup */
     .hand-container {
       overflow-x: auto;
-      padding: 15px 10px;
+      padding: 10px 5px;
       background: var(--panel-bg);
-      border-radius: 8px;
-      min-height: 145px;
-      scroll-behavior: smooth;
-      -webkit-overflow-scrolling: touch;
-      border: 1px solid rgba(0,0,0,0.05);
-    }
-
-    .hand {
+      border-radius: 6px;
+      height: 110px;
       display: flex;
-      justify-content: flex-start;
       align-items: center;
     }
 
-    .hand .card { margin-right: -32px; }
+    .hand { display: flex; align-items: center; }
+    .hand .card { margin-right: -24px; }
     .hand .card:last-child { margin-right: 0; }
 
-    .sticker-bar {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-      font-size: 1.5rem;
+    /* Quick Messages & Chat Box */
+    .chat-box {
       background: var(--panel-bg);
-      padding: 8px;
-      border-radius: 8px;
+      border-radius: 6px;
+      padding: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
 
-    .sticker-btn { cursor: pointer; transition: transform 0.1s; }
-    .sticker-btn:active { transform: scale(1.3); }
-
-    .sticker-pop {
-      position: fixed;
-      top: 40%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 5rem;
-      animation: popup 1s forwards;
-      pointer-events: none;
-      z-index: 100;
+    .quick-msg-bar {
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+      padding-bottom: 2px;
     }
 
-    @keyframes popup {
-      0% { opacity: 0; transform: translate(-50%, -40%) scale(0.5); }
-      50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
-      100% { opacity: 0; transform: translate(-50%, -60%) scale(1); }
+    .quick-btn {
+      background: rgba(0, 0, 0, 0.05);
+      color: var(--text-light);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .like-btn {
+      background: #3b82f6 !important;
+      color: white !important;
+      font-weight: bold;
+    }
+
+    .chat-display {
+      font-size: 0.75rem;
+      background: rgba(255, 255, 255, 0.5);
+      padding: 4px 8px;
+      border-radius: 4px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      overflow: hidden;
+    }
+
+    .controls {
+      display: flex;
+      gap: 6px;
     }
 
     button {
       background-color: var(--accent);
       color: #ffffff;
       border: none;
-      padding: 10px 14px;
+      padding: 8px 10px;
       font-weight: bold;
-      border-radius: 6px;
+      border-radius: 4px;
       cursor: pointer;
-      font-size: 0.85rem;
-    }
-
-    .action-btn {
-      width: 100%;
-      padding: 12px;
-      font-size: 1rem;
-    }
-
-    .start-btn {
-      background-color: #22c55e !important;
-      font-size: 1rem !important;
-      padding: 10px 16px !important;
-      color: white;
+      font-size: 0.75rem;
+      flex: 1;
     }
 
     .viewer-badge {
       background: #8b5cf6;
       color: white;
-      padding: 2px 8px;
-      border-radius: 10px;
-      font-size: 0.75rem;
-      margin-left: 5px;
+      padding: 1px 6px;
+      border-radius: 8px;
+      font-size: 0.65rem;
     }
 
     button:disabled { opacity: 0.4; cursor: not-allowed; }
@@ -312,13 +314,15 @@
 </head>
 <body class="theme-skyblue">
 
-  <div class="theme-bar">
-    <div class="theme-dot" style="background:#e0f2fe;" title="Sky Blue" onclick="setTheme('theme-skyblue')"></div>
-    <div class="theme-dot" style="background:#fbe4e8;" title="Pink" onclick="setTheme('theme-pink')"></div>
-    <div class="theme-dot" style="background:#ffffff;" title="White" onclick="setTheme('theme-white')"></div>
+  <!-- Minimal Top Bar -->
+  <div class="top-bar">
+    <h1>ସେଣ୍ଟୁ</h1>
+    <div class="theme-bar">
+      <div class="theme-dot" style="background:#e0f2fe;" onclick="setTheme('theme-skyblue')"></div>
+      <div class="theme-dot" style="background:#fbe4e8;" onclick="setTheme('theme-pink')"></div>
+      <div class="theme-dot" style="background:#ffffff;" onclick="setTheme('theme-white')"></div>
+    </div>
   </div>
-
-  <h1 style="margin: 5px 0; color: var(--accent);">ସେଣ୍ଟୁ</h1>
 
   <!-- Setup Menu -->
   <div class="menu-card" id="room-menu">
@@ -327,83 +331,70 @@
       <button class="tab-btn" id="tab-join" onclick="switchMode('join')">Join Room</button>
     </div>
 
-    <input type="text" id="player-name" placeholder="Enter Your Name">
+    <input type="text" id="player-name" placeholder="Your Name">
 
-    <div id="create-section" style="display:flex; flex-direction:column; gap:10px;">
-      <p style="margin: 0; font-size: 0.85rem; color: var(--text-light);">Supports 2 to 3 Players</p>
-      <button class="action-btn" onclick="handleCreateRoom()">Generate Room Code</button>
+    <div id="create-section" style="display:flex; flex-direction:column; gap:8px;">
+      <button onclick="handleCreateRoom()">Create & Go To Table 🚀</button>
     </div>
 
-    <div id="join-section" class="hidden" style="display:flex; flex-direction:column; gap:10px;">
-      <input type="number" id="join-room-id" placeholder="Enter 4-Digit Room Code">
-      <div class="form-group">
-        <label for="join-role-select">Join As:</label>
-        <select id="join-role-select">
-          <option value="player">Player 🎮</option>
-          <option value="viewer">Viewer / Spectator 👁️</option>
-        </select>
-      </div>
-      <button class="action-btn" onclick="handleJoinRoom()">Connect to Room</button>
-    </div>
-
-    <!-- Lobby / Waiting Area -->
-    <div id="lobby-section" class="lobby-status hidden">
-      <h2 style="margin:0;">Room Code: <span id="lobby-room-id" style="color:var(--accent);">-</span></h2>
-      <p id="lobby-message" style="margin:10px 0;">Connecting to lobby...</p>
-      <div id="connected-players-list" style="font-weight:bold; margin-bottom:10px;"></div>
-      <button id="start-game-lobby-btn" class="start-btn hidden" onclick="startMatch()">Start Game 🚀</button>
+    <div id="join-section" class="hidden" style="display:flex; flex-direction:column; gap:8px;">
+      <input type="number" id="join-room-id" placeholder="4-Digit Code">
+      <select id="join-role-select">
+        <option value="player">Player 🎮</option>
+        <option value="viewer">Viewer 👁️</option>
+      </select>
+      <button onclick="handleJoinRoom()">Join & Go To Table 🚀</button>
     </div>
   </div>
 
-  <!-- Game Canvas -->
+  <!-- Single-Screen Game Table -->
   <div class="game-board" id="game-board">
     <div class="status-panel">
-      <div><strong>Room ID:</strong> <span id="display-room-id">-</span></div>
-      <div>
-        <strong>User:</strong> <span id="display-player-name" style="color:var(--accent);">-</span>
-        <span id="role-badge" class="viewer-badge hidden">Viewer</span>
-      </div>
-      <button onclick="shareRoomLink()" style="padding: 4px 8px; font-size: 0.75rem;">🔗 Share Link</button>
+      <div>Room: <strong id="display-room-id">-</strong></div>
+      <div>User: <strong id="display-player-name" style="color:var(--accent);">-</strong> <span id="role-badge" class="viewer-badge hidden">Viewer</span></div>
+      <button onclick="shareRoomLink()" style="padding:2px 6px; flex:none;">🔗 Link</button>
     </div>
 
     <div class="status-panel">
-      <div><strong>Turn:</strong> <span id="current-player">-</span></div>
-      <button id="start-game-screen-btn" class="start-btn" onclick="initGame()">Start / Reset Match 🚀</button>
-      <div id="scores-display"><strong>Scores:</strong> -</div>
+      <div>Turn: <strong id="current-player">-</strong></div>
+      <div id="scores-display">Scores: -</div>
     </div>
 
     <div class="piles">
       <div class="pile" id="draw-pile" onclick="drawFromDeck()">
-        <small>Draw Deck</small>
-        <small id="draw-count">(42)</small>
+        <span>Deck</span>
+        <strong id="draw-count">(42)</strong>
       </div>
       <div class="pile" id="discard-pile" onclick="drawFromDiscard()">
-        <small>Discard</small>
+        <span>Discard</span>
         <div id="top-discard"></div>
       </div>
     </div>
 
-    <div class="sticker-bar">
-      <span class="sticker-btn" onclick="sendSticker('😂')">😂</span>
-      <span class="sticker-btn" onclick="sendSticker('😎')">😎</span>
-      <span class="sticker-btn" onclick="sendSticker('🤡')">🤡</span>
-      <span class="sticker-btn" onclick="sendSticker('🔥')">🔥</span>
-      <span class="sticker-btn" onclick="sendSticker('💣')">💣</span>
+    <!-- Quick Message Box -->
+    <div class="chat-box">
+      <div class="quick-msg-bar">
+        <button class="quick-btn like-btn" onclick="sendQuickMessage('👍 Like')">👍 Like</button>
+        <button class="quick-btn" onclick="sendQuickMessage('ଶୀଘ୍ର ଛାଡ଼େ')">ଶୀଘ୍ର ଛାଡ଼େ</button>
+        <button class="quick-btn" onclick="sendQuickMessage('ଛାଡ଼ିବୁ ନି କି')">ଛାଡ଼ିବୁ ନି କି</button>
+        <button class="quick-btn" onclick="sendQuickMessage('ତୁ ପାରିବୁ ନି')">ତୁ ପାରିବୁ ନି</button>
+        <button class="quick-btn" onclick="sendQuickMessage('କଣ କରୁଛୁ ଯେ')">କଣ କରୁଛୁ ଯେ</button>
+      </div>
+      <div class="chat-display" id="chat-display">
+        <span id="chat-msg" style="font-style:italic; color:#666;">No messages yet...</span>
+      </div>
     </div>
 
-    <h3 style="margin:5px 0;" id="cards-header">Your Cards (Swipe to reorder)</h3>
-    <div class="hand-container" id="hand-container">
+    <div class="hand-container">
       <div class="hand" id="player-hand"></div>
     </div>
 
     <div class="controls">
-      <button id="discard-btn" onclick="discardSelectedCard()" disabled>Discard Selected</button>
+      <button id="discard-btn" onclick="discardSelectedCard()" disabled>Discard</button>
       <button id="off-btn" onclick="declareOff()">Declare OFF</button>
       <button onclick="leaveRoom()" style="background:#ff4d4d; color:white;">Exit</button>
     </div>
   </div>
-
-  <div id="sticker-display"></div>
 
   <script>
     const SUITS = ['♠', '♥', '♦', '♣'];
@@ -419,24 +410,14 @@
     let isViewer = false;
     let peer = null;
     let conn = null;
-    let draggedIndex = null;
 
     let gameState = {
       activePlayers: [],
-      viewers: [],
       turnIndex: 0,
       drawPile: [],
       discardPile: [],
       selectedCardIndex: null,
       hasDrawnThisTurn: false
-    };
-
-    window.onload = () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      if(urlParams.has('room')) {
-        switchMode('join');
-        document.getElementById('join-room-id').value = urlParams.get('room');
-      }
     };
 
     function setTheme(themeName) { document.body.className = themeName; }
@@ -456,13 +437,13 @@
     }
 
     function handleCreateRoom() {
-      const playerName = document.getElementById('player-name').value.trim() || 'Host Player';
+      const playerName = document.getElementById('player-name').value.trim() || 'Host';
       currentRoomId = Math.floor(1000 + Math.random() * 9000).toString();
       isHost = true;
       isViewer = false;
 
       gameState.activePlayers = [{ name: playerName, hand: [], score: 0 }];
-      setupPeerHost(currentRoomId);
+      goToTable(playerName);
     }
 
     function handleJoinRoom() {
@@ -470,90 +451,17 @@
       const roomId = document.getElementById('join-room-id').value.trim();
       const role = document.getElementById('join-role-select').value;
 
-      if (!roomId) {
-        alert('Please enter a 4-Digit Room Code');
-        return;
-      }
+      if (!roomId) return alert('Enter 4-Digit Room Code');
 
       currentRoomId = roomId;
       isHost = false;
       isViewer = (role === 'viewer');
 
-      setupPeerClient(roomId, playerName, role);
+      if (!isViewer) gameState.activePlayers.push({ name: playerName, hand: [], score: 0 });
+      goToTable(playerName);
     }
 
-    function setupPeerHost(roomId) {
-      peer = new Peer('sentu-room-' + roomId);
-
-      peer.on('open', () => {
-        openLobby(gameState.activePlayers[0].name, roomId);
-      });
-
-      peer.on('connection', (connection) => {
-        conn = connection;
-        conn.on('data', (data) => {
-          if (data.type === 'JOIN') {
-            if (data.role === 'viewer') {
-              gameState.viewers.push(data.name);
-            } else {
-              if (!gameState.activePlayers.some(p => p.name === data.name)) {
-                gameState.activePlayers.push({ name: data.name, hand: [], score: 0 });
-              }
-            }
-            updateLobbyUI();
-          }
-        });
-      });
-    }
-
-    function setupPeerClient(roomId, playerName, role) {
-      peer = new Peer();
-      peer.on('open', () => {
-        conn = peer.connect('sentu-room-' + roomId);
-        conn.on('open', () => {
-          conn.send({ type: 'JOIN', name: playerName, role: role });
-          openLobby(playerName, roomId);
-        });
-      });
-    }
-
-    function openLobby(name, roomId) {
-      document.getElementById('lobby-room-id').innerText = roomId;
-      document.getElementById('create-section').classList.add('hidden');
-      document.getElementById('join-section').classList.add('hidden');
-      document.getElementById('lobby-section').classList.remove('hidden');
-
-      updateLobbyUI();
-    }
-
-    function updateLobbyUI() {
-      const playerNames = gameState.activePlayers.map(p => p.name).join(', ');
-      let statusText = `Players Connected: ${playerNames || 'Waiting...'}`;
-
-      if (gameState.viewers.length > 0) {
-        statusText += `<br>Viewers: ${gameState.viewers.join(', ')}`;
-      }
-
-      document.getElementById('connected-players-list').innerHTML = statusText;
-
-      if (isHost) {
-        document.getElementById('lobby-message').innerText = gameState.activePlayers.length >= 2 
-          ? 'At least 2 players joined! You can start match now.' 
-          : 'Waiting for at least 1 more player...';
-        
-        if(gameState.activePlayers.length >= 2) {
-          document.getElementById('start-game-lobby-btn').classList.remove('hidden');
-        }
-      } else {
-        document.getElementById('lobby-message').innerText = isViewer 
-          ? 'Joined as Viewer! Waiting for Host to start...' 
-          : 'Joined as Player! Waiting for Host to start...';
-        document.getElementById('start-game-lobby-btn').classList.add('hidden');
-      }
-    }
-
-    function startMatch() {
-      const playerName = document.getElementById('player-name').value.trim() || 'Host Player';
+    function goToTable(playerName) {
       document.getElementById('display-player-name').innerText = playerName;
       document.getElementById('display-room-id').innerText = currentRoomId;
       document.getElementById('room-menu').classList.add('hidden');
@@ -563,18 +471,18 @@
         document.getElementById('role-badge').classList.remove('hidden');
         document.getElementById('discard-btn').disabled = true;
         document.getElementById('off-btn').disabled = true;
-        document.getElementById('start-game-screen-btn').classList.add('hidden');
-        document.getElementById('cards-header').innerText = "Game View (Spectating)";
       }
 
       initGame();
     }
 
+    function sendQuickMessage(text) {
+      const name = document.getElementById('display-player-name').innerText;
+      document.getElementById('chat-msg').innerHTML = `<strong>${name}:</strong> ${text}`;
+    }
+
     function leaveRoom() {
-      if(peer) peer.destroy();
       document.getElementById('room-menu').classList.remove('hidden');
-      document.getElementById('lobby-section').classList.add('hidden');
-      document.getElementById('create-section').classList.remove('hidden');
       document.getElementById('game-board').style.display = 'none';
       document.getElementById('role-badge').classList.add('hidden');
       isHost = false;
@@ -583,30 +491,15 @@
 
     function shareRoomLink() {
       const shareUrl = `${window.location.origin}${window.location.pathname}?room=${currentRoomId}`;
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(shareUrl);
-        alert('Room Link copied to clipboard!');
-      } else {
-        alert(`Share Link: ${shareUrl}`);
-      }
-    }
-
-    function sendSticker(emoji) {
-      const display = document.getElementById('sticker-display');
-      display.innerHTML = `<div class="sticker-pop">${emoji}</div>`;
-      setTimeout(() => display.innerHTML = '', 1000);
+      if (navigator.clipboard) navigator.clipboard.writeText(shareUrl);
+      alert('Room Code copied!');
     }
 
     function createDeck() {
       let deck = [];
       for (let suit of SUITS) {
         for (let rank of RANKS) {
-          deck.push({ 
-            suit, 
-            label: rank.label, 
-            value: rank.value, 
-            isRed: suit === '♥' || suit === '♦' 
-          });
+          deck.push({ suit, label: rank.label, value: rank.value, isRed: suit === '♥' || suit === '♦' });
         }
       }
       return deck.sort(() => Math.random() - 0.5);
@@ -614,6 +507,9 @@
 
     function initGame() {
       const deck = createDeck();
+      if (gameState.activePlayers.length === 0) {
+        gameState.activePlayers = [{ name: 'Player 1', hand: [], score: 0 }, { name: 'Player 2', hand: [], score: 0 }];
+      }
       for (let i = 0; i < gameState.activePlayers.length; i++) {
         gameState.activePlayers[i].hand = deck.splice(0, 10);
       }
@@ -624,71 +520,16 @@
       gameState.selectedCardIndex = null;
       renderBoard();
     }
-    function getCardCenterSVG(card) {
-      const color = card.isRed ? '#d00000' : '#000000';
-      if (['J', 'Q', 'K'].includes(card.label)) {
-        return `
-          <svg viewBox="0 0 100 130">
-            <rect width="100" height="130" fill="#fffbf0" />
-            <path d="M 20,25 C 30,10 70,10 80,25 C 85,45 85,85 80,105 C 70,120 30,120 20,105 Z" fill="none" stroke="${color}" stroke-width="2"/>
-            <path d="M 35,35 L 65,35 L 65,60 L 35,60 Z" fill="#0284c7" stroke="#ffd700" stroke-width="2"/>
-            <path d="M 35,70 L 65,70 L 65,95 L 35,95 Z" fill="#d00000" stroke="#ffd700" stroke-width="2"/>
-            <polygon points="30,20 50,10 70,20 60,30 40,30" fill="#ffd700" stroke="#000" stroke-width="1"/>
-            <polygon points="30,110 50,120 70,110 60,100 40,100" fill="#ffd700" stroke="#000" stroke-width="1"/>
-            <circle cx="50" cy="47" r="6" fill="#ffd700" />
-            <circle cx="50" cy="83" r="6" fill="#ffd700" />
-            <text x="50" y="52" font-size="12" text-anchor="middle" fill="#000">${card.suit}</text>
-            <text x="50" y="88" font-size="12" text-anchor="middle" fill="#000">${card.suit}</text>
-          </svg>
-        `;
-      }
-      return `<div class="center-suit">${card.suit}</div>`;
-    }
 
     function generateCardHTML(card, index, isSelected = false) {
       if (!card) return '';
       return `
-        <div class="card ${card.isRed ? 'red' : ''} ${isSelected ? 'selected' : ''}" 
-             draggable="${!isViewer}" 
-             data-index="${index}">
-          <div class="corner">
-            <span>${card.label}</span>
-            <span>${card.suit}</span>
-          </div>
-          <div class="inner-frame">
-            ${getCardCenterSVG(card)}
-          </div>
-          <div class="corner bottom-corner">
-            <span>${card.label}</span>
-            <span>${card.suit}</span>
-          </div>
+        <div class="card ${card.isRed ? 'red' : ''} ${isSelected ? 'selected' : ''}" data-index="${index}">
+          <div class="corner"><span>${card.label}</span><span>${card.suit}</span></div>
+          <div class="inner-frame"><div class="center-suit">${card.suit}</div></div>
+          <div class="corner bottom-corner"><span>${card.label}</span><span>${card.suit}</span></div>
         </div>
       `;
-    }
-
-    function attachDragListeners() {
-      if(isViewer) return;
-      const cards = document.querySelectorAll('.hand .card');
-      cards.forEach(card => {
-        card.addEventListener('dragstart', (e) => {
-          draggedIndex = parseInt(card.getAttribute('data-index'));
-          e.dataTransfer.effectAllowed = 'move';
-        });
-
-        card.addEventListener('dragover', (e) => { e.preventDefault(); });
-
-        card.addEventListener('drop', (e) => {
-          e.preventDefault();
-          const targetIndex = parseInt(card.getAttribute('data-index'));
-          if (draggedIndex !== null && draggedIndex !== targetIndex) {
-            const hand = gameState.activePlayers[gameState.turnIndex].hand;
-            const movedCard = hand.splice(draggedIndex, 1)[0];
-            hand.splice(targetIndex, 0, movedCard);
-            draggedIndex = null;
-            renderBoard();
-          }
-        });
-      });
     }
 
     function drawFromDeck() {
@@ -732,7 +573,7 @@
     function declareOff() {
       if(isViewer) return;
       const player = gameState.activePlayers[gameState.turnIndex];
-      alert(`${player.name} declared OFF! Round ended.`);
+      alert(`${player.name} declared OFF!`);
       initGame();
     }
 
@@ -743,7 +584,7 @@
       document.getElementById('draw-count').innerText = `(${gameState.drawPile.length})`;
       
       const scoreStr = gameState.activePlayers.map((p) => `${p.name}: ${p.score}`).join(' | ');
-      document.getElementById('scores-display').innerHTML = `<strong>Scores:</strong> ${scoreStr}`;
+      document.getElementById('scores-display').innerHTML = `Scores: ${scoreStr}`;
 
       const topDiscardEl = document.getElementById('top-discard');
       if (gameState.discardPile.length > 0) {
@@ -764,14 +605,9 @@
         
         const cardElement = cardWrapper.firstElementChild;
         cardElement.onclick = () => selectCard(idx);
-        
         handEl.appendChild(cardElement);
       });
-
-      attachDragListeners();
     }
   </script>
 </body>
 </html>
-
-    
