@@ -4,15 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>ସେଣ୍ଟୁ - Classic Card Game</title>
+  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
   <style>
     :root {
-      --bg-color: #e0f2fe; /* Default Sky Blue */
+      --bg-color: #e0f2fe;
       --card-bg: #ffffff;
       --card-border: #cccccc;
       --card-text: #1a1a1a;
       --accent: #0284c7;
       --text-light: #0f172a;
-      --panel-bg: rgba(224, 242, 254, 0.9);
+      --panel-bg: rgba(224, 242, 254, 0.95);
       --inner-border: #0284c7;
     }
 
@@ -20,21 +21,21 @@
       --bg-color: #fbe4e8; 
       --accent: #d63384; 
       --text-light: #495057; 
-      --panel-bg: rgba(255, 240, 245, 0.9);
+      --panel-bg: rgba(255, 240, 245, 0.95);
       --inner-border: #d63384;
     }
     body.theme-white { 
       --bg-color: #ffffff; 
       --accent: #212529; 
       --text-light: #212529; 
-      --panel-bg: rgba(245, 245, 245, 0.9);
+      --panel-bg: rgba(245, 245, 245, 0.95);
       --inner-border: #333333;
     }
     body.theme-skyblue { 
       --bg-color: #e0f2fe; 
       --accent: #0284c7; 
       --text-light: #0f172a; 
-      --panel-bg: rgba(224, 242, 254, 0.9);
+      --panel-bg: rgba(224, 242, 254, 0.95);
       --inner-border: #0284c7;
     }
 
@@ -67,7 +68,6 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
-    /* Menu Card */
     .menu-card {
       background: var(--panel-bg);
       padding: 20px;
@@ -84,7 +84,7 @@
     .tab-buttons {
       display: flex;
       gap: 10px;
-      margin-bottom: 10px;
+      margin-bottom: 5px;
     }
 
     .tab-btn {
@@ -103,18 +103,28 @@
       color: #fff;
     }
 
-    .menu-card input {
+    .menu-card input, .menu-card select {
       padding: 12px;
       border-radius: 6px;
       border: 1px solid #ccc;
       font-size: 1rem;
+      width: 100%;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 5px;
+      font-weight: bold;
+      font-size: 0.9rem;
     }
 
     .lobby-status {
-      background: rgba(0,0,0,0.05);
+      background: rgba(255, 255, 255, 0.6);
       padding: 15px;
       border-radius: 8px;
-      margin-top: 10px;
+      border: 1px solid rgba(0,0,0,0.1);
     }
 
     .game-board {
@@ -138,7 +148,6 @@
       box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     }
 
-    /* Classic Court Card Visuals */
     .card {
       width: 78px;
       height: 115px;
@@ -275,6 +284,12 @@
       font-size: 0.85rem;
     }
 
+    .action-btn {
+      width: 100%;
+      padding: 12px;
+      font-size: 1rem;
+    }
+
     .start-btn {
       background-color: #22c55e !important;
       font-size: 1.1rem !important;
@@ -283,13 +298,21 @@
       margin-top: 10px;
     }
 
+    .viewer-badge {
+      background: #8b5cf6;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 0.75rem;
+      margin-left: 5px;
+    }
+
     button:disabled { opacity: 0.4; cursor: not-allowed; }
     .hidden { display: none !important; }
   </style>
 </head>
 <body class="theme-skyblue">
 
-  <!-- Color Themes Switcher -->
   <div class="theme-bar">
     <div class="theme-dot" style="background:#e0f2fe;" title="Sky Blue" onclick="setTheme('theme-skyblue')"></div>
     <div class="theme-dot" style="background:#fbe4e8;" title="Pink" onclick="setTheme('theme-pink')"></div>
@@ -298,7 +321,7 @@
 
   <h1 style="margin: 5px 0; color: var(--accent);">ସେଣ୍ଟୁ</h1>
 
-  <!-- Create / Join Room Menu -->
+  <!-- Setup Menu -->
   <div class="menu-card" id="room-menu">
     <div class="tab-buttons">
       <button class="tab-btn active" id="tab-create" onclick="switchMode('create')">Create Room</button>
@@ -307,35 +330,46 @@
 
     <input type="text" id="player-name" placeholder="Enter Your Name">
 
-    <div id="create-section">
-      <button style="width:100%; margin-top:10px;" onclick="handleCreateRoom()">Create Lobby</button>
+    <div id="create-section" style="display:flex; flex-direction:column; gap:10px;">
+      <p style="margin: 0; font-size: 0.85rem; color: var(--text-light);">Max Players: <strong>3 Players</strong></p>
+      <button class="action-btn" onclick="handleCreateRoom()">Generate Room Code</button>
     </div>
 
     <div id="join-section" class="hidden" style="display:flex; flex-direction:column; gap:10px;">
-      <input type="text" id="join-room-id" placeholder="Enter Room ID">
-      <input type="password" id="join-room-pass" placeholder="Enter Passcode">
-      <button onclick="handleJoinRoom()">Join Lobby</button>
+      <input type="number" id="join-room-id" placeholder="Enter 4-Digit Room Code">
+      <div class="form-group">
+        <label for="join-role-select">Join As:</label>
+        <select id="join-role-select">
+          <option value="player">Player 🎮</option>
+          <option value="viewer">Viewer / Spectator 👁️</option>
+        </select>
+      </div>
+      <button class="action-btn" onclick="handleJoinRoom()">Connect to Room</button>
     </div>
 
     <!-- Lobby / Waiting Area -->
     <div id="lobby-section" class="lobby-status hidden">
-      <h3>Room Code: <span id="lobby-room-id" style="color:var(--accent);">-</span></h3>
-      <p id="lobby-message">Waiting for players to join...</p>
+      <h2 style="margin:0;">Room Code: <span id="lobby-room-id" style="color:var(--accent);">-</span></h2>
+      <p id="lobby-message" style="margin:10px 0;">Connecting to lobby...</p>
+      <div id="connected-players-list" style="font-weight:bold; margin-bottom:10px;"></div>
       <button id="start-game-btn" class="start-btn hidden" onclick="startMatch()">Start Game 🚀</button>
     </div>
   </div>
 
-  <!-- Main Game Interface -->
+  <!-- Game Canvas -->
   <div class="game-board" id="game-board">
     <div class="status-panel">
       <div><strong>Room ID:</strong> <span id="display-room-id">-</span></div>
-      <div><strong>Player:</strong> <span id="display-player-name" style="color:var(--accent);">-</span></div>
+      <div>
+        <strong>User:</strong> <span id="display-player-name" style="color:var(--accent);">-</span>
+        <span id="role-badge" class="viewer-badge hidden">Viewer</span>
+      </div>
       <button onclick="shareRoomLink()" style="padding: 4px 8px; font-size: 0.75rem;">🔗 Share Link</button>
     </div>
 
     <div class="status-panel">
       <div><strong>Turn:</strong> <span id="current-player">-</span></div>
-      <div><strong>Scores:</strong> A:<span id="score-0">0</span> B:<span id="score-1">0</span> C:<span id="score-2">0</span></div>
+      <div id="scores-display"><strong>Scores:</strong> -</div>
     </div>
 
     <div class="piles">
@@ -357,7 +391,7 @@
       <span class="sticker-btn" onclick="sendSticker('💣')">💣</span>
     </div>
 
-    <h3 style="margin:5px 0;">Your Cards (Swipe to reorder)</h3>
+    <h3 style="margin:5px 0;" id="cards-header">Your Cards (Swipe to reorder)</h3>
     <div class="hand-container" id="hand-container">
       <div class="hand" id="player-hand"></div>
     </div>
@@ -380,16 +414,17 @@
       { label: '10', value: 10 }, { label: 'J', value: 11 }, { label: 'Q', value: 12 }, { label: 'K', value: 13 }
     ];
 
+    const MAX_PLAYERS = 3;
     let currentRoomId = '';
     let isHost = false;
+    let isViewer = false;
+    let peer = null;
+    let conn = null;
     let draggedIndex = null;
 
     let gameState = {
-      players: [
-        { name: '', hand: [], score: 0 },
-        { name: 'Player B', hand: [], score: 0 },
-        { name: 'Player C', hand: [], score: 0 }
-      ],
+      players: [],
+      viewers: [],
       turnIndex: 0,
       drawPile: [],
       discardPile: [],
@@ -405,9 +440,7 @@
       }
     };
 
-    function setTheme(themeName) {
-      document.body.className = themeName;
-    }
+    function setTheme(themeName) { document.body.className = themeName; }
 
     function switchMode(mode) {
       if (mode === 'create') {
@@ -427,55 +460,125 @@
       const playerName = document.getElementById('player-name').value.trim() || 'Host Player';
       currentRoomId = Math.floor(1000 + Math.random() * 9000).toString();
       isHost = true;
+      isViewer = false;
 
-      openLobby(playerName, currentRoomId);
+      gameState.players = [{ name: playerName, hand: [], score: 0 }];
+      for (let i = 1; i < MAX_PLAYERS; i++) {
+        gameState.players.push({ name: `Waiting...`, hand: [], score: 0 });
+      }
+
+      setupPeerHost(currentRoomId);
     }
 
     function handleJoinRoom() {
-      const playerName = document.getElementById('player-name').value.trim() || 'Player 2';
+      const playerName = document.getElementById('player-name').value.trim() || 'Guest';
       const roomId = document.getElementById('join-room-id').value.trim();
-      const pass = document.getElementById('join-room-pass').value.trim();
+      const role = document.getElementById('join-role-select').value;
 
-      if (!roomId || !pass) {
-        alert('Please enter both Room ID and Passcode');
+      if (!roomId) {
+        alert('Please enter a 4-Digit Room Code');
         return;
       }
+
       currentRoomId = roomId;
       isHost = false;
+      isViewer = (role === 'viewer');
 
-      openLobby(playerName, currentRoomId);
+      setupPeerClient(roomId, playerName, role);
+    }
+
+    function setupPeerHost(roomId) {
+      peer = new Peer('sentu-room-' + roomId);
+
+      peer.on('open', () => {
+        openLobby(gameState.players[0].name, roomId);
+      });
+
+      peer.on('connection', (connection) => {
+        conn = connection;
+        conn.on('data', (data) => {
+          if (data.type === 'JOIN') {
+            if (data.role === 'viewer') {
+              gameState.viewers.push(data.name);
+            } else {
+              const emptySlot = gameState.players.find(p => p.name === 'Waiting...');
+              if (emptySlot) {
+                emptySlot.name = data.name;
+              }
+            }
+            updateLobbyUI();
+          }
+        });
+      });
+    }
+
+    function setupPeerClient(roomId, playerName, role) {
+      peer = new Peer();
+      peer.on('open', () => {
+        conn = peer.connect('sentu-room-' + roomId);
+        conn.on('open', () => {
+          conn.send({ type: 'JOIN', name: playerName, role: role });
+          openLobby(playerName, roomId);
+        });
+      });
     }
 
     function openLobby(name, roomId) {
-      gameState.players[0].name = name;
       document.getElementById('lobby-room-id').innerText = roomId;
       document.getElementById('create-section').classList.add('hidden');
       document.getElementById('join-section').classList.add('hidden');
       document.getElementById('lobby-section').classList.remove('hidden');
 
+      updateLobbyUI();
+    }
+
+    function updateLobbyUI() {
+      const playerNames = gameState.players.map(p => p.name).filter(n => n !== 'Waiting...').join(', ');
+      let statusText = `Players (3 max): ${playerNames || 'Waiting...'}`;
+
+      if (gameState.viewers.length > 0) {
+        statusText += `<br>Viewers: ${gameState.viewers.join(', ')}`;
+      }
+
+      document.getElementById('connected-players-list').innerHTML = statusText;
+
       if (isHost) {
-        document.getElementById('lobby-message').innerText = 'You are the Host! Click below to start when ready.';
+        document.getElementById('lobby-message').innerText = 'You are Host! Start match when ready.';
         document.getElementById('start-game-btn').classList.remove('hidden');
       } else {
-        document.getElementById('lobby-message').innerText = 'Waiting for the host to start the game...';
+        document.getElementById('lobby-message').innerText = isViewer 
+          ? 'Joined as Viewer! Waiting for Host to start game...' 
+          : 'Joined as Player! Waiting for Host to start game...';
         document.getElementById('start-game-btn').classList.add('hidden');
       }
     }
 
     function startMatch() {
-      document.getElementById('display-player-name').innerText = gameState.players[0].name;
+      const playerName = document.getElementById('player-name').value.trim() || 'Host Player';
+      document.getElementById('display-player-name').innerText = playerName;
       document.getElementById('display-room-id').innerText = currentRoomId;
       document.getElementById('room-menu').classList.add('hidden');
       document.getElementById('game-board').style.display = 'flex';
+
+      if (isViewer) {
+        document.getElementById('role-badge').classList.remove('hidden');
+        document.getElementById('discard-btn').disabled = true;
+        document.getElementById('off-btn').disabled = true;
+        document.getElementById('cards-header').innerText = "Game View (Spectating)";
+      }
+
       initGame();
     }
 
     function leaveRoom() {
+      if(peer) peer.destroy();
       document.getElementById('room-menu').classList.remove('hidden');
       document.getElementById('lobby-section').classList.add('hidden');
       document.getElementById('create-section').classList.remove('hidden');
       document.getElementById('game-board').style.display = 'none';
+      document.getElementById('role-badge').classList.add('hidden');
       isHost = false;
+      isViewer = false;
     }
 
     function shareRoomLink() {
@@ -511,7 +614,7 @@
 
     function initGame() {
       const deck = createDeck();
-      for (let i = 0; i < 3; i++) {
+      for (let i = 0; i < MAX_PLAYERS; i++) {
         gameState.players[i].hand = deck.splice(0, 10);
       }
       gameState.drawPile = deck;
@@ -544,7 +647,7 @@
       if (!card) return '';
       return `
         <div class="card ${card.isRed ? 'red' : ''} ${isSelected ? 'selected' : ''}" 
-             draggable="true" 
+             draggable="${!isViewer}" 
              data-index="${index}">
           <div class="corner">
             <span>${card.label}</span>
@@ -562,6 +665,7 @@
     }
 
     function attachDragListeners() {
+      if(isViewer) return;
       const cards = document.querySelectorAll('.hand .card');
       cards.forEach(card => {
         card.addEventListener('dragstart', (e) => {
@@ -569,9 +673,7 @@
           e.dataTransfer.effectAllowed = 'move';
         });
 
-        card.addEventListener('dragover', (e) => {
-          e.preventDefault();
-        });
+        card.addEventListener('dragover', (e) => { e.preventDefault(); });
 
         card.addEventListener('drop', (e) => {
           e.preventDefault();
@@ -588,7 +690,7 @@
     }
 
     function drawFromDeck() {
-      if (gameState.hasDrawnThisTurn) return;
+      if (isViewer || gameState.hasDrawnThisTurn) return;
       if (gameState.drawPile.length === 0) {
         const top = gameState.discardPile.pop();
         gameState.drawPile = gameState.discardPile.sort(() => Math.random() - 0.5);
@@ -600,31 +702,33 @@
     }
 
     function drawFromDiscard() {
-      if (gameState.hasDrawnThisTurn || gameState.discardPile.length === 0) return;
+      if (isViewer || gameState.hasDrawnThisTurn || gameState.discardPile.length === 0) return;
       gameState.players[gameState.turnIndex].hand.push(gameState.discardPile.pop());
       gameState.hasDrawnThisTurn = true;
       renderBoard();
     }
 
     function selectCard(index) {
+      if (isViewer) return;
       gameState.selectedCardIndex = index;
       document.getElementById('discard-btn').disabled = !gameState.hasDrawnThisTurn;
       renderBoard();
     }
 
     function discardSelectedCard() {
-      if (gameState.selectedCardIndex === null || !gameState.hasDrawnThisTurn) return;
+      if (isViewer || gameState.selectedCardIndex === null || !gameState.hasDrawnThisTurn) return;
       const currentPlayer = gameState.players[gameState.turnIndex];
       const discardedCard = currentPlayer.hand.splice(gameState.selectedCardIndex, 1)[0];
       
       gameState.discardPile.push(discardedCard);
       gameState.selectedCardIndex = null;
       gameState.hasDrawnThisTurn = false;
-      gameState.turnIndex = (gameState.turnIndex + 1) % 3;
+      gameState.turnIndex = (gameState.turnIndex + 1) % MAX_PLAYERS;
       renderBoard();
     }
 
     function declareOff() {
+      if(isViewer) return;
       const player = gameState.players[gameState.turnIndex];
       alert(`${player.name} declared OFF! Round ended.`);
       gameState.turnIndex = 0;
@@ -635,9 +739,8 @@
       document.getElementById('current-player').innerText = gameState.players[gameState.turnIndex].name;
       document.getElementById('draw-count').innerText = `(${gameState.drawPile.length})`;
       
-      gameState.players.forEach((p, i) => {
-        document.getElementById(`score-${i}`).innerText = p.score;
-      });
+      const scoreStr = gameState.players.map((p, i) => `${p.name}: ${p.score}`).join(' | ');
+      document.getElementById('scores-display').innerHTML = `<strong>Scores:</strong> ${scoreStr}`;
 
       const topDiscardEl = document.getElementById('top-discard');
       if (gameState.discardPile.length > 0) {
