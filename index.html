@@ -30,6 +30,7 @@
         .team-btn { flex: 1; padding: 8px; border: 1px solid var(--primary); background: white; color: var(--primary); font-weight: bold; border-radius: 6px; cursor: pointer; }
         .team-btn.active { background: var(--primary); color: white; }
         .action-btn { padding: 10px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.95rem; }
+        .action-btn:disabled { background: #cccccc !important; cursor: not-allowed; color: #666666; }
         .skip-btn { padding: 10px; background: #757575; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.95rem; }
 
         /* GAME SCREEN */
@@ -43,7 +44,7 @@
         .top-bar-info { display: flex; gap: 8px; align-items: center; background: #e8f5e9; padding: 4px 8px; border-radius: 20px; flex-wrap: wrap; }
         .share-btn { background: #0288d1; color: white; border: none; padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; cursor: pointer; font-weight: bold; }
         
-        /* TOP BAR CONTROLS (Rules & Exit) */
+        /* TOP BAR CONTROLS */
         .top-bar-actions { display: flex; align-items: center; gap: 6px; }
         .exit-btn { 
             background: #d32f2f; color: white; border: none; padding: 4px 8px; 
@@ -51,6 +52,10 @@
             display: flex; align-items: center; gap: 2px;
         }
         .exit-btn:active { background: #b71c1c; }
+        .control-btn {
+            background: #ff9800; color: white; border: none; padding: 4px 8px;
+            border-radius: 6px; font-size: 0.8rem; font-weight: bold; cursor: pointer;
+        }
 
         .game-table {
             flex-grow: 1; background: var(--table-light);
@@ -76,6 +81,7 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: relative;
         }
         .player-badge.active-turn { border-color: #ff9800; background: #fffde7; }
+        .player-badge.trump-maker { border-color: #2e7d32; box-shadow: 0 0 8px rgba(46, 125, 50, 0.6); }
         
         .player-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid #777; }
         .player-meta { display: flex; flex-direction: column; }
@@ -93,7 +99,6 @@
         .suits-container { display: flex; justify-content: center; gap: 4px; width: 100%; overflow-x: auto; padding-bottom: 5px; }
         .suit-group { display: flex; background: rgba(255, 255, 255, 0.75); padding: 3px; border-radius: 6px; border: 1px dashed #a8d5ba; min-width: 86px; min-height: 124px; }
 
-        /* ENLARGED CARDS */
         .card {
             width: var(--card-width); height: var(--card-height);
             background: #ffffff; border: 1px solid #888; border-radius: 6px;
@@ -144,6 +149,13 @@
 
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 300; justify-content: center; align-items: center; }
         .modal-body { background: white; padding: 20px; border-radius: 10px; max-width: 80%; max-height: 80%; overflow-y: auto; }
+        
+        .pause-overlay {
+            display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); color: white; z-index: 280;
+            justify-content: center; align-items: center; font-size: 1.5rem; font-weight: bold;
+            border-radius: 20px;
+        }
     </style>
 </head>
 <body>
@@ -160,8 +172,9 @@
                 <input type="text" id="p-name" value="Player A">
             </div>
             <div class="input-group">
-                <label>Profile Image URL</label>
-                <input type="text" id="p-img" value="https://api.dicebear.com/7.x/bottts/svg?seed=PlayerA">
+                <label>Profile Image</label>
+                <input type="file" id="p-img-file" accept="image/*" onchange="handleImageUpload(event)">
+                <input type="hidden" id="p-img" value="https://api.dicebear.com/7.x/bottts/svg?seed=PlayerA">
             </div>
             <div class="input-group">
                 <label>Choose Team</label>
@@ -192,12 +205,15 @@
                 <button class="share-btn" onclick="shareRoomLink()">🔗 Share</button>
             </div>
             <div class="top-bar-actions">
+                <button class="action-btn" id="start-game-btn" onclick="startGameProcess()" disabled>▶️ Start Game</button>
+                <button class="control-btn" id="pause-btn" onclick="togglePauseGame()">⏸️ Pause</button>
                 <button onclick="toggleModal(true)">📜 Rules</button>
                 <button class="exit-btn" onclick="exitGame()">🚪 Exit</button>
             </div>
         </div>
 
         <div class="game-table" id="game-table">
+            <div class="pause-overlay" id="pause-overlay">⏸️ Game Paused</div>
             <div class="shuffle-deck" id="shuffle-deck"></div>
 
             <!-- Player C (Top) -->
@@ -206,7 +222,7 @@
                     <img src="https://api.dicebear.com/7.x/bottts/svg?seed=PlayerC" class="player-avatar" id="img-C">
                     <div class="player-meta">
                         <span id="name-C">Waiting... (C)</span>
-                        <span class="player-status" id="status-C">Idle</span>
+                        <span class="player-status" id="status-C">Waiting for join...</span>
                     </div>
                     <button class="mic-btn" id="mic-C" onclick="toggleMic('C')">🎙️</button>
                     <button class="sticker-btn" onclick="openStickerMenu(event, 'C')">😜</button>
@@ -219,7 +235,7 @@
                     <img src="https://api.dicebear.com/7.x/bottts/svg?seed=PlayerD" class="player-avatar" id="img-D">
                     <div class="player-meta">
                         <span id="name-D">Waiting... (D)</span>
-                        <span class="player-status" id="status-D">Idle</span>
+                        <span class="player-status" id="status-D">Waiting for join...</span>
                     </div>
                     <button class="mic-btn" id="mic-D" onclick="toggleMic('D')">🎙️</button>
                     <button class="sticker-btn" onclick="openStickerMenu(event, 'D')">😜</button>
@@ -232,7 +248,7 @@
                     <img src="https://api.dicebear.com/7.x/bottts/svg?seed=PlayerB" class="player-avatar" id="img-B">
                     <div class="player-meta">
                         <span id="name-B">Waiting... (B)</span>
-                        <span class="player-status" id="status-B">Idle</span>
+                        <span class="player-status" id="status-B">Waiting for join...</span>
                     </div>
                     <button class="mic-btn" id="mic-B" onclick="toggleMic('B')">🎙️</button>
                     <button class="sticker-btn" onclick="openStickerMenu(event, 'B')">😜</button>
@@ -248,7 +264,7 @@
                         <img src="https://api.dicebear.com/7.x/bottts/svg?seed=PlayerA" class="player-avatar" id="img-A">
                         <div class="player-meta">
                             <span id="name-A">You (A)</span>
-                            <span class="player-status" id="status-A">Your Turn</span>
+                            <span class="player-status" id="status-A">Lobby Leader</span>
                         </div>
                         <button class="mic-btn" id="mic-A" onclick="toggleMic('A')">🎙️</button>
                     </div>
@@ -261,9 +277,9 @@
                 </div>
             </div>
 
-            <!-- TRUMP SELECTION PANEL (5 OPTIONS + SKIP BUTTON) -->
+            <!-- TRUMP SELECTION PANEL -->
             <div class="trump-panel" id="trump-panel">
-                <h3>Select Trump (ରଙ୍ଗ) - First 9 Cards</h3>
+                <h3 id="trump-panel-title">Select Trump (ରଙ୍ଗ) - First 9 Cards</h3>
                 <div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center;">
                     <button class="action-btn" onclick="setTrump('♣️ Clubs')">♣️ Clubs</button>
                     <button class="action-btn" onclick="setTrump('♥️ Hearts')">♥️ Hearts</button>
@@ -275,7 +291,7 @@
             </div>
 
             <div class="bidding-panel" id="bidding-panel">
-                <h3>Enter Your Bid (ଗଣ୍ଡା)</h3>
+                <h3>Enter Your Bid (ଗଣ୍ដା)</h3>
                 <input type="number" id="bid-input" min="0" max="13" value="0" style="padding:8px; width:80px; margin:auto;">
                 <button class="action-btn" onclick="submitBid()">Submit Bid</button>
             </div>
@@ -306,9 +322,10 @@
         <div class="modal-body">
             <h3>Dasha Gandia Rules</h3>
             <p>1. <b>Trump (ରଙ୍ଗ):</b> Made after receiving 9 cards. Options include 4 suits or ବେରଙ୍ଗ (No Trump).</p>
-            <p>2. <b>Skip Trump:</b> Automatically sets Trump from 12th card suit. If 12th card is ❤️ 2 or ♠️ 2, it becomes ବେରଙ୍ଗ.</p>
-            <p>3. <b>Special Powers:</b> Heart 2 (1st) > Spade 2 (2nd) > Trump Ace (3rd).</p>
-            <p>4. <b>Drop Restrictions:</b> Heart 2 & Spade 2 cannot be played on 1st or 13th ଗଣ୍ଡା, and cannot open any round.</p>
+            <p>2. <b>Rotating Trump Maker:</b> Trump selection moves sequentially between players (A ➔ B ➔ C ➔ D) every round.</p>
+            <p>3. <b>Skip Trump:</b> Automatically sets Trump from 12th card suit. If 12th card is ❤️ 2 or ♠️ 2, it becomes ବେରଙ୍ଗ.</p>
+            <p>4. <b>Special Powers:</b> Heart 2 (1st) > Spade 2 (2nd) > Trump Ace (3rd).</p>
+            <p>5. <b>Drop Restrictions:</b> Heart 2 & Spade 2 cannot be played on 1st or 13th ଗଣ୍ଡା, and cannot open any round.</p>
             <button class="action-btn" style="margin-top:15px;" onclick="toggleModal(false)">Close</button>
         </div>
     </div>
@@ -328,6 +345,24 @@
         
         let currentGandaRound = 1;
         let isFirstMoveOfGanda = true;
+        let isPaused = false;
+        
+        // Joined players management
+        let joinedPlayersCount = 1; // Room creator (A) starts as 1
+        const PLAYERS_ORDER = ['A', 'B', 'C', 'D'];
+        let currentTrumpMakerIndex = 0; // Starts with A
+
+        /* FILE UPLOAD TO BASE64 HANDLER */
+        function handleImageUpload(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    document.getElementById('p-img').value = evt.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
 
         /* MOBILE FULLSCREEN & SWIPE BACK PROTECTION */
         let backSwipeCount = 0, swipeTimer = null;
@@ -394,12 +429,55 @@
         function setupConn(conn) {
             connections[conn.peer] = conn;
             conn.on('data', data => handleNetworkData(data));
+            
+            // Player Joined Simulation Logic
+            joinedPlayersCount++;
+            updateJoinedPlayerSlots();
         }
 
-        function createRoom() { requestFullScreen(); switchToTable(); }
+        function updateJoinedPlayerSlots() {
+            if (joinedPlayersCount >= 2) {
+                document.getElementById('name-B').innerText = "Player B";
+                document.getElementById('status-B').innerText = "Joined";
+            }
+            if (joinedPlayersCount >= 3) {
+                document.getElementById('name-C').innerText = "Player C";
+                document.getElementById('status-C').innerText = "Joined";
+            }
+            if (joinedPlayersCount >= 4) {
+                document.getElementById('name-D').innerText = "Player D";
+                document.getElementById('status-D').innerText = "Joined";
+            }
+
+            const startBtn = document.getElementById('start-game-btn');
+            if (joinedPlayersCount >= 4) {
+                startBtn.disabled = false;
+                startBtn.innerText = "▶️ Start Game";
+            } else {
+                startBtn.disabled = true;
+                startBtn.innerText = `Waiting (${joinedPlayersCount}/4)`;
+            }
+        }
+
+        function createRoom() { 
+            requestFullScreen(); 
+            switchToTable();
+            // Simulate/Allow testing option to fill room if playing solo/testing
+            setTimeout(() => {
+                // Auto fill slot status for demonstration if alone
+                if(joinedPlayersCount < 4) {
+                    showBubble('badge-A', 'Waiting for players to join link...');
+                }
+            }, 1000);
+        }
+
         function joinRoom() {
             const id = document.getElementById('join-id').value;
-            if(id) { peer.connect(id); requestFullScreen(); switchToTable(); }
+            if(id) { 
+                peer.connect(id); 
+                requestFullScreen(); 
+                switchToTable(); 
+            }
         }
 
         function switchToTable() {
@@ -411,9 +489,41 @@
             document.getElementById('name-A').innerText = pName + " (A)";
             if(pImg) document.getElementById('img-A').src = pImg;
 
+            updateJoinedPlayerSlots();
+        }
+
+        function togglePauseGame() {
+            isPaused = !isPaused;
+            const pauseBtn = document.getElementById('pause-btn');
+            const pauseOverlay = document.getElementById('pause-overlay');
+
+            if (isPaused) {
+                pauseBtn.innerText = "▶️ Resume";
+                pauseOverlay.style.display = "flex";
+            } else {
+                pauseBtn.innerText = "⏸️ Pause";
+                pauseOverlay.style.display = "none";
+            }
+        }
+
+        function startGameProcess() {
+            document.getElementById('start-game-btn').style.display = 'none';
+            
+            // Set initial trump maker highlight
+            updateTrumpMakerHighlight();
+
             triggerShuffleAnimation('slot-A', () => {
                 dealInitialNineCards();
             });
+        }
+
+        function updateTrumpMakerHighlight() {
+            PLAYERS_ORDER.forEach(p => {
+                document.getElementById(`badge-${p}`).classList.remove('trump-maker');
+            });
+            const makerSlot = PLAYERS_ORDER[currentTrumpMakerIndex];
+            document.getElementById(`badge-${makerSlot}`).classList.add('trump-maker');
+            showBubble(`badge-${makerSlot}`, `🎺 ${makerSlot} is Trump Maker`);
         }
 
         function triggerShuffleAnimation(shufflerSlotId, callback) {
@@ -452,11 +562,25 @@
 
             myHand = fullDealtHand.slice(0, 9);
             renderHand();
-            document.getElementById('trump-panel').style.display = 'flex';
+
+            // Check if current player (A) is the Trump Maker
+            if (PLAYERS_ORDER[currentTrumpMakerIndex] === 'A') {
+                document.getElementById('trump-panel').style.display = 'flex';
+            } else {
+                showBubble(`badge-${PLAYERS_ORDER[currentTrumpMakerIndex]}`, 'Selecting Trump...');
+                // Simulated auto trump selection for other players in rotation
+                setTimeout(() => {
+                    setTrump('♥️ Hearts');
+                }, 2500);
+            }
         }
 
         function setTrump(trumpStr) {
             document.getElementById('trump-val').innerText = trumpStr;
+            
+            // Increment Trump Maker for next round (Rotates A -> B -> C -> D)
+            currentTrumpMakerIndex = (currentTrumpMakerIndex + 1) % 4;
+
             finalizeFullHandAndProceed();
         }
 
@@ -472,8 +596,7 @@
                 showBubble('badge-A', `12th card (${card12.rank}${SUITS_SYMBOL[card12.suit]}) sets ରଙ୍ଗ: ${chosenTrump}`);
             }
 
-            document.getElementById('trump-val').innerText = chosenTrump;
-            finalizeFullHandAndProceed();
+            setTrump(chosenTrump);
         }
 
         function finalizeFullHandAndProceed() {
@@ -494,6 +617,7 @@
         }
 
         function isCardPlayable(card) {
+            if (isPaused) return false;
             const isH2orS2 = (card.suit === 'H' && card.rank === '2') || (card.suit === 'S' && card.rank === '2');
             
             if (isH2orS2) {
@@ -520,6 +644,10 @@
                         cardEl.onclick = () => playCard(card);
                     } else {
                         cardEl.onclick = () => {
+                            if (isPaused) {
+                                showBubble('badge-A', '⏸️ Game is paused!');
+                                return;
+                            }
                             const isH2orS2 = (card.suit === 'H' && card.rank === '2') || (card.suit === 'S' && card.rank === '2');
                             if (isH2orS2) {
                                 if (currentGandaRound === 1 || currentGandaRound === 13) {
