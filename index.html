@@ -1,517 +1,579 @@
 <!DOCTYPE html>
 <html lang="or">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, orientation=landscape">
-  <title>ଦଶ ଗଣ୍ଡିଆ - Dasha Gandia Lobby & Game</title>
-  <style>
-    :root {
-      --gold-accent: #ffd700;
-      --card-width: 62px;
-      --card-height: 88px;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ଦଶ ଗଣ୍ଡିଆ (Dasha Gandia)</title>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <style>
+        :root {
+            --bg-light: #f4f6f9;
+            --table-light: #f0f7f4;
+            --table-border: #a8d5ba;
+            --card-width: 65px;
+            --card-height: 95px;
+            --primary: #2e7d32;
+            --accent: #ff9800;
+        }
 
-    * {
-      box-sizing: border-box;
-      user-select: none;
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-light); height: 100vh; overflow: hidden; }
 
-    body {
-      background-color: #0b1325;
-      color: #fff;
-      overflow: hidden;
-      width: 100vw;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
+        /* LOBBY SCREEN */
+        #lobby-screen { display: flex; flex-direction: column; height: 100vh; background: #ffffff; }
+        .top-bar-lobby { background: var(--primary); color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .lobby-content { max-width: 450px; margin: auto; padding: 20px; width: 90%; display: flex; flex-direction: column; gap: 12px; }
+        .input-group { display: flex; flex-direction: column; gap: 4px; }
+        .input-group label { font-weight: bold; font-size: 0.85rem; color: #333; }
+        .input-group input { padding: 8px; border: 1px solid #ccc; border-radius: 6px; }
+        .team-selector { display: flex; gap: 8px; }
+        .team-btn { flex: 1; padding: 8px; border: 1px solid var(--primary); background: white; color: var(--primary); font-weight: bold; border-radius: 6px; cursor: pointer; }
+        .team-btn.active { background: var(--primary); color: white; }
+        .action-btn { padding: 10px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.95rem; }
+        .skip-btn { padding: 10px; background: #757575; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.95rem; }
 
-    /* ---------------- LOBBY SCREEN ---------------- */
-    #lobbyScreen {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-      z-index: 200;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
+        /* GAME SCREEN */
+        #game-screen { display: none; height: 100vh; flex-direction: column; }
+        #game-screen.active { display: flex; }
+        
+        .game-top-bar { 
+            background: #ffffff; padding: 6px 12px; border-bottom: 2px solid #e0e0e0; 
+            display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem; font-weight: bold;
+        }
+        .top-bar-info { display: flex; gap: 10px; align-items: center; background: #e8f5e9; padding: 4px 10px; border-radius: 20px; }
 
-    .lobby-card {
-      background: rgba(30, 41, 59, 0.95);
-      border: 2px solid var(--gold-accent);
-      border-radius: 12px;
-      padding: 24px;
-      width: 100%;
-      max-width: 650px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
+        .game-table {
+            flex-grow: 1; background: var(--table-light);
+            border: 4px solid var(--table-border); margin: 6px; border-radius: 20px;
+            position: relative; display: grid;
+            grid-template-areas:
+                "top-left top top-right"
+                "left center right"
+                "bottom-left bottom bottom-right";
+            grid-template-rows: 1fr 1.2fr 1.8fr;
+            grid-template-columns: 1fr 2.5fr 1fr;
+        }
 
-    .lobby-title {
-      font-size: 22px;
-      font-weight: bold;
-      color: var(--gold-accent);
-      text-align: center;
-    }
+        .player-slot { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .slot-top { grid-area: top; }
+        .slot-right { grid-area: right; }
+        .slot-left { grid-area: left; }
+        .slot-bottom { grid-area: bottom; justify-content: flex-end; width: 100%; }
 
-    .profile-section {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      background: rgba(0,0,0,0.3);
-      padding: 12px;
-      border-radius: 8px;
-    }
+        .player-badge { 
+            background: #ffffff; padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; 
+            font-weight: bold; border: 2px solid #ccc; display: flex; align-items: center; gap: 6px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: relative;
+        }
+        .player-badge.active-turn { border-color: #ff9800; background: #fffde7; }
+        
+        .player-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid #777; }
+        .player-meta { display: flex; flex-direction: column; }
+        .player-status { font-size: 0.65rem; color: #2e7d32; font-weight: normal; }
 
-    .avatar-preview {
-      width: 64px;
-      height: 64px;
-      border-radius: 50%;
-      border: 2px solid var(--gold-accent);
-      object-fit: cover;
-      background: #334155;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-    }
+        .mic-btn, .sticker-btn { 
+            background: #eee; border: 1px solid #ccc; border-radius: 50%; 
+            width: 24px; height: 24px; cursor: pointer; font-size: 0.75rem; display: flex; align-items: center; justify-content: center;
+        }
+        .mic-btn.active { background: #ff5252; color: white; border-color: #d32f2f; }
 
-    .input-field {
-      width: 100%;
-      padding: 8px 12px;
-      background: #0f172a;
-      border: 1px solid #475569;
-      color: #fff;
-      border-radius: 6px;
-      outline: none;
-    }
+        .center-area { grid-area: center; border: 2px dashed #a8d5ba; border-radius: 15px; display: flex; justify-content: center; align-items: center; gap: 10px; position: relative; }
 
-    .room-actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
+        .bottom-hand-wrapper { width: 100%; display: flex; flex-direction: column; align-items: center; }
+        .suits-container { display: flex; justify-content: center; gap: 6px; width: 100%; overflow-x: auto; padding-bottom: 5px; }
+        .suit-group { display: flex; background: rgba(255, 255, 255, 0.7); padding: 3px; border-radius: 6px; border: 1px dashed #a8d5ba; min-width: 70px; min-height: 100px; }
 
-    .btn {
-      padding: 10px;
-      border: none;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-      background: var(--gold-accent);
-      color: #000;
-      transition: 0.2s;
-    }
+        .card {
+            width: var(--card-width); height: var(--card-height);
+            background: #ffffff; border: 1px solid #888; border-radius: 5px;
+            margin-left: -42px; position: relative; cursor: pointer;
+            box-shadow: 1px 1px 4px rgba(0,0,0,0.2); transition: transform 0.15s, border 0.15s;
+            user-select: none; flex-shrink: 0;
+            display: flex; flex-direction: column; justify-content: space-between; padding: 4px;
+            font-weight: bold;
+        }
+        .card:first-child { margin-left: 0; }
+        .card:hover { transform: translateY(-15px); z-index: 100 !important; }
+        .card.disabled { opacity: 0.45; cursor: not-allowed; border-color: #d32f2f; }
+        .card.disabled:hover { transform: none; }
+        .card.red { color: #d32f2f; }
+        .card.black { color: #212121; }
+        .card .c-top { font-size: 0.75rem; line-height: 1; }
+        .card .c-suit { font-size: 1.2rem; text-align: center; }
+        .card .c-bot { font-size: 0.75rem; line-height: 1; align-self: flex-end; transform: rotate(180deg); }
 
-    .btn:hover {
-      opacity: 0.9;
-    }
+        .shuffle-deck {
+            position: absolute; width: var(--card-width); height: var(--card-height);
+            background: #1565c0; border: 2px solid #fff; border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3); display: none; z-index: 250;
+        }
+        @keyframes shuffleAnim {
+            0% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.1) translate(-20px, -10px) rotate(-10deg); }
+            50% { transform: scale(1.1) translate(20px, 10px) rotate(10deg); }
+            75% { transform: scale(1.05) translate(-10px, 10px) rotate(-5deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+        .shuffling { animation: shuffleAnim 0.6s ease-in-out infinite; }
 
-    .btn-secondary {
-      background: #334155;
-      color: #fff;
-      border: 1px solid var(--gold-accent);
-    }
+        .bidding-panel, .trump-panel, .chat-popover, .sticker-popover { position: absolute; background: white; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); padding: 12px; z-index: 200; }
+        .bidding-panel, .trump-panel { top: 50%; left: 50%; transform: translate(-50%, -50%); display: none; flex-direction: column; gap: 10px; text-align: center; }
 
-    /* Teams Selection */
-    .teams-container {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 8px;
-    }
+        .chat-popover { bottom: 60px; right: 15px; display: none; flex-direction: column; gap: 5px; }
+        .chat-opt { padding: 6px 12px; background: #f0f0f0; border-radius: 4px; cursor: pointer; font-size: 0.85rem; }
+        .chat-opt:hover { background: #e0e0e0; }
 
-    .team-box {
-      border: 2px dashed #475569;
-      border-radius: 8px;
-      padding: 10px;
-      text-align: center;
-      cursor: pointer;
-    }
+        .sticker-popover { display: none; grid-template-columns: repeat(3, 1fr); gap: 5px; font-size: 1.5rem; }
+        .sticker-opt { cursor: pointer; text-align: center; padding: 3px; }
 
-    .team-box.selected {
-      border-color: var(--gold-accent);
-      background: rgba(255, 215, 0, 0.1);
-    }
+        .bubble { position: absolute; background: #333; color: white; padding: 5px 10px; border-radius: 8px; font-size: 0.8rem; z-index: 150; animation: fadeout 3s forwards; }
+        @keyframes fadeout { 0% { opacity: 1; } 80% { opacity: 1; } 100% { opacity: 0; } }
 
-    .team-box.full {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
+        .quick-msg-btn { position: fixed; bottom: 15px; right: 15px; background: var(--accent); color: white; border: none; border-radius: 50%; width: 42px; height: 42px; font-size: 1.2rem; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.2); z-index: 100; }
 
-    /* ---------------- GAME BOARD SCREEN ---------------- */
-    .top-bar {
-      height: 44px;
-      background: rgba(0, 0, 0, 0.85);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 16px;
-      border-bottom: 2px solid var(--gold-accent);
-      z-index: 10;
-    }
-
-    .game-title {
-      font-size: 16px;
-      font-weight: bold;
-      color: var(--gold-accent);
-    }
-
-    .top-buttons button {
-      background: #1e293b;
-      color: #fff;
-      border: 1px solid var(--gold-accent);
-      padding: 4px 10px;
-      margin-left: 6px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 12px;
-    }
-
-    .table-container {
-      flex: 1;
-      position: relative;
-      background: radial-gradient(circle, #005c2b 0%, #002b13 100%);
-      display: grid;
-      grid-template-columns: 140px 1fr 140px;
-      grid-template-rows: 80px 1fr 120px;
-      padding: 8px;
-    }
-
-    .side-score {
-      background: rgba(0, 0, 0, 0.75);
-      border: 2px solid var(--gold-accent);
-      border-radius: 6px;
-      padding: 6px;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-
-    .score-title { font-size: 11px; color: #ccc; }
-    .score-val { font-size: 20px; font-weight: bold; color: var(--gold-accent); }
-    .bid-tag { font-size: 10px; background: #334155; border-radius: 3px; padding: 2px 4px; margin-top: 3px; color: #64ffda; }
-
-    .team-left { grid-column: 1; grid-row: 2; }
-    .team-right { grid-column: 3; grid-row: 2; }
-
-    .seat { display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 5; }
-    .seat-partner { grid-column: 2; grid-row: 1; }
-    .seat-left { grid-column: 1; grid-row: 1; }
-    .seat-right { grid-column: 3; grid-row: 1; }
-
-    .avatar {
-      width: 38px; height: 38px; border-radius: 50%; background: #334155;
-      border: 2px solid var(--gold-accent); display: flex; align-items: center; justify-content: center; font-size: 18px;
-      object-fit: cover;
-    }
-    .player-name { font-size: 11px; font-weight: bold; margin-top: 2px; }
-
-    .trick-area {
-      grid-column: 2; grid-row: 2; position: relative; background: rgba(0, 0, 0, 0.2);
-      border-radius: 12px; border: 2px dashed rgba(255, 215, 0, 0.4);
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-    }
-
-    .card-deck-hand {
-      grid-column: 1 / span 3; grid-row: 3;
-      display: flex; justify-content: center; align-items: flex-end; padding-bottom: 5px;
-    }
-
-    .classic-card {
-      width: var(--card-width);
-      height: var(--card-height);
-      background-color: #ffffff;
-      border: 1px solid #000;
-      border-radius: 3px;
-      box-shadow: 1px 2px 5px rgba(0,0,0,0.5);
-      position: relative;
-      margin-left: -22px;
-      cursor: grab;
-      transition: transform 0.15s ease-in-out;
-      touch-action: none;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 3px;
-    }
-
-    .classic-card:hover { transform: translateY(-18px); z-index: 30 !important; }
-    .classic-card.clubs, .classic-card.spades { color: #000000; }
-    .classic-card.hearts, .classic-card.diamonds { color: #cc0000; }
-
-    .card-corner { display: flex; flex-direction: column; align-items: center; line-height: 0.9; font-weight: bold; font-size: 12px; }
-    .card-corner.bottom { transform: rotate(180deg); }
-    .card-center-pip { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 20px; }
-
-    .power-badge {
-      position: absolute; top: -8px; right: -4px; background: var(--gold-accent); color: #000;
-      font-size: 9px; font-weight: bold; padding: 1px 3px; border-radius: 3px; border: 1px solid #000;
-    }
-
-    .modal {
-      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85);
-      z-index: 100; align-items: center; justify-content: center;
-    }
-    .modal-content {
-      background: #0f172a; border: 2px solid var(--gold-accent); padding: 18px;
-      border-radius: 10px; width: 85%; max-width: 480px; max-height: 85vh; overflow-y: auto;
-    }
-    .modal-title { font-size: 16px; color: var(--gold-accent); margin-bottom: 10px; font-weight: bold; }
-  </style>
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 300; justify-content: center; align-items: center; }
+        .modal-body { background: white; padding: 20px; border-radius: 10px; max-width: 80%; max-height: 80%; overflow-y: auto; }
+    </style>
 </head>
 <body>
 
-  <!-- LOBBY SCREEN -->
-  <div id="lobbyScreen">
-    <div class="lobby-card">
-      <div class="lobby-title">ଦଶ ଗଣ୍ଡିଆ (Dasha Gandia) Lobby</div>
-
-      <!-- Profile Section: Name + Photo Upload -->
-      <div class="profile-section">
-        <img id="avatarImage" class="avatar-preview" src="" alt="👤" style="display:none;">
-        <div id="avatarIcon" class="avatar-preview">👤</div>
-        <div style="flex:1;">
-          <label style="font-size:12px; color:#aaa;">Player Name:</label>
-          <input type="text" id="playerNameInput" class="input-field" value="Player 1">
-          <label style="font-size:12px; color:#aaa; margin-top:6px; display:block;">Profile Photo:</label>
-          <input type="file" id="photoUpload" accept="image/*" style="font-size:11px; color:#ccc; margin-top:2px;">
+    <!-- LOBBY SCREEN -->
+    <div id="lobby-screen">
+        <div class="top-bar-lobby">
+            <h2>ଦଶ ଗଣ୍ଡିଆ (Dasha Gandia)</h2>
+            <button class="action-btn" style="padding:4px 10px;" onclick="toggleModal(true)">Rules</button>
         </div>
-      </div>
-
-      <!-- Room Creation/Join Actions -->
-      <div class="room-actions">
-        <button class="btn" onclick="generateRoomCode()">Create Room</button>
-        <div style="display:flex; gap:4px;">
-          <input type="text" id="roomCodeInput" class="input-field" placeholder="4-Digit Code" maxlength="4" style="text-align:center; font-weight:bold;">
-          <button class="btn btn-secondary" onclick="joinRoom()">Join</button>
+        <div class="lobby-content">
+            <div class="input-group">
+                <label>Player Name</label>
+                <input type="text" id="p-name" value="Player A">
+            </div>
+            <div class="input-group">
+                <label>Profile Image URL</label>
+                <input type="text" id="p-img" value="https://api.dicebear.com/7.x/bottts/svg?seed=PlayerA">
+            </div>
+            <div class="input-group">
+                <label>Choose Team</label>
+                <div class="team-selector">
+                    <button class="team-btn active" id="btn-teamA" onclick="selectTeam('A')">Team A (A & C)</button>
+                    <button class="team-btn" id="btn-teamB" onclick="selectTeam('B')">Team B (B & D)</button>
+                </div>
+            </div>
+            <hr>
+            <button class="action-btn" onclick="createRoom()">Create Room</button>
+            <div class="input-group">
+                <input type="text" id="join-id" placeholder="Paste Room ID">
+                <button class="action-btn" style="background:#0288d1;" onclick="joinRoom()">Join Room</button>
+            </div>
+            <p id="peer-status" style="font-size:0.8rem; color:#666; text-align:center;"></p>
         </div>
-      </div>
+    </div>
 
-      <div id="roomCodeDisplay" style="text-align:center; font-weight:bold; color:var(--gold-accent); font-size:14px; display:none;">
-        ROOM CODE: <span id="codeText">----</span>
-      </div>
-
-      <!-- Team Selection (Team A & Team B) -->
-      <div>
-        <label style="font-size:13px; font-weight:bold; color:#ccc;">Select Your Team (Max 2 Players per Team):</label>
-        <div class="teams-container">
-          <div id="teamABox" class="team-box selected" onclick="selectTeam('A')">
-            <div style="font-weight:bold; color:var(--gold-accent);">TEAM A</div>
-            <div id="teamACount" style="font-size:11px; color:#aaa;">Players: 1 / 2</div>
-          </div>
-          <div id="teamBBox" class="team-box" onclick="selectTeam('B')">
-            <div style="font-weight:bold; color:var(--gold-accent);">TEAM B</div>
-            <div id="teamBCount" style="font-size:11px; color:#aaa;">Players: 0 / 2</div>
-          </div>
+    <!-- GAME SCREEN -->
+    <div id="game-screen">
+        <div class="game-top-bar">
+            <span>ଦଶ ଗଣ୍ଡିଆ</span>
+            <div class="top-bar-info">
+                <span>Hand: <b id="ganda-count">1/13</b></span>
+                <span>Score - A: <b id="score-A">0</b> | B: <b id="score-B">0</b></span>
+                <span>Targets - A: <b id="target-A">0</b> | B: <b id="target-B">0</b></span>
+                <span>Trump: <b id="trump-val">None</b></span>
+            </div>
+            <button onclick="toggleModal(true)">📜 Rules</button>
         </div>
-      </div>
 
-      <button class="btn" style="margin-top:8px; padding:12px; font-size:15px;" onclick="startGame()">ENTER MATCH</button>
+        <div class="game-table" id="game-table">
+            <div class="shuffle-deck" id="shuffle-deck"></div>
+
+            <!-- Player C (Top) -->
+            <div class="player-slot slot-top" id="slot-C">
+                <div class="player-badge" id="badge-C">
+                    <img src="https://api.dicebear.com/7.x/bottts/svg?seed=PlayerC" class="player-avatar" id="img-C">
+                    <div class="player-meta">
+                        <span id="name-C">Waiting... (C)</span>
+                        <span class="player-status" id="status-C">Idle</span>
+                    </div>
+                    <button class="mic-btn" id="mic-C" onclick="toggleMic('C')">🎙️</button>
+                    <button class="sticker-btn" onclick="openStickerMenu(event, 'C')">😜</button>
+                </div>
+            </div>
+
+            <!-- Player D (Left) -->
+            <div class="player-slot slot-left" id="slot-D">
+                <div class="player-badge" id="badge-D">
+                    <img src="https://api.dicebear.com/7.x/bottts/svg?seed=PlayerD" class="player-avatar" id="img-D">
+                    <div class="player-meta">
+                        <span id="name-D">Waiting... (D)</span>
+                        <span class="player-status" id="status-D">Idle</span>
+                    </div>
+                    <button class="mic-btn" id="mic-D" onclick="toggleMic('D')">🎙️</button>
+                    <button class="sticker-btn" onclick="openStickerMenu(event, 'D')">😜</button>
+                </div>
+            </div>
+
+            <!-- Player B (Right) -->
+            <div class="player-slot slot-right" id="slot-B">
+                <div class="player-badge" id="badge-B">
+                    <img src="https://api.dicebear.com/7.x/bottts/svg?seed=PlayerB" class="player-avatar" id="img-B">
+                    <div class="player-meta">
+                        <span id="name-B">Waiting... (B)</span>
+                        <span class="player-status" id="status-B">Idle</span>
+                    </div>
+                    <button class="mic-btn" id="mic-B" onclick="toggleMic('B')">🎙️</button>
+                    <button class="sticker-btn" onclick="openStickerMenu(event, 'B')">😜</button>
+                </div>
+            </div>
+
+            <div class="center-area" id="center-area"></div>
+
+            <!-- Player A (Bottom - You) -->
+            <div class="player-slot slot-bottom" id="slot-A">
+                <div class="bottom-hand-wrapper">
+                    <div class="player-badge active-turn" id="badge-A" style="margin-bottom: 4px;">
+                        <img src="https://api.dicebear.com/7.x/bottts/svg?seed=PlayerA" class="player-avatar" id="img-A">
+                        <div class="player-meta">
+                            <span id="name-A">You (A)</span>
+                            <span class="player-status" id="status-A">Your Turn</span>
+                        </div>
+                        <button class="mic-btn" id="mic-A" onclick="toggleMic('A')">🎙️</button>
+                    </div>
+                    <div class="suits-container" id="my-hand">
+                        <div class="suit-group" id="group-C"></div>
+                        <div class="suit-group" id="group-H"></div>
+                        <div class="suit-group" id="group-S"></div>
+                        <div class="suit-group" id="group-D"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TRUMP SELECTION PANEL (5 OPTIONS + SKIP BUTTON) -->
+            <div class="trump-panel" id="trump-panel">
+                <h3>Select Trump (ରଙ୍ଗ) - First 9 Cards</h3>
+                <div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center;">
+                    <button class="action-btn" onclick="setTrump('♣️ Clubs')">♣️ Clubs</button>
+                    <button class="action-btn" onclick="setTrump('♥️ Hearts')">♥️ Hearts</button>
+                    <button class="action-btn" onclick="setTrump('♠️ Spades')">♠️ Spades</button>
+                    <button class="action-btn" onclick="setTrump('♦️ Diamonds')">♦️ Diamonds</button>
+                    <button class="action-btn" style="background:#8e24aa;" onclick="setTrump('No Trump')">🚫 No Trump</button>
+                    <button class="skip-btn" onclick="skipTrumpSelection()">⏭️ Skip (Use 12th Card)</button>
+                </div>
+            </div>
+
+            <div class="bidding-panel" id="bidding-panel">
+                <h3>Enter Your Bid (Gandas)</h3>
+                <input type="number" id="bid-input" min="0" max="13" value="0" style="padding:8px; width:80px; margin:auto;">
+                <button class="action-btn" onclick="submitBid()">Submit Bid</button>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <!-- GAME BOARD SCREEN -->
-  <div class="top-bar">
-    <div class="game-title">ଦଶ ଗଣ୍ଡିଆ (Dasha Gandia)</div>
-    <div class="top-buttons">
-      <button onclick="toggleModal('pointModal')">📊 Point Table</button>
-      <button onclick="toggleModal('rulesModal')">📖 Rules</button>
-    </div>
-  </div>
-
-  <!-- Table Container -->
-  <div class="table-container">
-    
-    <!-- Team A Score Card (Left) -->
-    <div class="side-score team-left">
-      <div class="score-title">TEAM A</div>
-      <div class="score-val">0 / 100</div>
-      <div class="bid-tag">BID: 5 Gandas</div>
+    <!-- Quick Messaging -->
+    <button class="quick-msg-btn" onclick="toggleChatMenu()">💬</button>
+    <div class="chat-popover" id="chat-popover">
+        <div class="chat-opt" onclick="sendQuickMsg('ପକା ଶୀଘ୍ର')">ପକା ଶୀଘ୍ର</div>
+        <div class="chat-opt" onclick="sendQuickMsg('ତାସ ନାହିଁ କି')">ତାସ ନାହିଁ କି</div>
+        <div class="chat-opt" onclick="sendQuickMsg('କଣ କରୁଛୁ ଯେ')">କଣ କରୁଛୁ ଯେ</div>
+        <div class="chat-opt" onclick="sendQuickMsg('ରଙ୍ଗ କର')">ରଙ୍ଗ କର</div>
     </div>
 
-    <!-- Partner Player Seat (Top Center) -->
-    <div class="seat seat-partner">
-      <div class="avatar" id="partnerAvatar">👨‍💼</div>
-      <div class="player-name" id="partnerName">Partner</div>
+    <!-- Stickers -->
+    <div class="sticker-popover" id="sticker-popover">
+        <div class="sticker-opt" onclick="sendSticker('🤡')">🤡</div>
+        <div class="sticker-opt" onclick="sendSticker('👻')">👻</div>
+        <div class="sticker-opt" onclick="sendSticker('🐸')">🐸</div>
+        <div class="sticker-opt" onclick="sendSticker('💥')">💥</div>
+        <div class="sticker-opt" onclick="sendSticker('👎')">👎</div>
+        <div class="sticker-opt" onclick="sendSticker('🐔')">🐔</div>
     </div>
 
-    <!-- Team B Score Card (Right) -->
-    <div class="side-score team-right">
-      <div class="score-title">TEAM B</div>
-      <div class="score-val">0 / 100</div>
-      <div class="bid-tag">BID: 4 Gandas</div>
+    <!-- Rules Modal -->
+    <div class="modal" id="rules-modal">
+        <div class="modal-body">
+            <h3>Dasha Gandia Rules</h3>
+            <p>1. <b>Trump Selection:</b> Made after receiving 9 cards. Choose from Clubs, Hearts, Spades, Diamonds, or No Trump.</p>
+            <p>2. <b>Skip Trump:</b> If skipped, the suit of your randomly dealt 12th card becomes Trump. If 12th card is ❤️ 2 or ♠️ 2, game automatically becomes No Trump.</p>
+            <p>3. <b>Special Powers:</b> Heart 2 (1st) > Spade 2 (2nd) > Trump Ace (3rd).</p>
+            <p>4. <b>Drop Restrictions:</b> Heart 2 & Spade 2 cannot be played on Hand 1 or Hand 13, and cannot open any Ganda.</p>
+            <button class="action-btn" style="margin-top:15px;" onclick="toggleModal(false)">Close</button>
+        </div>
     </div>
 
-    <!-- Left Opponent -->
-    <div class="seat seat-left">
-      <div class="avatar">🤖</div>
-      <div class="player-name">Opponent 1</div>
-    </div>
+    <script>
+        const SUITS_SYMBOL = { 'C': '♣️', 'H': '♥️', 'S': '♠️', 'D': '♦️' };
+        const SUITS_FULL = { 'C': '♣️ Clubs', 'H': '♥️ Hearts', 'S': '♠️ Spades', 'D': '♦️ Diamonds' };
+        const RANK_POWER = { '2': 14, 'A': 13, 'K': 12, 'Q': 11, 'J': 10, '10': 9, '9': 8, '8': 7, '7': 6, '5': 4, '4': 3, '3': 2 };
 
-    <!-- Central Trick Play Area -->
-    <div class="trick-area" id="trickArea">
-      <span style="color: rgba(255,255,255,0.3); font-size: 11px;">PULL / SWIPE CARD UP TO PLAY</span>
-    </div>
+        let selectedTeam = 'A';
+        let peer, connections = {};
+        let fullDealtHand = [];
+        let myHand = [];
+        let playerBids = { A: 0, B: 0, C: 0, D: 0 };
+        let activeTargetSlot = null;
+        let micStates = { A: false, B: false, C: false, D: false };
+        
+        let currentGandaRound = 1;
+        let isFirstMoveOfGanda = true;
 
-    <!-- Right Opponent -->
-    <div class="seat seat-right">
-      <div class="avatar">🤖</div>
-      <div class="player-name">Opponent 2</div>
-    </div>
+        function selectTeam(team) {
+            selectedTeam = team;
+            document.getElementById('btn-teamA').classList.toggle('active', team === 'A');
+            document.getElementById('btn-teamB').classList.toggle('active', team === 'B');
+        }
 
-    <!-- Player Categorized 13-Card Hand -->
-    <div class="card-deck-hand" id="playerHand">
-      <!-- Cards rendered here -->
-    </div>
+        function initPeer() {
+            peer = new Peer();
+            peer.on('open', id => document.getElementById('peer-status').innerText = "Room ID: " + id);
+            peer.on('connection', conn => setupConn(conn));
+        }
+        initPeer();
 
-  </div>
+        function setupConn(conn) {
+            connections[conn.peer] = conn;
+            conn.on('data', data => handleNetworkData(data));
+        }
 
-  <!-- Modals -->
-  <div class="modal" id="rulesModal">
-    <div class="modal-content">
-      <div class="modal-title">ଦଶ ଗଣ୍ଡିଆ - Rules</div>
-      <p style="font-size: 13px; line-height: 1.4;">
-        <b>1. Power Cards:</b> Heart 2 (👑 1st Power) > Spade 2 (⚔️ 2nd Power) > Trump Ace > Trumps.<br><br>
-        <b>2. Beranga Rule:</b> If no trump, Heart 2 and Spade 2 are top. Void players can drop any card.<br><br>
-        <b>3. Trick Cutting:</b> Drop Colour cards on void suit tricks to take Gandas.
-      </p>
-      <button style="margin-top:15px; width:100%; padding:8px; background:var(--gold-accent); border:none; font-weight:bold; cursor:pointer;" onclick="toggleModal('rulesModal')">CLOSE</button>
-    </div>
-  </div>
+        function createRoom() { switchToTable(); }
+        function joinRoom() {
+            const id = document.getElementById('join-id').value;
+            if(id) { peer.connect(id); switchToTable(); }
+        }
 
-  <div class="modal" id="pointModal">
-    <div class="modal-content">
-      <div class="modal-title">Point Table</div>
-      <p style="font-size: 13px;"><b>Goal:</b> 100 Points</p>
-      <p style="font-size: 13px;"><b>Team A Target:</b> 5 Gandas</p>
-      <p style="font-size: 13px;"><b>Team B Target:</b> 4 Gandas</p>
-      <button style="margin-top:15px; width:100%; padding:8px; background:var(--gold-accent); border:none; font-weight:bold; cursor:pointer;" onclick="toggleModal('pointModal')">CLOSE</button>
-    </div>
-  </div>
+        function switchToTable() {
+            document.getElementById('lobby-screen').style.display = 'none';
+            document.getElementById('game-screen').classList.add('active');
+            
+            const pName = document.getElementById('p-name').value || 'Player A';
+            const pImg = document.getElementById('p-img').value;
+            document.getElementById('name-A').innerText = pName + " (A)";
+            if(pImg) document.getElementById('img-A').src = pImg;
 
-  <script>
-    let selectedTeam = 'A';
-    let teamAPlayers = 1;
-    let teamBPlayers = 0;
-    let playerAvatarUrl = '';
+            triggerShuffleAnimation('slot-A', () => {
+                dealInitialNineCards();
+            });
+        }
 
-    // Handle Photo Upload
-    document.getElementById('photoUpload').addEventListener('change', function(e) {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(evt) {
-          playerAvatarUrl = evt.target.result;
-          const img = document.getElementById('avatarImage');
-          img.src = playerAvatarUrl;
-          img.style.display = 'block';
-          document.getElementById('avatarIcon').style.display = 'none';
-        };
-        reader.readAsDataURL(file);
-      }
-    });
+        function triggerShuffleAnimation(shufflerSlotId, callback) {
+            const shufflerEl = document.getElementById(shufflerSlotId);
+            const deckEl = document.getElementById('shuffle-deck');
+            const rect = shufflerEl.getBoundingClientRect();
+            const tableRect = document.getElementById('game-table').getBoundingClientRect();
 
-    // Create 4-Digit Room Code
-    function generateRoomCode() {
-      const code = Math.floor(1000 + Math.random() * 9000);
-      document.getElementById('codeText').innerText = code;
-      document.getElementById('roomCodeDisplay').style.display = 'block';
-      document.getElementById('roomCodeInput').value = code;
-    }
+            deckEl.style.top = (rect.top - tableRect.top) + 'px';
+            deckEl.style.left = (rect.left - tableRect.left + 20) + 'px';
+            deckEl.style.display = 'block';
+            deckEl.classList.add('shuffling');
 
-    function joinRoom() {
-      const code = document.getElementById('roomCodeInput').value;
-      if (code.length === 4) {
-        document.getElementById('codeText').innerText = code;
-        document.getElementById('roomCodeDisplay').style.display = 'block';
-        alert('Joined Room: ' + code);
-      } else {
-        alert('Please enter a valid 4-digit room code.');
-      }
-    }
+            document.getElementById('status-A').innerText = 'Shuffling...';
 
-    // Select Team A or Team B (Cap: 2 players per team)
-    function selectTeam(team) {
-      if (team === 'A' && teamAPlayers >= 2) return alert('Team A is full!');
-      if (team === 'B' && teamBPlayers >= 2) return alert('Team B is full!');
+            setTimeout(() => {
+                deckEl.classList.remove('shuffling');
+                deckEl.style.display = 'none';
+                document.getElementById('status-A').innerText = 'Your Turn';
+                if(callback) callback();
+            }, 2000);
+        }
 
-      selectedTeam = team;
-      document.getElementById('teamABox').classList.toggle('selected', team === 'A');
-      document.getElementById('teamBBox').classList.toggle('selected', team === 'B');
-    }
+        /* Deal 13 total cards to player, display first 9 for trump selection */
+        function dealInitialNineCards() {
+            currentGandaRound = 1;
+            isFirstMoveOfGanda = true;
+            document.getElementById('ganda-count').innerText = `${currentGandaRound}/13`;
 
-    function startGame() {
-      document.getElementById('lobbyScreen').style.display = 'none';
-      renderHand();
-    }
+            fullDealtHand = [
+                { suit: 'H', rank: '2' }, { suit: 'S', rank: '2' }, { suit: 'S', rank: 'A' },
+                { suit: 'C', rank: 'K' }, { suit: 'C', rank: '10' }, { suit: 'D', rank: 'A' },
+                { suit: 'D', rank: 'J' }, { suit: 'H', rank: 'Q' }, { suit: 'S', rank: '7' },
+                { suit: 'C', rank: '3' }, { suit: 'D', rank: '5' }, { suit: 'H', rank: '8' }, // 12th card: Heart 8
+                { suit: 'S', rank: '9' }
+            ];
 
-    function toggleModal(id) {
-      const modal = document.getElementById(id);
-      modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
-    }
+            // Render first 9 cards
+            myHand = fullDealtHand.slice(0, 9);
+            renderHand();
+            document.getElementById('trump-panel').style.display = 'flex';
+        }
 
-    // Classic Deck Structure
-    const deckData = [
-      { suit: 'clubs', symbol: '♣', rank: 'A', class: 'clubs' },
-      { suit: 'clubs', symbol: '♣', rank: 'K', class: 'clubs' },
-      { suit: 'clubs', symbol: '♣', rank: 'Q', class: 'clubs' },
-      { suit: 'hearts', symbol: '♥', rank: '2', class: 'hearts', power: '👑 1st' },
-      { suit: 'hearts', symbol: '♥', rank: 'A', class: 'hearts' },
-      { suit: 'spades', symbol: '♠', rank: '2', class: 'spades', power: '⚔️ 2nd' },
-      { suit: 'spades', symbol: '♠', rank: 'A', class: 'spades' },
-      { suit: 'diamonds', symbol: '♦', rank: 'A', class: 'diamonds' }
-    ];
+        function setTrump(trumpStr) {
+            document.getElementById('trump-val').innerText = trumpStr;
+            finalizeFullHandAndProceed();
+        }
 
-    function renderHand() {
-      const handContainer = document.getElementById('playerHand');
-      handContainer.innerHTML = '';
+        /* SKIP TRUMP RULE ENFORCEMENT */
+        function skipTrumpSelection() {
+            const card12 = fullDealtHand[11]; // Index 11 is the 12th card
+            let chosenTrump = "";
 
-      deckData.forEach((card, index) => {
-        const cardEl = document.createElement('div');
-        cardEl.className = `classic-card ${card.class}`;
-        cardEl.style.zIndex = index + 1;
+            if ((card12.suit === 'H' && card12.rank === '2') || (card12.suit === 'S' && card12.rank === '2')) {
+                chosenTrump = "No Trump";
+                showBubble('badge-A', `12th card is ${SUITS_SYMBOL[card12.suit]}2 ➡️ No Trump!`);
+            } else {
+                chosenTrump = SUITS_FULL[card12.suit];
+                showBubble('badge-A', `12th card (${card12.rank}${SUITS_SYMBOL[card12.suit]}) sets Trump: ${chosenTrump}`);
+            }
 
-        cardEl.innerHTML = `
-          ${card.power ? `<div class="power-badge">${card.power}</div>` : ''}
-          <div class="card-corner top"><div>${card.rank}</div><div>${card.symbol}</div></div>
-          <div class="card-center-pip">${card.symbol}</div>
-          <div class="card-corner bottom"><div>${card.rank}</div><div>${card.symbol}</div></div>
-        `;
+            document.getElementById('trump-val').innerText = chosenTrump;
+            finalizeFullHandAndProceed();
+        }
 
-        let startY = 0;
-        cardEl.addEventListener('touchstart', (e) => { startY = e.touches[0].clientY; });
-        cardEl.addEventListener('touchend', (e) => {
-          if (startY - e.changedTouches[0].clientY > 35) playCard(cardEl);
-        });
+        function finalizeFullHandAndProceed() {
+            document.getElementById('trump-panel').style.display = 'none';
+            // Revealing all 13 cards for gameplay
+            myHand = [...fullDealtHand];
+            renderHand();
+            document.getElementById('bidding-panel').style.display = 'flex';
+        }
 
-        cardEl.addEventListener('mousedown', (e) => { startY = e.clientY; });
-        cardEl.addEventListener('mouseup', (e) => {
-          if (startY - e.clientY > 20) playCard(cardEl);
-        });
+        function submitBid() {
+            const val = parseInt(document.getElementById('bid-input').value) || 0;
+            playerBids.A = val; 
+            document.getElementById('bidding-panel').style.display = 'none';
 
-        handContainer.appendChild(cardEl);
-      });
-    }
+            playerBids.C = 3; playerBids.B = 2; playerBids.D = 4;
+            document.getElementById('target-A').innerText = playerBids.A + playerBids.C;
+            document.getElementById('target-B').innerText = playerBids.B + playerBids.D;
+        }
 
-    function playCard(cardElement) {
-      const trickArea = document.getElementById('trickArea');
-      if (trickArea.querySelector('span')) trickArea.innerHTML = '';
-      cardElement.style.position = 'relative';
-      cardElement.style.margin = '0';
-      cardElement.style.transform = 'none';
-      trickArea.appendChild(cardElement);
-    }
-  </script>
+        function isCardPlayable(card) {
+            const isH2orS2 = (card.suit === 'H' && card.rank === '2') || (card.suit === 'S' && card.rank === '2');
+            
+            if (isH2orS2) {
+                if (currentGandaRound === 1 || currentGandaRound === 13) return false;
+                if (isFirstMoveOfGanda) return false;
+            }
+            return true;
+        }
+
+        function renderHand() {
+            ['C', 'H', 'S', 'D'].forEach(s => {
+                const container = document.getElementById(`group-${s}`);
+                container.innerHTML = '';
+                const groupCards = myHand.filter(c => c.suit === s);
+
+                groupCards.sort((a,b) => RANK_POWER[b.rank] - RANK_POWER[a.rank]);
+
+                groupCards.forEach((card, idx) => {
+                    const playable = isCardPlayable(card);
+                    const cardEl = createCardDOM(card, playable);
+                    cardEl.style.zIndex = idx;
+
+                    if (playable) {
+                        cardEl.onclick = () => playCard(card);
+                    } else {
+                        cardEl.onclick = () => {
+                            const isH2orS2 = (card.suit === 'H' && card.rank === '2') || (card.suit === 'S' && card.rank === '2');
+                            if (isH2orS2) {
+                                if (currentGandaRound === 1 || currentGandaRound === 13) {
+                                    showBubble('badge-A', '❌ H2 & S2 blocked in 1st/13th Ganda!');
+                                } else if (isFirstMoveOfGanda) {
+                                    showBubble('badge-A', '❌ Cannot drop H2/S2 as first card!');
+                                }
+                            }
+                        };
+                    }
+                    container.appendChild(cardEl);
+                });
+            });
+        }
+
+        function createCardDOM(card, playable = true) {
+            const cardEl = document.createElement('div');
+            const isRed = card.suit === 'D' || card.suit === 'H';
+            cardEl.className = `card ${isRed ? 'red' : 'black'} ${!playable ? 'disabled' : ''}`;
+            cardEl.innerHTML = `
+                <div class="c-top">${card.rank}<br>${SUITS_SYMBOL[card.suit]}</div>
+                <div class="c-suit">${SUITS_SYMBOL[card.suit]}</div>
+                <div class="c-bot">${card.rank}<br>${SUITS_SYMBOL[card.suit]}</div>
+            `;
+            return cardEl;
+        }
+
+        function playCard(card) {
+            if (!isCardPlayable(card)) return;
+
+            myHand = myHand.filter(c => !(c.suit === card.suit && c.rank === card.rank));
+            renderCenterTable('A', card);
+            
+            isFirstMoveOfGanda = false; 
+            renderHand();
+        }
+
+        function renderCenterTable(player, card) {
+            const center = document.getElementById('center-area');
+            
+            const wrapper = document.createElement('div');
+            wrapper.style.display = 'flex';
+            wrapper.style.flexDirection = 'column';
+            wrapper.style.alignItems = 'center';
+            
+            const pLabel = document.createElement('span');
+            pLabel.style.fontSize = '0.65rem';
+            pLabel.style.fontWeight = 'bold';
+            pLabel.innerText = player;
+
+            const cardEl = createCardDOM(card, true);
+            cardEl.style.margin = '0';
+
+            wrapper.appendChild(pLabel);
+            wrapper.appendChild(cardEl);
+            center.appendChild(wrapper);
+        }
+
+        function toggleMic(playerSlot) {
+            micStates[playerSlot] = !micStates[playerSlot];
+            const micBtn = document.getElementById(`mic-${playerSlot}`);
+            if (micStates[playerSlot]) {
+                micBtn.classList.add('active');
+                showBubble(`badge-${playerSlot}`, 'Mute Mic');
+            } else {
+                micBtn.classList.remove('active');
+                showBubble(`badge-${playerSlot}`, 'Unmute Mic');
+            }
+        }
+
+        function toggleChatMenu() {
+            const pop = document.getElementById('chat-popover');
+            pop.style.display = pop.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        function sendQuickMsg(txt) {
+            showBubble('badge-A', txt);
+            toggleChatMenu();
+        }
+
+        function openStickerMenu(e, slot) {
+            e.stopPropagation();
+            activeTargetSlot = slot;
+            const pop = document.getElementById('sticker-popover');
+            pop.style.top = e.clientY + 'px';
+            pop.style.left = e.clientX + 'px';
+            pop.style.display = 'grid';
+        }
+
+        function sendSticker(emoji) {
+            if(activeTargetSlot) showBubble(`badge-${activeTargetSlot}`, emoji);
+            document.getElementById('sticker-popover').style.display = 'none';
+        }
+
+        function showBubble(elementId, text) {
+            const el = document.getElementById(elementId);
+            if(!el) return;
+            const rect = el.getBoundingClientRect();
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            bubble.innerText = text;
+            bubble.style.top = (rect.top - 25) + 'px';
+            bubble.style.left = rect.left + 'px';
+            document.body.appendChild(bubble);
+            setTimeout(() => bubble.remove(), 2500);
+        }
+
+        function toggleModal(show) {
+            document.getElementById('rules-modal').style.display = show ? 'flex' : 'none';
+        }
+
+        window.onclick = function() {
+            document.getElementById('sticker-popover').style.display = 'none';
+        }
+    </script>
 </body>
 </html>
