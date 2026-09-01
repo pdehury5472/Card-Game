@@ -2,7 +2,7 @@
 <html lang="or">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>ଦଶ ଗଣ୍ଡିଆ (Dasha Gandia)</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
@@ -10,14 +10,14 @@
             --bg-light: #f4f6f9;
             --table-light: #f0f7f4;
             --table-border: #a8d5ba;
-            --card-width: 65px;
-            --card-height: 95px;
+            --card-width: 82px;
+            --card-height: 118px;
             --primary: #2e7d32;
             --accent: #ff9800;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: var(--bg-light); height: 100vh; overflow: hidden; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; touch-action: manipulation; }
+        body { background-color: var(--bg-light); height: 100vh; overflow: hidden; -webkit-user-select: none; user-select: none; }
 
         /* LOBBY SCREEN */
         #lobby-screen { display: flex; flex-direction: column; height: 100vh; background: #ffffff; }
@@ -40,17 +40,27 @@
             background: #ffffff; padding: 6px 12px; border-bottom: 2px solid #e0e0e0; 
             display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem; font-weight: bold;
         }
-        .top-bar-info { display: flex; gap: 10px; align-items: center; background: #e8f5e9; padding: 4px 10px; border-radius: 20px; }
+        .top-bar-info { display: flex; gap: 8px; align-items: center; background: #e8f5e9; padding: 4px 8px; border-radius: 20px; flex-wrap: wrap; }
+        .share-btn { background: #0288d1; color: white; border: none; padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; cursor: pointer; font-weight: bold; }
+        
+        /* TOP BAR CONTROLS (Rules & Exit) */
+        .top-bar-actions { display: flex; align-items: center; gap: 6px; }
+        .exit-btn { 
+            background: #d32f2f; color: white; border: none; padding: 4px 8px; 
+            border-radius: 6px; font-size: 0.8rem; font-weight: bold; cursor: pointer; 
+            display: flex; align-items: center; gap: 2px;
+        }
+        .exit-btn:active { background: #b71c1c; }
 
         .game-table {
             flex-grow: 1; background: var(--table-light);
-            border: 4px solid var(--table-border); margin: 6px; border-radius: 20px;
+            border: 4px solid var(--table-border); margin: 4px; border-radius: 20px;
             position: relative; display: grid;
             grid-template-areas:
                 "top-left top top-right"
                 "left center right"
                 "bottom-left bottom bottom-right";
-            grid-template-rows: 1fr 1.2fr 1.8fr;
+            grid-template-rows: 1fr 1.2fr 2.2fr;
             grid-template-columns: 1fr 2.5fr 1fr;
         }
 
@@ -80,31 +90,32 @@
         .center-area { grid-area: center; border: 2px dashed #a8d5ba; border-radius: 15px; display: flex; justify-content: center; align-items: center; gap: 10px; position: relative; }
 
         .bottom-hand-wrapper { width: 100%; display: flex; flex-direction: column; align-items: center; }
-        .suits-container { display: flex; justify-content: center; gap: 6px; width: 100%; overflow-x: auto; padding-bottom: 5px; }
-        .suit-group { display: flex; background: rgba(255, 255, 255, 0.7); padding: 3px; border-radius: 6px; border: 1px dashed #a8d5ba; min-width: 70px; min-height: 100px; }
+        .suits-container { display: flex; justify-content: center; gap: 4px; width: 100%; overflow-x: auto; padding-bottom: 5px; }
+        .suit-group { display: flex; background: rgba(255, 255, 255, 0.75); padding: 3px; border-radius: 6px; border: 1px dashed #a8d5ba; min-width: 86px; min-height: 124px; }
 
+        /* ENLARGED CARDS */
         .card {
             width: var(--card-width); height: var(--card-height);
-            background: #ffffff; border: 1px solid #888; border-radius: 5px;
-            margin-left: -42px; position: relative; cursor: pointer;
-            box-shadow: 1px 1px 4px rgba(0,0,0,0.2); transition: transform 0.15s, border 0.15s;
+            background: #ffffff; border: 1px solid #888; border-radius: 6px;
+            margin-left: -52px; position: relative; cursor: pointer;
+            box-shadow: 1px 2px 5px rgba(0,0,0,0.25); transition: transform 0.15s, border 0.15s;
             user-select: none; flex-shrink: 0;
-            display: flex; flex-direction: column; justify-content: space-between; padding: 4px;
+            display: flex; flex-direction: column; justify-content: space-between; padding: 5px;
             font-weight: bold;
         }
         .card:first-child { margin-left: 0; }
-        .card:hover { transform: translateY(-15px); z-index: 100 !important; }
+        .card:hover, .card:active { transform: translateY(-20px); z-index: 100 !important; }
         .card.disabled { opacity: 0.45; cursor: not-allowed; border-color: #d32f2f; }
-        .card.disabled:hover { transform: none; }
+        .card.disabled:hover, .card.disabled:active { transform: none; }
         .card.red { color: #d32f2f; }
         .card.black { color: #212121; }
-        .card .c-top { font-size: 0.75rem; line-height: 1; }
-        .card .c-suit { font-size: 1.2rem; text-align: center; }
-        .card .c-bot { font-size: 0.75rem; line-height: 1; align-self: flex-end; transform: rotate(180deg); }
+        .card .c-top { font-size: 0.9rem; line-height: 1; }
+        .card .c-suit { font-size: 1.5rem; text-align: center; }
+        .card .c-bot { font-size: 0.9rem; line-height: 1; align-self: flex-end; transform: rotate(180deg); }
 
         .shuffle-deck {
             position: absolute; width: var(--card-width); height: var(--card-height);
-            background: #1565c0; border: 2px solid #fff; border-radius: 5px;
+            background: #1565c0; border: 2px solid #fff; border-radius: 6px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.3); display: none; z-index: 250;
         }
         @keyframes shuffleAnim {
@@ -174,12 +185,16 @@
         <div class="game-top-bar">
             <span>ଦଶ ଗଣ୍ଡିଆ</span>
             <div class="top-bar-info">
-                <span>Hand: <b id="ganda-count">1/13</b></span>
+                <span>ଗଣ୍ଡା: <b id="ganda-count">1/13</b></span>
                 <span>Score - A: <b id="score-A">0</b> | B: <b id="score-B">0</b></span>
                 <span>Targets - A: <b id="target-A">0</b> | B: <b id="target-B">0</b></span>
-                <span>Trump: <b id="trump-val">None</b></span>
+                <span>ରଙ୍ଗ: <b id="trump-val">None</b></span>
+                <button class="share-btn" onclick="shareRoomLink()">🔗 Share</button>
             </div>
-            <button onclick="toggleModal(true)">📜 Rules</button>
+            <div class="top-bar-actions">
+                <button onclick="toggleModal(true)">📜 Rules</button>
+                <button class="exit-btn" onclick="exitGame()">🚪 Exit</button>
+            </div>
         </div>
 
         <div class="game-table" id="game-table">
@@ -254,13 +269,13 @@
                     <button class="action-btn" onclick="setTrump('♥️ Hearts')">♥️ Hearts</button>
                     <button class="action-btn" onclick="setTrump('♠️ Spades')">♠️ Spades</button>
                     <button class="action-btn" onclick="setTrump('♦️ Diamonds')">♦️ Diamonds</button>
-                    <button class="action-btn" style="background:#8e24aa;" onclick="setTrump('No Trump')">🚫 No Trump</button>
+                    <button class="action-btn" style="background:#8e24aa;" onclick="setTrump('ବେରଙ୍ଗ')">🚫 ବେରଙ୍ଗ</button>
                     <button class="skip-btn" onclick="skipTrumpSelection()">⏭️ Skip (Use 12th Card)</button>
                 </div>
             </div>
 
             <div class="bidding-panel" id="bidding-panel">
-                <h3>Enter Your Bid (Gandas)</h3>
+                <h3>Enter Your Bid (ଗଣ୍ଡା)</h3>
                 <input type="number" id="bid-input" min="0" max="13" value="0" style="padding:8px; width:80px; margin:auto;">
                 <button class="action-btn" onclick="submitBid()">Submit Bid</button>
             </div>
@@ -290,10 +305,10 @@
     <div class="modal" id="rules-modal">
         <div class="modal-body">
             <h3>Dasha Gandia Rules</h3>
-            <p>1. <b>Trump Selection:</b> Made after receiving 9 cards. Choose from Clubs, Hearts, Spades, Diamonds, or No Trump.</p>
-            <p>2. <b>Skip Trump:</b> If skipped, the suit of your randomly dealt 12th card becomes Trump. If 12th card is ❤️ 2 or ♠️ 2, game automatically becomes No Trump.</p>
+            <p>1. <b>Trump (ରଙ୍ଗ):</b> Made after receiving 9 cards. Options include 4 suits or ବେରଙ୍ଗ (No Trump).</p>
+            <p>2. <b>Skip Trump:</b> Automatically sets Trump from 12th card suit. If 12th card is ❤️ 2 or ♠️ 2, it becomes ବେରଙ୍ଗ.</p>
             <p>3. <b>Special Powers:</b> Heart 2 (1st) > Spade 2 (2nd) > Trump Ace (3rd).</p>
-            <p>4. <b>Drop Restrictions:</b> Heart 2 & Spade 2 cannot be played on Hand 1 or Hand 13, and cannot open any Ganda.</p>
+            <p>4. <b>Drop Restrictions:</b> Heart 2 & Spade 2 cannot be played on 1st or 13th ଗଣ୍ଡା, and cannot open any round.</p>
             <button class="action-btn" style="margin-top:15px;" onclick="toggleModal(false)">Close</button>
         </div>
     </div>
@@ -304,7 +319,7 @@
         const RANK_POWER = { '2': 14, 'A': 13, 'K': 12, 'Q': 11, 'J': 10, '10': 9, '9': 8, '8': 7, '7': 6, '5': 4, '4': 3, '3': 2 };
 
         let selectedTeam = 'A';
-        let peer, connections = {};
+        let peer, connections = {}, currentRoomId = "";
         let fullDealtHand = [];
         let myHand = [];
         let playerBids = { A: 0, B: 0, C: 0, D: 0 };
@@ -314,6 +329,33 @@
         let currentGandaRound = 1;
         let isFirstMoveOfGanda = true;
 
+        /* MOBILE FULLSCREEN & SWIPE BACK PROTECTION */
+        let backSwipeCount = 0, swipeTimer = null;
+        history.pushState(null, null, location.href);
+        window.onpopstate = function () {
+            history.pushState(null, null, location.href);
+            backSwipeCount++;
+            showBubble('badge-A', `⚠️ Swipe again to exit game (${backSwipeCount}/2)`);
+            clearTimeout(swipeTimer);
+            swipeTimer = setTimeout(() => { backSwipeCount = 0; }, 2000);
+            if (backSwipeCount >= 2) {
+                exitGame();
+            }
+        };
+
+        function exitGame() {
+            if (confirm("Are you sure you want to exit to lobby?")) {
+                if (document.exitFullscreen) { document.exitFullscreen().catch(()=>{}); }
+                location.reload();
+            }
+        }
+
+        function requestFullScreen() {
+            let elem = document.documentElement;
+            if (elem.requestFullscreen) { elem.requestFullscreen(); }
+            else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); }
+        }
+
         function selectTeam(team) {
             selectedTeam = team;
             document.getElementById('btn-teamA').classList.toggle('active', team === 'A');
@@ -322,20 +364,42 @@
 
         function initPeer() {
             peer = new Peer();
-            peer.on('open', id => document.getElementById('peer-status').innerText = "Room ID: " + id);
+            peer.on('open', id => {
+                currentRoomId = id;
+                document.getElementById('peer-status').innerText = "Room ID: " + id;
+                checkUrlRoomId();
+            });
             peer.on('connection', conn => setupConn(conn));
         }
         initPeer();
+
+        function checkUrlRoomId() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const roomIdParam = urlParams.get('room');
+            if (roomIdParam) {
+                document.getElementById('join-id').value = roomIdParam;
+            }
+        }
+
+        function shareRoomLink() {
+            const shareUrl = `${window.location.origin}${window.location.pathname}?room=${currentRoomId}`;
+            if (navigator.share) {
+                navigator.share({ title: 'Join Dasha Gandia Game', url: shareUrl });
+            } else if (navigator.clipboard) {
+                navigator.clipboard.writeText(shareUrl);
+                showBubble('badge-A', '📋 Room Link Copied!');
+            }
+        }
 
         function setupConn(conn) {
             connections[conn.peer] = conn;
             conn.on('data', data => handleNetworkData(data));
         }
 
-        function createRoom() { switchToTable(); }
+        function createRoom() { requestFullScreen(); switchToTable(); }
         function joinRoom() {
             const id = document.getElementById('join-id').value;
-            if(id) { peer.connect(id); switchToTable(); }
+            if(id) { peer.connect(id); requestFullScreen(); switchToTable(); }
         }
 
         function switchToTable() {
@@ -373,7 +437,6 @@
             }, 2000);
         }
 
-        /* Deal 13 total cards to player, display first 9 for trump selection */
         function dealInitialNineCards() {
             currentGandaRound = 1;
             isFirstMoveOfGanda = true;
@@ -383,11 +446,10 @@
                 { suit: 'H', rank: '2' }, { suit: 'S', rank: '2' }, { suit: 'S', rank: 'A' },
                 { suit: 'C', rank: 'K' }, { suit: 'C', rank: '10' }, { suit: 'D', rank: 'A' },
                 { suit: 'D', rank: 'J' }, { suit: 'H', rank: 'Q' }, { suit: 'S', rank: '7' },
-                { suit: 'C', rank: '3' }, { suit: 'D', rank: '5' }, { suit: 'H', rank: '8' }, // 12th card: Heart 8
+                { suit: 'C', rank: '3' }, { suit: 'D', rank: '5' }, { suit: 'H', rank: '8' },
                 { suit: 'S', rank: '9' }
             ];
 
-            // Render first 9 cards
             myHand = fullDealtHand.slice(0, 9);
             renderHand();
             document.getElementById('trump-panel').style.display = 'flex';
@@ -398,17 +460,16 @@
             finalizeFullHandAndProceed();
         }
 
-        /* SKIP TRUMP RULE ENFORCEMENT */
         function skipTrumpSelection() {
-            const card12 = fullDealtHand[11]; // Index 11 is the 12th card
+            const card12 = fullDealtHand[11];
             let chosenTrump = "";
 
             if ((card12.suit === 'H' && card12.rank === '2') || (card12.suit === 'S' && card12.rank === '2')) {
-                chosenTrump = "No Trump";
-                showBubble('badge-A', `12th card is ${SUITS_SYMBOL[card12.suit]}2 ➡️ No Trump!`);
+                chosenTrump = "ବେରଙ୍ଗ";
+                showBubble('badge-A', `12th card is ${SUITS_SYMBOL[card12.suit]}2 ➡️ ବେରଙ୍ଗ!`);
             } else {
                 chosenTrump = SUITS_FULL[card12.suit];
-                showBubble('badge-A', `12th card (${card12.rank}${SUITS_SYMBOL[card12.suit]}) sets Trump: ${chosenTrump}`);
+                showBubble('badge-A', `12th card (${card12.rank}${SUITS_SYMBOL[card12.suit]}) sets ରଙ୍ଗ: ${chosenTrump}`);
             }
 
             document.getElementById('trump-val').innerText = chosenTrump;
@@ -417,7 +478,6 @@
 
         function finalizeFullHandAndProceed() {
             document.getElementById('trump-panel').style.display = 'none';
-            // Revealing all 13 cards for gameplay
             myHand = [...fullDealtHand];
             renderHand();
             document.getElementById('bidding-panel').style.display = 'flex';
@@ -463,7 +523,7 @@
                             const isH2orS2 = (card.suit === 'H' && card.rank === '2') || (card.suit === 'S' && card.rank === '2');
                             if (isH2orS2) {
                                 if (currentGandaRound === 1 || currentGandaRound === 13) {
-                                    showBubble('badge-A', '❌ H2 & S2 blocked in 1st/13th Ganda!');
+                                    showBubble('badge-A', '❌ H2 & S2 blocked in 1st/13th ଗଣ୍ଡା!');
                                 } else if (isFirstMoveOfGanda) {
                                     showBubble('badge-A', '❌ Cannot drop H2/S2 as first card!');
                                 }
