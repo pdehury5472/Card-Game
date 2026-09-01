@@ -2,843 +2,386 @@
 <html lang="or">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>ସେଣ୍ଟୁ - Classic Card Game</title>
-  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, orientation=landscape">
+  <title>ଦଶ ଗଣ୍ଡିଆ - Classic Deck Edition</title>
   <style>
     :root {
-      --bg-color: #e0f2fe;
-      --card-bg: #ffffff;
-      --card-border: #cccccc;
-      --card-text: #1a1a1a;
-      --accent: #0284c7;
-      --text-light: #0f172a;
-      --panel-bg: rgba(224, 242, 254, 0.95);
-      --inner-border: #0284c7;
+      --bg-felt: #0d47a1;
+      --gold-accent: #ffd700;
+      --card-width: 62px;
+      --card-height: 88px;
     }
 
-    body.theme-pink { 
-      --bg-color: #fbe4e8; 
-      --accent: #d63384; 
-      --text-light: #495057; 
-      --panel-bg: rgba(255, 240, 245, 0.95);
-      --inner-border: #d63384;
-    }
-    body.theme-white { 
-      --bg-color: #ffffff; 
-      --accent: #212529; 
-      --text-light: #212529; 
-      --panel-bg: rgba(245, 245, 245, 0.95);
-      --inner-border: #333333;
-    }
-    body.theme-skyblue { 
-      --bg-color: #e0f2fe; 
-      --accent: #0284c7; 
-      --text-light: #0f172a; 
-      --panel-bg: rgba(224, 242, 254, 0.95);
-      --inner-border: #0284c7;
-    }
-
-    * { box-sizing: border-box; touch-action: manipulation; }
-
-    html, body {
-      height: 100vh;
-      max-height: 100vh;
-      overflow: hidden;
+    * {
+      box-sizing: border-box;
+      user-select: none;
       margin: 0;
-      padding: 6px;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-light);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .top-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      width: 100%;
-      max-width: 500px;
-      height: 28px;
-      margin-bottom: 4px;
-    }
-
-    .top-bar h1 { margin: 0; font-size: 1.1rem; color: var(--accent); }
-    .theme-bar { display: flex; gap: 6px; }
-    .theme-dot {
-      width: 18px; height: 18px; border-radius: 50%;
-      cursor: pointer; border: 1px solid #aaa;
-    }
-
-    .menu-card {
-      background: var(--panel-bg);
-      padding: 14px;
-      border-radius: 8px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      width: 100%;
-      max-width: 360px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      text-align: center;
-      margin-top: auto;
-      margin-bottom: auto;
-    }
-
-    .tab-buttons { display: flex; gap: 6px; }
-    .tab-btn {
-      flex: 1; background: rgba(0, 0, 0, 0.05);
-      color: var(--text-light); padding: 6px;
-      border: 1px solid rgba(0, 0, 0, 0.1);
-      border-radius: 4px; font-weight: bold;
-      cursor: pointer; font-size: 0.8rem;
-    }
-    .tab-btn.active { background: var(--accent); color: #fff; }
-
-    .menu-card input, .menu-card select {
-      padding: 8px; border-radius: 4px;
-      border: 1px solid #ccc; font-size: 0.85rem; width: 100%;
-    }
-
-    .game-board {
-      width: 100%; max-width: 500px;
-      height: calc(100vh - 40px);
-      display: none; flex-direction: column;
-      justify-content: space-between; gap: 4px;
-    }
-
-    .status-panel {
-      background: var(--panel-bg);
-      padding: 6px 10px; border-radius: 6px;
-      display: flex; justify-content: space-between;
-      align-items: center; font-size: 0.75rem;
-    }
-
-    /* Avatar Grid Setup */
-    .players-avatar-bar {
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      background: var(--panel-bg);
-      padding: 6px;
-      border-radius: 8px;
-    }
-
-    .player-avatar-card {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      position: relative;
-    }
-
-    .avatar-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: #ccc;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
-      border: 2px solid transparent;
-    }
-
-    .player-avatar-card.active .avatar-icon {
-      border-color: #22c55e;
-      box-shadow: 0 0 8px #22c55e;
-    }
-
-    .player-name-tag {
-      font-size: 0.65rem;
-      font-weight: bold;
-      margin-top: 2px;
-    }
-
-    .bell-btn {
-      position: absolute;
-      top: -4px;
-      right: -8px;
-      background: #eab308;
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 18px;
-      height: 18px;
-      font-size: 0.6rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       padding: 0;
+      font-family: 'Courier New', Courier, monospace; /* Retro pixel feel */
     }
 
-    .piles { display: flex; justify-content: center; gap: 15px; margin: 2px 0; }
-    .pile {
-      width: 65px; height: 90px;
-      border: 2px dashed rgba(0, 0, 0, 0.2);
-      border-radius: 6px; display: flex;
-      flex-direction: column; justify-content: center;
-      align-items: center; cursor: pointer;
-      background: rgba(0,0,0,0.02); font-size: 0.7rem;
-      position: relative;
-    }
-
-    .pile.drag-over {
-      border-color: #22c55e;
-      background: rgba(34, 197, 94, 0.15);
-    }
-
-    .card {
-      width: 60px; height: 88px;
-      background-color: var(--card-bg);
-      color: var(--card-text);
-      border: 1px solid var(--card-border);
-      border-radius: 4px; display: flex;
-      flex-direction: column; justify-content: space-between;
-      padding: 2px; font-weight: bold;
-      box-shadow: -2px 2px 4px rgba(0,0,0,0.15);
-      user-select: none; position: relative;
-      cursor: grab; flex-shrink: 0;
-    }
-
-    .card .corner {
-      display: flex; flex-direction: column;
-      align-items: center; font-size: 0.7rem; line-height: 0.8;
-    }
-    .card .inner-frame {
-      border: 1px solid var(--inner-border);
-      height: 60%; margin: 1px; display: flex;
-      align-items: center; justify-content: center;
-      overflow: hidden; background: #fafafa;
-    }
-    .card .center-suit { font-size: 1.2rem; }
-    .card.bottom-corner { transform: rotate(180deg); }
-    .card.red { color: #d00000; }
-    .card.selected {
-      border: 2px solid var(--accent);
-      transform: translateY(-8px);
-      box-shadow: 0 0 8px var(--accent);
-    }
-
-    .hand-container {
-      overflow-x: auto; padding: 10px 5px;
-      background: var(--panel-bg); border-radius: 6px;
-      min-height: 110px; display: flex; flex-direction: column; gap: 8px;
-    }
-    
-    .sets-wrapper { display: flex; gap: 10px; overflow-x: auto; width: 100%; }
-    .card-set-group {
+    body {
+      background-color: #0b1325;
+      color: #fff;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
       display: flex;
-      background: rgba(0,0,0,0.04);
-      padding: 4px;
+      flex-direction: column;
+    }
+
+    /* Top Navigation Bar */
+    .top-bar {
+      height: 44px;
+      background: rgba(0, 0, 0, 0.85);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      border-bottom: 2px solid var(--gold-accent);
+      z-index: 10;
+    }
+
+    .game-title {
+      font-size: 16px;
+      font-weight: bold;
+      color: var(--gold-accent);
+      font-family: sans-serif;
+    }
+
+    .top-buttons button {
+      background: #1e293b;
+      color: #fff;
+      border: 1px solid var(--gold-accent);
+      padding: 4px 10px;
+      margin-left: 6px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 12px;
+      font-family: sans-serif;
+    }
+
+    /* Main Table Board */
+    .table-container {
+      flex: 1;
+      position: relative;
+      background: radial-gradient(circle, #005c2b 0%, #002b13 100%);
+      display: grid;
+      grid-template-columns: 140px 1fr 140px;
+      grid-template-rows: 80px 1fr 120px;
+      padding: 8px;
+    }
+
+    /* Bipolar Team Scorecards */
+    .side-score {
+      background: rgba(0, 0, 0, 0.75);
+      border: 2px solid var(--gold-accent);
       border-radius: 6px;
-      border: 1px solid rgba(0,0,0,0.1);
-    }
-    
-    .card-set-group .card { margin-right: -32px; }
-    .card-set-group .card:last-child { margin-right: 0; }
-
-    .chat-box {
-      background: var(--panel-bg); border-radius: 6px;
-      padding: 4px; display: flex; flex-direction: column; gap: 4px;
-    }
-    .quick-msg-bar { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 2px; }
-    .quick-btn {
-      background: rgba(0, 0, 0, 0.05); color: var(--text-light);
-      border: 1px solid rgba(0, 0, 0, 0.1); padding: 4px 8px;
-      border-radius: 12px; font-size: 0.7rem;
-      white-space: nowrap; cursor: pointer;
-    }
-    .like-btn { background: #3b82f6 !important; color: white !important; font-weight: bold; }
-    .chat-display {
-      font-size: 0.75rem; background: rgba(255, 255, 255, 0.5);
-      padding: 4px 8px; border-radius: 4px; height: 24px;
-      display: flex; align-items: center; justify-content: space-between; overflow: hidden;
+      padding: 6px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      font-family: sans-serif;
     }
 
-    .controls { display: flex; gap: 6px; flex-wrap: wrap; }
-    button {
-      background-color: var(--accent); color: #ffffff;
-      border: none; padding: 8px 10px; font-weight: bold;
-      border-radius: 4px; cursor: pointer; font-size: 0.75rem; flex: 1;
-    }
-    .aux-btn { background-color: #64748b; }
-    .viewer-badge {
-      background: #8b5cf6; color: white;
-      padding: 1px 6px; border-radius: 8px; font-size: 0.65rem;
-    }
-    button:disabled { opacity: 0.4; cursor: not-allowed; }
-    .hidden { display: none !important; }
+    .score-title { font-size: 11px; color: #ccc; }
+    .score-val { font-size: 20px; font-weight: bold; color: var(--gold-accent); }
+    .bid-tag { font-size: 10px; background: #334155; border-radius: 3px; padding: 2px 4px; margin-top: 3px; color: #64ffda; }
 
-    /* Modal for Scoreboard */
-    .modal-overlay {
-      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.5); display: flex;
-      align-items: center; justify-content: center; z-index: 100;
+    .team-left { grid-column: 1; grid-row: 2; }
+    .team-right { grid-column: 3; grid-row: 2; }
+
+    /* Player Seats */
+    .seat { display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 5; font-family: sans-serif;}
+    .seat-partner { grid-column: 2; grid-row: 1; }
+    .seat-left { grid-column: 1; grid-row: 1; }
+    .seat-right { grid-column: 3; grid-row: 1; }
+
+    .avatar {
+      width: 38px; height: 38px; border-radius: 50%; background: #334155;
+      border: 2px solid var(--gold-accent); display: flex; align-items: center; justify-content: center; font-size: 18px;
     }
-    .modal-body {
-      background: white; padding: 16px; border-radius: 8px;
-      width: 90%; max-width: 320px; text-align: center;
+    .player-name { font-size: 11px; font-weight: bold; margin-top: 2px; }
+
+    /* Central Trick Area */
+    .trick-area {
+      grid-column: 2; grid-row: 2; position: relative; background: rgba(0, 0, 0, 0.2);
+      border-radius: 12px; border: 2px dashed rgba(255, 215, 0, 0.4);
+      display: flex; align-items: center; justify-content: center; gap: 8px;
     }
-    .modal-table { width: 100%; margin: 10px 0; border-collapse: collapse; }
-    .modal-table th, .modal-table td { border: 1px solid #ddd; padding: 6px; font-size: 0.8rem; }
+
+    /* Pixel/Classic Card Design Matching Uploaded Image */
+    .card-deck-hand {
+      grid-column: 1 / span 3; grid-row: 3;
+      display: flex; justify-content: center; align-items: flex-end; padding-bottom: 5px;
+    }
+
+    .classic-card {
+      width: var(--card-width);
+      height: var(--card-height);
+      background-color: #ffffff;
+      border: 1px solid #000;
+      border-radius: 3px;
+      box-shadow: 1px 2px 5px rgba(0,0,0,0.5);
+      position: relative;
+      margin-left: -22px;
+      cursor: grab;
+      transition: transform 0.15s ease-in-out, margin 0.15s;
+      touch-action: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 3px;
+    }
+
+    .classic-card:hover {
+      transform: translateY(-18px);
+      z-index: 30 !important;
+    }
+
+    /* Suits & Ranks Styling */
+    .classic-card.clubs, .classic-card.spades { color: #000000; }
+    .classic-card.hearts, .classic-card.diamonds { color: #cc0000; }
+
+    .card-corner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      line-height: 0.9;
+      font-weight: bold;
+      font-size: 12px;
+    }
+
+    .card-corner.bottom {
+      transform: rotate(180deg);
+    }
+
+    .card-center-pip {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 20px;
+    }
+
+    /* Special Power Badges */
+    .power-badge {
+      position: absolute;
+      top: -8px;
+      right: -4px;
+      background: var(--gold-accent);
+      color: #000;
+      font-size: 9px;
+      font-weight: bold;
+      padding: 1px 3px;
+      border-radius: 3px;
+      border: 1px solid #000;
+      font-family: sans-serif;
+    }
+
+    /* Dialog Windows */
+    .modal {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+      z-index: 100; align-items: center; justify-content: center; font-family: sans-serif;
+    }
+
+    .modal-content {
+      background: #0f172a; border: 2px solid var(--gold-accent); padding: 18px;
+      border-radius: 10px; width: 85%; max-width: 480px; max-height: 85vh; overflow-y: auto;
+    }
+
+    .modal-title { font-size: 16px; color: var(--gold-accent); margin-bottom: 10px; font-weight: bold; }
   </style>
 </head>
-<body class="theme-skyblue">
+<body>
 
+  <!-- Top Bar -->
   <div class="top-bar">
-    <h1>ସେଣ୍ଟୁ</h1>
-    <div class="theme-bar">
-      <div class="theme-dot" style="background:#e0f2fe;" onclick="setTheme('theme-skyblue')"></div>
-      <div class="theme-dot" style="background:#fbe4e8;" onclick="setTheme('theme-pink')"></div>
-      <div class="theme-dot" style="background:#ffffff;" onclick="setTheme('theme-white')"></div>
+    <div class="game-title">ଦଶ ଗଣ୍ଡିଆ (Dasha Gandia)</div>
+    <div class="top-buttons">
+      <button onclick="toggleModal('pointModal')">📊 Point Table</button>
+      <button onclick="toggleModal('rulesModal')">📖 Rules</button>
+      <button onclick="toggleModal('profileModal')">👤 Profile</button>
     </div>
   </div>
 
-  <div class="menu-card" id="room-menu">
-    <div class="tab-buttons">
-      <button class="tab-btn active" id="tab-create" onclick="switchMode('create')">Create Room</button>
-      <button class="tab-btn" id="tab-join" onclick="switchMode('join')">Join Room</button>
+  <!-- Table Container -->
+  <div class="table-container">
+    
+    <!-- Team 1 Score Card (Left) -->
+    <div class="side-score team-left">
+      <div class="score-title">TEAM 1 (A & C)</div>
+      <div class="score-val">0 / 100</div>
+      <div class="bid-tag">BID: 5 Gandas</div>
     </div>
 
-    <input type="text" id="player-name" placeholder="Your Name">
-    <select id="avatar-select">
-      <option value="🦊">🦊 Fox Avatar</option>
-      <option value="🐯">🐯 Tiger Avatar</option>
-      <option value="🐼">🐼 Panda Avatar</option>
-      <option value="🦁">🦁 Lion Avatar</option>
-    </select>
-
-    <div id="create-section" style="display:flex; flex-direction:column; gap:8px;">
-      <button onclick="handleCreateRoom()">Create & Go To Table 🚀</button>
+    <!-- Partner Player Seat (Top Center) -->
+    <div class="seat seat-partner">
+      <div class="avatar">👨‍💼</div>
+      <div class="player-name">Partner (C)</div>
     </div>
 
-    <div id="join-section" class="hidden" style="display:flex; flex-direction:column; gap:8px;">
-      <input type="text" id="join-room-id" placeholder="4-Letter Code" style="text-transform:uppercase">
-      <select id="join-role-select">
-        <option value="player">Player 🎮</option>
-        <option value="viewer">Viewer 👁️</option>
-      </select>
-      <button onclick="handleJoinRoom()">Join & Go To Table 🚀</button>
+    <!-- Team 2 Score Card (Right) -->
+    <div class="side-score team-right">
+      <div class="score-title">TEAM 2 (B & D)</div>
+      <div class="score-val">0 / 100</div>
+      <div class="bid-tag">BID: 4 Gandas</div>
+    </div>
+
+    <!-- Left Opponent -->
+    <div class="seat seat-left">
+      <div class="avatar">🤖</div>
+      <div class="player-name">Bot B</div>
+    </div>
+
+    <!-- Central Trick Play Area -->
+    <div class="trick-area" id="trickArea">
+      <span style="color: rgba(255,255,255,0.3); font-size: 11px; font-family: sans-serif;">PULL / SWIPE CARD UP TO PLAY</span>
+    </div>
+
+    <!-- Right Opponent -->
+    <div class="seat seat-right">
+      <div class="avatar">🤖</div>
+      <div class="player-name">Bot D</div>
+    </div>
+
+    <!-- Player Categorized 13-Card Hand (Sorted Upper to Lower) -->
+    <div class="card-deck-hand" id="playerHand">
+      <!-- Generated via JS matching exact deck layout -->
+    </div>
+
+  </div>
+
+  <!-- Rules Dialog Modal -->
+  <div class="modal" id="rulesModal">
+    <div class="modal-content">
+      <div class="modal-title">ଦଶ ଗଣ୍ଡିଆ - Gameplay & Beranga Rules</div>
+      <p style="font-size: 13px; line-height: 1.4;">
+        <b>1. Card Hierarchy:</b> Heart 2 (👑 1st Power) > Spade 2 (⚔️ 2nd Power) > Trump Ace (✨ 3rd Power) > Trump Cards > High Suit Cards.<br><br>
+        <b>2. Beranga Rule (ବେରଙ୍ଗ):</b> If no Trump suit is set, Heart 2 and Spade 2 remain the highest cards in game. All other suits follow standard ranking (Ace down to 2). If void in led suit, any card can be played.<br><br>
+        <b>3. Trick Cutting:</b> Playing a Colour card on a void non-colour trick captures all 4 cards and Gandas. Over-trumping with a higher Colour card takes the trick.<br><br>
+        <b>4. Swipe Control:</b> Pull/drag cards upward to throw them into the trick area.
+      </p>
+      <button style="margin-top:15px; width:100%; padding:8px; background:var(--gold-accent); border:none; font-weight:bold; cursor:pointer;" onclick="toggleModal('rulesModal')">CLOSE</button>
     </div>
   </div>
 
-  <div class="game-board" id="game-board">
-    <div class="status-panel">
-      <div>Room: <strong id="display-room-id">-</strong></div>
-      <div>User: <strong id="display-player-name" style="color:var(--accent);">-</strong> <span id="role-badge" class="viewer-badge hidden">Viewer</span></div>
-      <button onclick="toggleScoreModal()" style="padding:2px 6px; flex:none;">🏆 Scores</button>
-      <button onclick="shareRoomLink()" style="padding:2px 6px; flex:none;">🔗 Link</button>
-    </div>
-
-    <!-- Avatar Bar -->
-    <div class="players-avatar-bar" id="avatar-bar"></div>
-
-    <div class="piles">
-      <div class="pile" id="draw-pile" onclick="drawFromDeck()">
-        <span>Deck</span>
-        <strong id="draw-count">(0)</strong>
-      </div>
-      <div class="pile" id="discard-pile" onclick="drawFromDiscard()" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
-        <span>Discard</span>
-        <div id="top-discard"></div>
-      </div>
-    </div>
-
-    <div class="chat-box">
-      <div class="quick-msg-bar">
-        <button class="quick-btn like-btn" onclick="sendQuickMessage('👍 Like')">👍 Like</button>
-        <button class="quick-btn" onclick="sendQuickMessage('ଶୀଘ୍ର ଛାଡ଼େ')">ଶୀଘ୍ର ଛାଡ଼େ</button>
-        <button class="quick-btn" onclick="sendQuickMessage('ଛାଡ଼ିବୁ ନି କି')">ଛାଡ଼ିବୁ ନି କି</button>
-        <button class="quick-btn" onclick="sendQuickMessage('ତୁ ପାରିବୁ ନି')">ତୁ ପାରିବୁ ନି</button>
-      </div>
-      <div class="chat-display">
-        <span id="chat-msg" style="font-style:italic; color:#666;">No messages yet...</span>
-      </div>
-    </div>
-
-    <!-- Hand & Card Serial Display -->
-    <div class="hand-container">
-      <div class="sets-wrapper" id="sets-wrapper"></div>
-    </div>
-
-    <div class="controls">
-      <button class="aux-btn" onclick="sortHandBySuit()">Sort Suits</button>
-      <button class="aux-btn" onclick="sortHandByRank()">Sort Rank</button>
-      <button class="aux-btn" onclick="groupSelectedCards()">Group Set (3/4)</button>
-      <button id="discard-btn" onclick="discardSelectedCard()" disabled>Discard</button>
-      <button id="off-btn" onclick="declareOff()">Declare OFF</button>
-      <button onclick="leaveRoom()" style="background:#ff4d4d; color:white; flex:0 0 100%;">Exit</button>
+  <!-- Point Table Modal -->
+  <div class="modal" id="pointModal">
+    <div class="modal-content">
+      <div class="modal-title">Point Table & Ganda Tracker</div>
+      <p style="font-size: 13px;"><b>Winning Target:</b> 100 Points</p>
+      <hr style="margin: 10px 0; border-color: #334155;">
+      <p style="font-size: 13px;"><b>Team 1 Target:</b> 5 Gandas | Captured: 0</p>
+      <p style="font-size: 13px;"><b>Team 2 Target:</b> 4 Gandas | Captured: 0</p>
+      <button style="margin-top:15px; width:100%; padding:8px; background:var(--gold-accent); border:none; font-weight:bold; cursor:pointer;" onclick="toggleModal('pointModal')">CLOSE</button>
     </div>
   </div>
 
-  <!-- Score Board Modal -->
-  <div class="modal-overlay hidden" id="score-modal">
-    <div class="modal-body">
-      <h3>Global Scoreboard</h3>
-      <table class="modal-table">
-        <thead><tr><th>Player</th><th>Avatar</th><th>Score</th></tr></thead>
-        <tbody id="scoreboard-rows"></tbody>
-      </table>
-      <button onclick="toggleScoreModal()">Close</button>
+  <!-- Profile Settings Modal -->
+  <div class="modal" id="profileModal">
+    <div class="modal-content">
+      <div class="modal-title">Player Profile</div>
+      <label style="font-size: 12px;">Display Name:</label>
+      <input type="text" value="Player A" style="width:100%; padding:6px; margin: 6px 0 12px 0; background:#1e293b; color:#fff; border:1px solid #475569; border-radius:4px;">
+      <button style="width:100%; padding:8px; background:var(--gold-accent); border:none; font-weight:bold; cursor:pointer;" onclick="toggleModal('profileModal')">SAVE</button>
     </div>
   </div>
 
   <script>
-    const SUITS = ['♠', '♥', '♦', '♣'];
-    const RANKS = [
-      { label: 'A', value: 1 }, { label: '2', value: 2 }, { label: '3', value: 3 },
-      { label: '4', value: 4 }, { label: '5', value: 5 }, { label: '6', value: 6 },
-      { label: '7', value: 7 }, { label: '8', value: 8 }, { label: '9', value: 9 },
-      { label: '10', value: 10 }, { label: 'J', value: 11 }, { label: 'Q', value: 12 }, { label: 'K', value: 13 }
+    function toggleModal(id) {
+      const modal = document.getElementById(id);
+      modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    // Full classic deck data matching uploaded layout rows
+    const deckData = [
+      // Clubs Row 1 (♣)
+      { suit: 'clubs', symbol: '♣', rank: 'A', class: 'clubs' },
+      { suit: 'clubs', symbol: '♣', rank: 'K', class: 'clubs' },
+      { suit: 'clubs', symbol: '♣', rank: 'Q', class: 'clubs' },
+      { suit: 'clubs', symbol: '♣', rank: 'J', class: 'clubs' },
+      { suit: 'clubs', symbol: '♣', rank: '10', class: 'clubs' },
+      // Hearts Row 2 (♥)
+      { suit: 'hearts', symbol: '♥', rank: '2', class: 'hearts', power: '👑 1st' },
+      { suit: 'hearts', symbol: '♥', rank: 'A', class: 'hearts' },
+      { suit: 'hearts', symbol: '♥', rank: 'K', class: 'hearts' },
+      { suit: 'hearts', symbol: '♥', rank: 'Q', class: 'hearts' },
+      // Spades Row 3 (♠)
+      { suit: 'spades', symbol: '♠', rank: '2', class: 'spades', power: '⚔️ 2nd' },
+      { suit: 'spades', symbol: '♠', rank: 'A', class: 'spades' },
+      { suit: 'spades', symbol: '♠', rank: 'K', class: 'spades' },
+      // Diamonds Row 4 (♦)
+      { suit: 'diamonds', symbol: '♦', rank: 'A', class: 'diamonds' }
     ];
 
-    let currentRoomId = '';
-    let isHost = false;
-    let isViewer = false;
-    let myPeerId = '';
-    let localPlayerName = '';
-    let localAvatar = '🦊';
-    let peer = null;
-    let connections = [];
+    function renderHand() {
+      const handContainer = document.getElementById('playerHand');
+      handContainer.innerHTML = '';
 
-    let gameState = {
-      players: [], 
-      turnIndex: 0,
-      drawPile: [],
-      discardPile: [],
-      hasDrawnThisTurn: false
-    };
+      deckData.forEach((card, index) => {
+        const cardEl = document.createElement('div');
+        cardEl.className = `classic-card ${card.class}`;
+        cardEl.style.zIndex = index + 1;
 
-    let localSelectedCardIndices = [];
-    let localGroups = []; // Stores indices sets [[0,1,2], [3,4,5,6]]
-
-    window.addEventListener('load', () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const roomParam = urlParams.get('room');
-      if (roomParam) {
-        switchMode('join');
-        document.getElementById('join-room-id').value = roomParam.toUpperCase();
-      }
-    });
-
-    function setTheme(themeName) { document.body.className = themeName; }
-
-    function switchMode(mode) {
-      if (mode === 'create') {
-        document.getElementById('tab-create').classList.add('active');
-        document.getElementById('tab-join').classList.remove('active');
-        document.getElementById('create-section').classList.remove('hidden');
-        document.getElementById('join-section').classList.add('hidden');
-      } else {
-        document.getElementById('tab-join').classList.add('active');
-        document.getElementById('tab-create').classList.remove('active');
-        document.getElementById('join-section').classList.remove('hidden');
-        document.getElementById('create-section').classList.add('hidden');
-      }
-    }
-
-    function initPeer(idPrefix, callback) {
-      const cleanId = idPrefix ? idPrefix.toLowerCase().replace(/[^a-z0-9]/g, '') : null;
-      peer = new Peer(cleanId ? `sentu-room-${cleanId}` : null);
-
-      peer.on('open', (id) => {
-        myPeerId = id;
-        callback(true);
-      });
-
-      peer.on('error', (err) => {
-        alert('Network connection error: ' + err.type);
-        callback(false);
-      });
-    }
-
-    function handleCreateRoom() {
-      localPlayerName = document.getElementById('player-name').value.trim() || 'Host';
-      localAvatar = document.getElementById('avatar-select').value;
-      currentRoomId = Math.random().toString(36).substring(2, 6).toUpperCase();
-      isHost = true;
-      isViewer = false;
-
-      initPeer(currentRoomId, (success) => {
-        if (!success) return;
-        gameState.players = [{ peerId: myPeerId, name: localPlayerName, avatar: localAvatar, hand: [], score: 0, isViewer: false }];
-        
-        peer.on('connection', (conn) => {
-          connections.push(conn);
-          conn.on('data', (data) => handleHostIncomingData(data, conn));
-          conn.on('close', () => {
-            connections = connections.filter(c => c !== conn);
-            gameState.players = gameState.players.filter(p => p.peerId !== conn.peer);
-            broadcastState();
-          });
-        });
-
-        goToTable();
-        startNewRound();
-      });
-    }
-
-    function handleJoinRoom() {
-      localPlayerName = document.getElementById('player-name').value.trim() || 'Guest';
-      localAvatar = document.getElementById('avatar-select').value;
-      const code = document.getElementById('join-room-id').value.trim().toUpperCase();
-      const role = document.getElementById('join-role-select').value;
-
-      if (!code) return alert('Enter 4-Letter Room Code');
-
-      currentRoomId = code;
-      isHost = false;
-      isViewer = (role === 'viewer');
-
-      initPeer(null, (success) => {
-        if (!success) return;
-        const hostPeerId = `sentu-room-${currentRoomId.toLowerCase()}`;
-        const conn = peer.connect(hostPeerId);
-        connections = [conn];
-
-        conn.on('open', () => {
-          conn.send({
-            type: 'JOIN',
-            payload: { peerId: myPeerId, name: localPlayerName, avatar: localAvatar, isViewer: isViewer }
-          });
-          goToTable();
-        });
-
-        conn.on('data', (data) => handleClientIncomingData(data));
-      });
-    }
-
-    function handleHostIncomingData(data, conn) {
-      if (data.type === 'JOIN') {
-        const existing = gameState.players.find(p => p.peerId === data.payload.peerId);
-        if (!existing) {
-          gameState.players.push({
-            peerId: data.payload.peerId,
-            name: data.payload.name,
-            avatar: data.payload.avatar,
-            hand: [],
-            score: 0,
-            isViewer: data.payload.isViewer
-          });
-          if (gameState.drawPile.length > 0 && !data.payload.isViewer) {
-            const newPlayer = gameState.players[gameState.players.length - 1];
-            newPlayer.hand = gameState.drawPile.splice(0, 10);
-          }
-        }
-        broadcastState();
-      } else if (data.type === 'ACTION') {
-        executeAction(data.payload.action, data.payload.peerId, data.payload.params);
-      } else if (data.type === 'NUDGE') {
-        broadcastMessage({ type: 'CHAT', payload: { name: 'SYSTEM', text: `🔔 ${data.payload.from} reminded ${data.payload.to} to play their move!` } });
-      } else if (data.type === 'CHAT') {
-        broadcastMessage(data);
-      }
-    }
-
-    function handleClientIncomingData(data) {
-      if (data.type === 'STATE_UPDATE') {
-        gameState = data.payload;
-        renderBoard();
-      } else if (data.type === 'CHAT') {
-        displayMessage(data.payload.name, data.payload.text);
-      }
-    }
-
-    function sendActionToHost(action, params = {}) {
-      if (isHost) {
-        executeAction(action, myPeerId, params);
-      } else if (connections[0]) {
-        connections[0].send({ type: 'ACTION', payload: { action, peerId: myPeerId, params } });
-      }
-    }
-
-    function broadcastState() {
-      if (!isHost) return;
-      connections.forEach(c => c.send({ type: 'STATE_UPDATE', payload: gameState }));
-      renderBoard();
-    }
-
-    function broadcastMessage(chatData) {
-      if (isHost) {
-        connections.forEach(c => c.send(chatData));
-        displayMessage(chatData.payload.name, chatData.payload.text);
-      }
-    }
-
-    function executeAction(action, peerId, params) {
-      const activePlayers = gameState.players.filter(p => !p.isViewer);
-      if (activePlayers.length === 0) return;
-      const currentTurnPlayer = activePlayers[gameState.turnIndex];
-
-      if (action === 'DRAW_DECK') {
-        if (currentTurnPlayer.peerId !== peerId || gameState.hasDrawnThisTurn) return;
-        if (gameState.drawPile.length === 0) {
-          if (gameState.discardPile.length <= 1) return;
-          const top = gameState.discardPile.pop();
-          gameState.drawPile = gameState.discardPile.sort(() => Math.random() - 0.5);
-          gameState.discardPile = [top];
-        }
-        currentTurnPlayer.hand.push(gameState.drawPile.pop());
-        gameState.hasDrawnThisTurn = true;
-      } 
-      else if (action === 'DRAW_DISCARD') {
-        if (currentTurnPlayer.peerId !== peerId || gameState.hasDrawnThisTurn || gameState.discardPile.length === 0) return;
-        currentTurnPlayer.hand.push(gameState.discardPile.pop());
-        gameState.hasDrawnThisTurn = true;
-      } 
-      else if (action === 'DISCARD') {
-        if (currentTurnPlayer.peerId !== peerId || !gameState.hasDrawnThisTurn) return;
-        const cardIdx = params.cardIndex;
-        if (cardIdx < 0 || cardIdx >= currentTurnPlayer.hand.length) return;
-
-        const discarded = currentTurnPlayer.hand.splice(cardIdx, 1)[0];
-        gameState.discardPile.push(discarded);
-        gameState.hasDrawnThisTurn = false;
-        gameState.turnIndex = (gameState.turnIndex + 1) % activePlayers.length;
-      } 
-      else if (action === 'DECLARE_OFF') {
-        if (currentTurnPlayer.peerId !== peerId) return;
-        currentTurnPlayer.score += 25;
-        alert(`${currentTurnPlayer.name} declared OFF! Round restarted.`);
-        startNewRound();
-        return;
-      }
-
-      broadcastState();
-    }
-
-    function startNewRound() {
-      if (!isHost) return;
-      const deck = createDeck();
-      const active = gameState.players.filter(p => !p.isViewer);
-
-      active.forEach(p => { p.hand = deck.splice(0, 10); });
-      gameState.drawPile = deck;
-      gameState.discardPile = [gameState.drawPile.pop()];
-      gameState.turnIndex = 0;
-      gameState.hasDrawnThisTurn = false;
-      broadcastState();
-    }
-
-    /* Drag & Drop Discarding Controls */
-    function handleDragStart(e, idx) {
-      e.dataTransfer.setData('text/plain', idx);
-    }
-    function handleDragOver(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
-    function handleDragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
-    function handleDrop(e) {
-      e.preventDefault();
-      e.currentTarget.classList.remove('drag-over');
-      const cardIdx = parseInt(e.dataTransfer.getData('text/plain'), 10);
-      if (!isNaN(cardIdx)) {
-        sendActionToHost('DISCARD', { cardIndex: cardIdx });
-        localSelectedCardIndices = [];
-      }
-    }
-
-    /* Sorting and Grouping Logic */
-    function sortHandBySuit() {
-      const me = gameState.players.find(p => p.peerId === myPeerId);
-      if (!me) return;
-      me.hand.sort((a, b) => a.suit.localeCompare(b.suit) || a.value - b.value);
-      localGroups = [];
-      renderBoard();
-    }
-
-    function sortHandByRank() {
-      const me = gameState.players.find(p => p.peerId === myPeerId);
-      if (!me) return;
-      me.hand.sort((a, b) => a.value - b.value || a.suit.localeCompare(b.suit));
-      localGroups = [];
-      renderBoard();
-    }
-
-    function groupSelectedCards() {
-      if (localSelectedCardIndices.length < 3) {
-        return alert("Select at least 3 or 4 cards to form a group/set!");
-      }
-      localGroups.push([...localSelectedCardIndices]);
-      localSelectedCardIndices = [];
-      renderBoard();
-    }
-
-    function sendNudge(targetName) {
-      if (isHost) {
-        broadcastMessage({ type: 'CHAT', payload: { name: 'SYSTEM', text: `🔔 ${localPlayerName} reminded ${targetName} to play move!` } });
-      } else {
-        connections[0].send({ type: 'NUDGE', payload: { from: localPlayerName, to: targetName } });
-      }
-    }
-
-    function toggleScoreModal() {
-      const modal = document.getElementById('score-modal');
-      modal.classList.toggle('hidden');
-
-      if (!modal.classList.contains('hidden')) {
-        const tbody = document.getElementById('scoreboard-rows');
-        tbody.innerHTML = '';
-        gameState.players.forEach(p => {
-          tbody.innerHTML += `<tr><td>${p.name}</td><td>${p.avatar}</td><td>${p.score}</td></tr>`;
-        });
-      }
-    }
-
-    function goToTable() {
-      document.getElementById('display-player-name').innerText = localPlayerName;
-      document.getElementById('display-room-id').innerText = currentRoomId;
-      document.getElementById('room-menu').classList.add('hidden');
-      document.getElementById('game-board').style.display = 'flex';
-
-      if (isViewer) {
-        document.getElementById('role-badge').classList.remove('hidden');
-        document.getElementById('discard-btn').disabled = true;
-        document.getElementById('off-btn').disabled = true;
-      }
-    }
-
-    function sendQuickMessage(text) {
-      const chatPayload = { type: 'CHAT', payload: { name: localPlayerName, text } };
-      if (isHost) broadcastMessage(chatPayload);
-      else if (connections[0]) connections[0].send(chatPayload);
-    }
-
-    function displayMessage(name, text) {
-      document.getElementById('chat-msg').innerHTML = `<strong>${name}:</strong> ${text}`;
-    }
-
-    function leaveRoom() { if (peer) peer.destroy(); location.reload(); }
-
-    function shareRoomLink() {
-      const shareUrl = `${window.location.origin}${window.location.pathname}?room=${currentRoomId}`;
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(shareUrl);
-        alert('Room Code & Link copied!');
-      }
-    }
-
-    function createDeck() {
-      let deck = [];
-      for (let suit of SUITS) {
-        for (let rank of RANKS) {
-          deck.push({ suit, label: rank.label, value: rank.value, isRed: suit === '♥' || suit === '♦' });
-        }
-      }
-      return deck.sort(() => Math.random() - 0.5);
-    }
-
-    function drawFromDeck() { if (!isViewer) sendActionToHost('DRAW_DECK'); }
-    function drawFromDiscard() { if (!isViewer) sendActionToHost('DRAW_DISCARD'); }
-
-    function toggleSelectCard(index) {
-      if (isViewer) return;
-      const pos = localSelectedCardIndices.indexOf(index);
-      if (pos > -1) localSelectedCardIndices.splice(pos, 1);
-      else localSelectedCardIndices.push(index);
-
-      document.getElementById('discard-btn').disabled = (localSelectedCardIndices.length !== 1);
-      renderBoard();
-    }
-
-    function discardSelectedCard() {
-      if (isViewer || localSelectedCardIndices.length !== 1) return;
-      sendActionToHost('DISCARD', { cardIndex: localSelectedCardIndices[0] });
-      localSelectedCardIndices = [];
-    }
-
-    function declareOff() { if (!isViewer) sendActionToHost('DECLARE_OFF'); }
-
-    function generateCardHTML(card, index, isSelected = false) {
-      if (!card) return '';
-      return `
-        <div class="card ${card.isRed ? 'red' : ''} ${isSelected ? 'selected' : ''}" 
-             draggable="true" 
-             ondragstart="handleDragStart(event, ${index})" 
-             data-index="${index}">
-          <div class="corner"><span>${card.label}</span><span>${card.suit}</span></div>
-          <div class="inner-frame"><div class="center-suit">${card.suit}</div></div>
-          <div class="corner bottom-corner"><span>${card.label}</span><span>${card.suit}</span></div>
-        </div>
-      `;
-    }
-
-    function renderBoard() {
-      const activePlayers = gameState.players.filter(p => !p.isViewer);
-      if (activePlayers.length === 0) return;
-
-      const currentTurnPlayer = activePlayers[gameState.turnIndex];
-      const isMyTurn = currentTurnPlayer && currentTurnPlayer.peerId === myPeerId;
-
-      document.getElementById('draw-count').innerText = `(${gameState.drawPile.length})`;
-
-      // Render Avatars Bar & Turn Bell
-      const avatarBar = document.getElementById('avatar-bar');
-      avatarBar.innerHTML = '';
-      activePlayers.forEach((p, idx) => {
-        const isCurrent = (idx === gameState.turnIndex);
-        avatarBar.innerHTML += `
-          <div class="player-avatar-card ${isCurrent ? 'active' : ''}">
-            <div class="avatar-icon">${p.avatar || '👤'}</div>
-            <div class="player-name-tag">${p.name}</div>
-            ${isCurrent && p.peerId !== myPeerId ? `<button class="bell-btn" onclick="sendNudge('${p.name}')">🔔</button>` : ''}
+        // Render top/bottom corners & center pip matching classic deck
+        cardEl.innerHTML = `
+          ${card.power ? `<div class="power-badge">${card.power}</div>` : ''}
+          <div class="card-corner top">
+            <div>${card.rank}</div>
+            <div>${card.symbol}</div>
+          </div>
+          <div class="card-center-pip">${card.symbol}</div>
+          <div class="card-corner bottom">
+            <div>${card.rank}</div>
+            <div>${card.symbol}</div>
           </div>
         `;
-      });
 
-      // Discard Pile
-      const topDiscardEl = document.getElementById('top-discard');
-      if (gameState.discardPile.length > 0) {
-        const topCard = gameState.discardPile[gameState.discardPile.length - 1];
-        topDiscardEl.innerHTML = generateCardHTML(topCard, 'discard');
-      } else {
-        topDiscardEl.innerHTML = 'Empty';
-      }
+        // Touch & Mouse Drag/Pull up mechanic
+        let startY = 0;
+        
+        cardEl.addEventListener('touchstart', (e) => {
+          startY = e.touches[0].clientY;
+        });
 
-      // Render Local Hand & Groups (Sets vs Other Cards)
-      const setsWrapper = document.getElementById('sets-wrapper');
-      setsWrapper.innerHTML = '';
-
-      const me = gameState.players.find(p => p.peerId === myPeerId);
-      const myHand = me ? me.hand : [];
-
-      let groupedIndices = new Set();
-      localGroups.forEach((group) => {
-        const setDiv = document.createElement('div');
-        setDiv.className = 'card-set-group';
-        group.forEach(idx => {
-          if (myHand[idx]) {
-            groupedIndices.add(idx);
-            const isSelected = localSelectedCardIndices.includes(idx);
-            const cardWrapper = document.createElement('div');
-            cardWrapper.innerHTML = generateCardHTML(myHand[idx], idx, isSelected);
-            const cardEl = cardWrapper.firstElementChild;
-            cardEl.onclick = () => toggleSelectCard(idx);
-            setDiv.appendChild(cardEl);
+        cardEl.addEventListener('touchend', (e) => {
+          let endY = e.changedTouches[0].clientY;
+          if (startY - endY > 35) { // Pulled upwards
+            playCardToTrick(cardEl);
           }
         });
-        setsWrapper.appendChild(setDiv);
-      });
 
-      // Render standard/other ungrouped cards
-      const otherDiv = document.createElement('div');
-      otherDiv.className = 'card-set-group';
-      myHand.forEach((card, idx) => {
-        if (!groupedIndices.has(idx)) {
-          const isSelected = localSelectedCardIndices.includes(idx);
-          const cardWrapper = document.createElement('div');
-          cardWrapper.innerHTML = generateCardHTML(card, idx, isSelected);
-          const cardEl = cardWrapper.firstElementChild;
-          cardEl.onclick = () => toggleSelectCard(idx);
-          otherDiv.appendChild(cardEl);
-        }
-      });
-      setsWrapper.appendChild(otherDiv);
+        cardEl.addEventListener('mousedown', (e) => {
+          startY = e.clientY;
+        });
 
-      document.getElementById('discard-btn').disabled = !isMyTurn || !gameState.hasDrawnThisTurn || localSelectedCardIndices.length !== 1;
-      document.getElementById('off-btn').disabled = !isMyTurn;
+        cardEl.addEventListener('mouseup', (e) => {
+          let endY = e.clientY;
+          if (startY - endY > 20) {
+            playCardToTrick(cardEl);
+          }
+        });
+
+        handContainer.appendChild(cardEl);
+      });
     }
+
+    function playCardToTrick(cardElement) {
+      const trickArea = document.getElementById('trickArea');
+      // Remove text prompt if present
+      if (trickArea.querySelector('span')) {
+        trickArea.innerHTML = '';
+      }
+      cardElement.style.position = 'relative';
+      cardElement.style.margin = '0';
+      cardElement.style.transform = 'none';
+      trickArea.appendChild(cardElement);
+    }
+
+    renderHand();
   </script>
 </body>
 </html>
