@@ -18,7 +18,6 @@
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; touch-action: manipulation; }
         
-        /* FIXED: Use 100dvh and Safe Area Insets to avoid browser dynamic bar clipping */
         html, body { 
             background-color: var(--bg-light); 
             height: 100vh;
@@ -29,9 +28,50 @@
             user-select: none; 
         }
 
-        /* ENFORCE LANDSCAPE VIEW ON PORTRAIT DEVICES */
+        /* LOBBY SCREEN (PORTRAIT BY DEFAULT) */
+        #lobby-screen { 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh; 
+            height: 100dvh; 
+            width: 100vw;
+            background: #ffffff; 
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+            overflow-y: auto;
+        }
+        .top-bar-lobby { background: var(--primary); color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+        .lobby-content { max-width: 450px; margin: auto; padding: 20px 15px; width: 100%; display: flex; flex-direction: column; gap: 12px; }
+        .input-group { display: flex; flex-direction: column; gap: 5px; }
+        .input-group label { font-weight: bold; font-size: 0.85rem; color: #333; }
+        .input-group input { padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.95rem; }
+        .team-selector { display: flex; gap: 8px; }
+        .team-btn { flex: 1; padding: 10px; border: 1px solid var(--primary); background: white; color: var(--primary); font-weight: bold; border-radius: 6px; cursor: pointer; }
+        .team-btn.active { background: var(--primary); color: white; }
+        .action-btn { padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.95rem; text-align: center; }
+        .action-btn:disabled { background: #cccccc !important; cursor: not-allowed; color: #666666; }
+        .skip-btn { padding: 10px; background: #757575; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.95rem; }
+
+        /* GAME SCREEN (FORCE LANDSCAPE FOR PORTRAIT MOBILES) */
+        #game-screen { 
+            display: none; 
+            height: 100vh;
+            height: 100dvh; 
+            width: 100vw;
+            flex-direction: column;
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+        }
+        
+        #game-screen.active { 
+            display: flex; 
+        }
+
+        /* ROTATE GAME SCREEN TO LANDSCAPE WHEN DEVICE IS IN PORTRAIT */
         @media screen and (orientation: portrait) {
-            #game-screen, #lobby-screen {
+            #game-screen.active {
                 transform: rotate(-90deg);
                 transform-origin: left top;
                 width: 100dvh !important;
@@ -42,41 +82,6 @@
             }
         }
 
-        /* LOBBY SCREEN */
-        #lobby-screen { 
-            display: flex; 
-            flex-direction: column; 
-            height: 100vh; 
-            height: 100dvh; 
-            background: #ffffff; 
-            padding-top: env(safe-area-inset-top);
-            padding-bottom: env(safe-area-inset-bottom);
-        }
-        .top-bar-lobby { background: var(--primary); color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; }
-        .lobby-content { max-width: 450px; margin: auto; padding: 15px; width: 90%; display: flex; flex-direction: column; gap: 10px; }
-        .input-group { display: flex; flex-direction: column; gap: 4px; }
-        .input-group label { font-weight: bold; font-size: 0.85rem; color: #333; }
-        .input-group input { padding: 8px; border: 1px solid #ccc; border-radius: 6px; }
-        .team-selector { display: flex; gap: 8px; }
-        .team-btn { flex: 1; padding: 8px; border: 1px solid var(--primary); background: white; color: var(--primary); font-weight: bold; border-radius: 6px; cursor: pointer; }
-        .team-btn.active { background: var(--primary); color: white; }
-        .action-btn { padding: 10px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.95rem; }
-        .action-btn:disabled { background: #cccccc !important; cursor: not-allowed; color: #666666; }
-        .skip-btn { padding: 10px; background: #757575; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.95rem; }
-
-        /* GAME SCREEN WITH VIEWPORT CLIPPING FIXES */
-        #game-screen { 
-            display: none; 
-            height: 100vh;
-            height: 100dvh; 
-            flex-direction: column;
-            padding-top: env(safe-area-inset-top);
-            padding-bottom: env(safe-area-inset-bottom);
-            padding-left: env(safe-area-inset-left);
-            padding-right: env(safe-area-inset-right);
-        }
-        #game-screen.active { display: flex; }
-        
         .game-top-bar { 
             background: #ffffff; padding: 4px 10px; border-bottom: 2px solid #e0e0e0; 
             display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; font-weight: bold;
@@ -194,7 +199,6 @@
 </head>
 <body>
 
-    <!-- LOBBY SCREEN -->
     <div id="lobby-screen">
         <div class="top-bar-lobby">
             <h2>ଦଶ ଗଣ୍ଡିଆ (Dasha Gandia)</h2>
@@ -217,17 +221,17 @@
                     <button class="team-btn" id="btn-teamB" onclick="selectTeam('B')">Team B (B & D)</button>
                 </div>
             </div>
-            <hr>
+            <hr style="margin: 5px 0;">
             <button class="action-btn" onclick="createRoom()">Create Room (Host)</button>
-            <div class="input-group">
+            <div class="input-group" style="margin-top: 5px;">
+                <label>Join Room Code</label>
                 <input type="text" id="join-id" placeholder="Paste Room ID">
-                <button class="action-btn" style="background:#0288d1;" onclick="joinRoom()">Join Room</button>
+                <button class="action-btn" style="background:#0288d1; margin-top:5px;" onclick="joinRoom()">Join Room</button>
             </div>
-            <p id="peer-status" style="font-size:0.8rem; color:#666; text-align:center;"></p>
+            <p id="peer-status" style="font-size:0.8rem; color:#666; text-align:center; margin-top:5px;"></p>
         </div>
     </div>
 
-    <!-- GAME SCREEN -->
     <div id="game-screen">
         <div class="game-top-bar">
             <span>ଦଶ ଗଣ୍ଡିଆ</span>
@@ -250,7 +254,6 @@
             <div class="pause-overlay" id="pause-overlay">⏸️ Game Paused</div>
             <div class="shuffle-deck" id="shuffle-deck"></div>
 
-            <!-- Player C (Top) -->
             <div class="player-slot slot-top" id="slot-C">
                 <div class="player-badge" id="badge-C">
                     <img src="https://api.dicebear.com/7.x/bottts/svg?seed=PlayerC" class="player-avatar" id="img-C">
@@ -263,7 +266,6 @@
                 </div>
             </div>
 
-            <!-- Player D (Left) -->
             <div class="player-slot slot-left" id="slot-D">
                 <div class="player-badge" id="badge-D">
                     <img src="https://api.dicebear.com/7.x/bottts/svg?seed=PlayerD" class="player-avatar" id="img-D">
@@ -276,7 +278,6 @@
                 </div>
             </div>
 
-            <!-- Player B (Right) -->
             <div class="player-slot slot-right" id="slot-B">
                 <div class="player-badge" id="badge-B">
                     <img src="https://api.dicebear.com/7.x/bottts/svg?seed=PlayerB" class="player-avatar" id="img-B">
@@ -291,7 +292,6 @@
 
             <div class="center-area" id="center-area"></div>
 
-            <!-- Player A (Bottom - Me) -->
             <div class="player-slot slot-bottom" id="slot-A">
                 <div class="bottom-hand-wrapper">
                     <div class="player-badge active-turn" id="badge-A" style="margin-bottom: 2px;">
@@ -311,7 +311,6 @@
                 </div>
             </div>
 
-            <!-- TRUMP SELECTION PANEL -->
             <div class="trump-panel" id="trump-panel">
                 <h3 id="trump-panel-title">Select Trump (ରଙ୍ଗ) - First 9 Cards</h3>
                 <div style="display:flex; flex-wrap:wrap; gap:6px; justify-content:center;">
@@ -332,7 +331,6 @@
         </div>
     </div>
 
-    <!-- Quick Messaging -->
     <button class="quick-msg-btn" onclick="toggleChatMenu()">💬</button>
     <div class="chat-popover" id="chat-popover">
         <div class="chat-opt" onclick="sendQuickMsg('ପକା ଶୀଘ୍ର')">ପକା ଶୀଘ୍ର</div>
@@ -341,7 +339,6 @@
         <div class="chat-opt" onclick="sendQuickMsg('ରଙ୍ଗ କର')">ରଙ୍ଗ କର</div>
     </div>
 
-    <!-- Stickers -->
     <div class="sticker-popover" id="sticker-popover">
         <div class="sticker-opt" onclick="sendSticker('🤡')">🤡</div>
         <div class="sticker-opt" onclick="sendSticker('👻')">👻</div>
@@ -351,7 +348,6 @@
         <div class="sticker-opt" onclick="sendSticker('🐔')">🐔</div>
     </div>
 
-    <!-- Rules Modal -->
     <div class="modal" id="rules-modal">
         <div class="modal-body">
             <h3>Dasha Gandia Rules</h3>
@@ -372,7 +368,7 @@
         let selectedTeam = 'A';
         let peer, connections = {}, currentRoomId = "";
         let isHost = false;
-        let mySlot = 'A'; // Host is 'A', clients get assigned 'B', 'C', 'D'
+        let mySlot = 'A';
         let playersState = {
             A: { name: 'Player A', img: '', joined: false },
             B: { name: 'Waiting...', img: '', joined: false },
@@ -431,12 +427,11 @@
             peer = new Peer();
             peer.on('open', id => {
                 currentRoomId = id;
-                document.getElementById('peer-status').innerText = "Room ID: " + id;
+                document.getElementById('peer-status').innerText = "Your Host Room ID: " + id;
                 document.getElementById('top-room-id').innerText = id;
                 checkUrlRoomId();
             });
 
-            // Host receives connections from 3 clients
             peer.on('connection', conn => {
                 setupHostConnection(conn);
             });
@@ -461,7 +456,6 @@
             }
         }
 
-        // HOST MULTIPLAYER LOGIC
         function setupHostConnection(conn) {
             const availableSlots = ['B', 'C', 'D'].filter(slot => !playersState[slot].joined);
             if (availableSlots.length === 0) {
@@ -473,7 +467,6 @@
             connections[assignedSlot] = conn;
 
             conn.on('open', () => {
-                // Confirm assignment to client
                 conn.send({ type: 'INIT_SLOT', slot: assignedSlot, roomId: currentRoomId });
             });
 
@@ -488,10 +481,12 @@
             });
         }
 
-        // CLIENT CONNECT LOGIC
         function joinRoom() {
             const id = document.getElementById('join-id').value.trim();
-            if(!id) return;
+            if(!id) {
+                alert("Please enter a valid Room ID");
+                return;
+            }
 
             isHost = false;
             currentRoomId = id;
@@ -528,7 +523,6 @@
             updateUIFromState();
         }
 
-        // CENTRAL NETWORK DATA HANDLER
         function handleNetworkData(data, senderSlot) {
             if (data.type === 'INIT_SLOT') {
                 mySlot = data.slot;
