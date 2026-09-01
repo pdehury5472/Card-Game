@@ -28,7 +28,7 @@
             user-select: none; 
         }
 
-        /* LOBBY SCREEN (PORTRAIT BY DEFAULT) */
+        /* PORTRAIT LOBBY SCREEN */
         #lobby-screen { 
             display: flex; 
             flex-direction: column; 
@@ -52,7 +52,7 @@
         .action-btn:disabled { background: #cccccc !important; cursor: not-allowed; color: #666666; }
         .skip-btn { padding: 10px; background: #757575; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.95rem; }
 
-        /* GAME SCREEN (FORCE LANDSCAPE FOR PORTRAIT MOBILES) */
+        /* LANDSCAPE GAME SCREEN */
         #game-screen { 
             display: none; 
             height: 100vh;
@@ -65,11 +65,8 @@
             padding-right: env(safe-area-inset-right);
         }
         
-        #game-screen.active { 
-            display: flex; 
-        }
+        #game-screen.active { display: flex; }
 
-        /* ROTATE GAME SCREEN TO LANDSCAPE WHEN DEVICE IS IN PORTRAIT */
         @media screen and (orientation: portrait) {
             #game-screen.active {
                 transform: rotate(-90deg);
@@ -88,7 +85,7 @@
             flex-shrink: 0;
         }
         .top-bar-info { display: flex; gap: 6px; align-items: center; background: #e8f5e9; padding: 2px 8px; border-radius: 20px; flex-wrap: wrap; }
-        .room-code-badge { background: #2196f3; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; letter-spacing: 0.5px; }
+        .room-code-badge { background: #2196f3; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.85rem; letter-spacing: 1px; font-weight: bold; }
         .share-btn { background: #0288d1; color: white; border: none; padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; cursor: pointer; font-weight: bold; }
         
         .top-bar-actions { display: flex; align-items: center; gap: 6px; }
@@ -224,8 +221,8 @@
             <hr style="margin: 5px 0;">
             <button class="action-btn" onclick="createRoom()">Create Room (Host)</button>
             <div class="input-group" style="margin-top: 5px;">
-                <label>Join Room Code</label>
-                <input type="text" id="join-id" placeholder="Paste Room ID">
+                <label>Enter 4-Digit Room Code</label>
+                <input type="number" id="join-id" placeholder="e.g. 4829" maxlength="4" oninput="if(this.value.length > 4) this.value = this.value.slice(0, 4)">
                 <button class="action-btn" style="background:#0288d1; margin-top:5px;" onclick="joinRoom()">Join Room</button>
             </div>
             <p id="peer-status" style="font-size:0.8rem; color:#666; text-align:center; margin-top:5px;"></p>
@@ -236,7 +233,7 @@
         <div class="game-top-bar">
             <span>ଦଶ ଗଣ୍ଡିଆ</span>
             <div class="top-bar-info">
-                <span class="room-code-badge">ID: <b id="top-room-id">-----</b></span>
+                <span class="room-code-badge">CODE: <b id="top-room-id">----</b></span>
                 <span>ଗଣ୍ଡା: <b id="ganda-count">1/13</b></span>
                 <span>Score - A: <b id="score-A">0</b> | B: <b id="score-B">0</b></span>
                 <span>Targets - A: <b id="target-A">0</b> | B: <b id="target-B">0</b></span>
@@ -254,53 +251,53 @@
             <div class="pause-overlay" id="pause-overlay">⏸️ Game Paused</div>
             <div class="shuffle-deck" id="shuffle-deck"></div>
 
-            <div class="player-slot slot-top" id="slot-C">
-                <div class="player-badge" id="badge-C">
-                    <img src="https://api.dicebear.com/7.x/bottts/svg?seed=PlayerC" class="player-avatar" id="img-C">
+            <div class="player-slot slot-top" id="slot-top">
+                <div class="player-badge" id="badge-top">
+                    <img src="https://api.dicebear.com/7.x/bottts/svg?seed=PlayerC" class="player-avatar" id="img-top">
                     <div class="player-meta">
-                        <span id="name-C">Waiting... (C)</span>
-                        <span class="player-status" id="status-C">Waiting...</span>
+                        <span id="name-top">Waiting...</span>
+                        <span class="player-status" id="status-top">Waiting...</span>
                     </div>
-                    <button class="mic-btn" id="mic-C" onclick="toggleMic('C')">🎙️</button>
-                    <button class="sticker-btn" onclick="openStickerMenu(event, 'C')">😜</button>
+                    <button class="mic-btn" id="mic-top" onclick="toggleMicByPosition('top')">🎙️</button>
+                    <button class="sticker-btn" onclick="openStickerMenuByPos(event, 'top')">😜</button>
                 </div>
             </div>
 
-            <div class="player-slot slot-left" id="slot-D">
-                <div class="player-badge" id="badge-D">
-                    <img src="https://api.dicebear.com/7.x/bottts/svg?seed=PlayerD" class="player-avatar" id="img-D">
+            <div class="player-slot slot-left" id="slot-left">
+                <div class="player-badge" id="badge-left">
+                    <img src="https://api.dicebear.com/7.x/bottts/svg?seed=PlayerD" class="player-avatar" id="img-left">
                     <div class="player-meta">
-                        <span id="name-D">Waiting... (D)</span>
-                        <span class="player-status" id="status-D">Waiting...</span>
+                        <span id="name-left">Waiting...</span>
+                        <span class="player-status" id="status-left">Waiting...</span>
                     </div>
-                    <button class="mic-btn" id="mic-D" onclick="toggleMic('D')">🎙️</button>
-                    <button class="sticker-btn" onclick="openStickerMenu(event, 'D')">😜</button>
+                    <button class="mic-btn" id="mic-left" onclick="toggleMicByPosition('left')">🎙️</button>
+                    <button class="sticker-btn" onclick="openStickerMenuByPos(event, 'left')">😜</button>
                 </div>
             </div>
 
-            <div class="player-slot slot-right" id="slot-B">
-                <div class="player-badge" id="badge-B">
-                    <img src="https://api.dicebear.com/7.x/bottts/svg?seed=PlayerB" class="player-avatar" id="img-B">
+            <div class="player-slot slot-right" id="slot-right">
+                <div class="player-badge" id="badge-right">
+                    <img src="https://api.dicebear.com/7.x/bottts/svg?seed=PlayerB" class="player-avatar" id="img-right">
                     <div class="player-meta">
-                        <span id="name-B">Waiting... (B)</span>
-                        <span class="player-status" id="status-B">Waiting...</span>
+                        <span id="name-right">Waiting...</span>
+                        <span class="player-status" id="status-right">Waiting...</span>
                     </div>
-                    <button class="mic-btn" id="mic-B" onclick="toggleMic('B')">🎙️</button>
-                    <button class="sticker-btn" onclick="openStickerMenu(event, 'B')">😜</button>
+                    <button class="mic-btn" id="mic-right" onclick="toggleMicByPosition('right')">🎙️</button>
+                    <button class="sticker-btn" onclick="openStickerMenuByPos(event, 'right')">😜</button>
                 </div>
             </div>
 
             <div class="center-area" id="center-area"></div>
 
-            <div class="player-slot slot-bottom" id="slot-A">
+            <div class="player-slot slot-bottom" id="slot-bottom">
                 <div class="bottom-hand-wrapper">
-                    <div class="player-badge active-turn" id="badge-A" style="margin-bottom: 2px;">
-                        <img src="https://api.dicebear.com/7.x/bottts/svg?seed=PlayerA" class="player-avatar" id="img-A">
+                    <div class="player-badge active-turn" id="badge-bottom" style="margin-bottom: 2px;">
+                        <img src="https://api.dicebear.com/7.x/bottts/svg?seed=PlayerA" class="player-avatar" id="img-bottom">
                         <div class="player-meta">
-                            <span id="name-A">You (A)</span>
-                            <span class="player-status" id="status-A">Lobby Leader</span>
+                            <span id="name-bottom">You</span>
+                            <span class="player-status" id="status-bottom">Connected</span>
                         </div>
-                        <button class="mic-btn" id="mic-A" onclick="toggleMic('A')">🎙️</button>
+                        <button class="mic-btn" id="mic-bottom" onclick="toggleMicByPosition('bottom')">🎙️</button>
                     </div>
                     <div class="suits-container" id="my-hand">
                         <div class="suit-group" id="group-C"></div>
@@ -366,9 +363,18 @@
         const RANK_POWER = { '2': 14, 'A': 13, 'K': 12, 'Q': 11, 'J': 10, '10': 9, '9': 8, '8': 7, '7': 6, '5': 4, '4': 3, '3': 2 };
 
         let selectedTeam = 'A';
-        let peer, connections = {}, currentRoomId = "";
+        let peer = null, connections = {}, currentRoomId = "";
         let isHost = false;
-        let mySlot = 'A';
+        let mySlot = 'A'; // Absolute slots: A, B, C, D
+
+        // SEAT MAPPING TO ENSURE FACE-TO-FACE PERSPECTIVE
+        const SEAT_MAPS = {
+            'A': { bottom: 'A', left: 'D', top: 'C', right: 'B' },
+            'B': { bottom: 'B', left: 'A', top: 'D', right: 'C' },
+            'C': { bottom: 'C', left: 'B', top: 'A', right: 'D' },
+            'D': { bottom: 'D', left: 'C', top: 'B', right: 'A' }
+        };
+
         let playersState = {
             A: { name: 'Player A', img: '', joined: false },
             B: { name: 'Waiting...', img: '', joined: false },
@@ -379,14 +385,18 @@
         let fullDealtHand = [];
         let myHand = [];
         let playerBids = { A: 0, B: 0, C: 0, D: 0 };
-        let activeTargetSlot = null;
-        let micStates = { A: false, B: false, C: false, D: false };
+        let activeTargetPosition = null;
+        let micStates = { bottom: false, left: false, top: false, right: false };
         
         let currentGandaRound = 1;
         let isFirstMoveOfGanda = true;
         let isPaused = false;
         const PLAYERS_ORDER = ['A', 'B', 'C', 'D'];
         let currentTrumpMakerIndex = 0;
+
+        function generate4DigitCode() {
+            return Math.floor(1000 + Math.random() * 9000).toString();
+        }
 
         function handleImageUpload(e) {
             const file = e.target.files[0];
@@ -423,21 +433,6 @@
             document.getElementById('btn-teamB').classList.toggle('active', team === 'B');
         }
 
-        function initPeer() {
-            peer = new Peer();
-            peer.on('open', id => {
-                currentRoomId = id;
-                document.getElementById('peer-status').innerText = "Your Host Room ID: " + id;
-                document.getElementById('top-room-id').innerText = id;
-                checkUrlRoomId();
-            });
-
-            peer.on('connection', conn => {
-                setupHostConnection(conn);
-            });
-        }
-        initPeer();
-
         function checkUrlRoomId() {
             const urlParams = new URLSearchParams(window.location.search);
             const roomIdParam = urlParams.get('room');
@@ -445,6 +440,7 @@
                 document.getElementById('join-id').value = roomIdParam;
             }
         }
+        checkUrlRoomId();
 
         function shareRoomLink() {
             const shareUrl = `${window.location.origin}${window.location.pathname}?room=${currentRoomId}`;
@@ -452,8 +448,84 @@
                 navigator.share({ title: 'Join Dasha Gandia Game', url: shareUrl });
             } else if (navigator.clipboard) {
                 navigator.clipboard.writeText(shareUrl);
-                showBubble('badge-A', '📋 Room Link Copied!');
+                showBubble('badge-bottom', '📋 Room Code Link Copied!');
             }
+        }
+
+        // CREATE 4-DIGIT HOST ROOM
+        function createRoom() { 
+            isHost = true;
+            mySlot = 'A';
+            currentRoomId = generate4DigitCode();
+            
+            document.getElementById('peer-status').innerText = "Connecting Host with Code: " + currentRoomId + "...";
+
+            peer = new Peer('dashagandia-' + currentRoomId);
+
+            peer.on('open', id => {
+                document.getElementById('peer-status').innerText = "Room Created! 4-Digit Code: " + currentRoomId;
+                document.getElementById('top-room-id').innerText = currentRoomId;
+
+                playersState.A = {
+                    name: document.getElementById('p-name').value || 'Host (A)',
+                    img: document.getElementById('p-img').value,
+                    joined: true
+                };
+
+                requestLandscapeAndFullScreen(); 
+                switchToTable();
+                updateUIFromState();
+            });
+
+            peer.on('error', err => {
+                if(err.type === 'unavailable-id') {
+                    // Try another code if collision occurs
+                    createRoom();
+                } else {
+                    alert("Error creating room: " + err);
+                }
+            });
+
+            peer.on('connection', conn => {
+                setupHostConnection(conn);
+            });
+        }
+
+        // JOIN 4-DIGIT ROOM
+        function joinRoom() {
+            const code = document.getElementById('join-id').value.trim();
+            if(!code || code.length !== 4) {
+                alert("Please enter a valid 4-digit Room Code");
+                return;
+            }
+
+            isHost = false;
+            currentRoomId = code;
+            document.getElementById('top-room-id').innerText = currentRoomId;
+
+            peer = new Peer();
+
+            peer.on('open', () => {
+                const hostConn = peer.connect('dashagandia-' + currentRoomId);
+                connections['HOST'] = hostConn;
+
+                hostConn.on('open', () => {
+                    const name = document.getElementById('p-name').value || 'Guest Player';
+                    const img = document.getElementById('p-img').value;
+                    hostConn.send({ type: 'JOIN_REQUEST', name: name, img: img });
+                });
+
+                hostConn.on('data', data => {
+                    handleNetworkData(data, 'HOST');
+                });
+
+                hostConn.on('error', () => {
+                    alert("Could not connect to room code " + currentRoomId);
+                });
+
+                requestLandscapeAndFullScreen();
+                switchToTable();
+            });
         }
 
         function setupHostConnection(conn) {
@@ -481,52 +553,10 @@
             });
         }
 
-        function joinRoom() {
-            const id = document.getElementById('join-id').value.trim();
-            if(!id) {
-                alert("Please enter a valid Room ID");
-                return;
-            }
-
-            isHost = false;
-            currentRoomId = id;
-            document.getElementById('top-room-id').innerText = id;
-
-            const hostConn = peer.connect(id);
-            connections['HOST'] = hostConn;
-
-            hostConn.on('open', () => {
-                const name = document.getElementById('p-name').value || 'Guest Player';
-                const img = document.getElementById('p-img').value;
-                hostConn.send({ type: 'JOIN_REQUEST', name: name, img: img });
-            });
-
-            hostConn.on('data', data => {
-                handleNetworkData(data, 'HOST');
-            });
-
-            requestLandscapeAndFullScreen();
-            switchToTable();
-        }
-
-        function createRoom() { 
-            isHost = true;
-            mySlot = 'A';
-            playersState.A = {
-                name: document.getElementById('p-name').value || 'Host (A)',
-                img: document.getElementById('p-img').value,
-                joined: true
-            };
-            
-            requestLandscapeAndFullScreen(); 
-            switchToTable();
-            updateUIFromState();
-        }
-
         function handleNetworkData(data, senderSlot) {
             if (data.type === 'INIT_SLOT') {
                 mySlot = data.slot;
-                showBubble('badge-A', `Connected! You are Player ${mySlot}`);
+                showBubble('badge-bottom', `Connected! You are seated as Player ${mySlot}`);
             }
             else if (data.type === 'JOIN_REQUEST' && isHost) {
                 playersState[senderSlot] = {
@@ -540,6 +570,10 @@
                 playersState = data.playersState;
                 updateUIFromState();
             }
+            else if (data.type === 'START_GAME_SHUFFLE') {
+                // Synchronized Game Start received by clients
+                runSynchronizedStartSequence();
+            }
         }
 
         function broadcastGameState() {
@@ -552,21 +586,29 @@
             });
         }
 
+        // RENDER UI BASED ON CURRENT PLAYER'S FACE-TO-FACE PERSPECTIVE
         function updateUIFromState() {
-            const slots = ['A', 'B', 'C', 'D'];
+            const seats = SEAT_MAPS[mySlot]; 
+            const positions = ['bottom', 'left', 'top', 'right'];
             let joinedCount = 0;
 
-            slots.forEach(s => {
-                if (playersState[s] && playersState[s].joined) {
-                    joinedCount++;
-                    document.getElementById(`name-${s}`).innerText = `${playersState[s].name} (${s})`;
-                    document.getElementById(`status-${s}`).innerText = "Joined";
-                    if (playersState[s].img) {
-                        document.getElementById(`img-${s}`).src = playersState[s].img;
+            ['A', 'B', 'C', 'D'].forEach(s => {
+                if (playersState[s] && playersState[s].joined) joinedCount++;
+            });
+
+            positions.forEach(pos => {
+                const absSlot = seats[pos];
+                const player = playersState[absSlot];
+
+                if (player && player.joined) {
+                    document.getElementById(`name-${pos}`).innerText = `${player.name} (${absSlot})`;
+                    document.getElementById(`status-${pos}`).innerText = "Connected";
+                    if (player.img) {
+                        document.getElementById(`img-${pos}`).src = player.img;
                     }
                 } else {
-                    document.getElementById(`name-${s}`).innerText = `Waiting... (${s})`;
-                    document.getElementById(`status-${s}`).innerText = "Waiting...";
+                    document.getElementById(`name-${pos}`).innerText = `Waiting... (${absSlot})`;
+                    document.getElementById(`status-${pos}`).innerText = "Waiting...";
                 }
             });
 
@@ -604,21 +646,39 @@
             }
         }
 
+        // HOST TRIGGERS SYNCHRONIZED START FOR EVERYONE
         function startGameProcess() {
+            if (!isHost) return;
+
+            // Broadcast trigger to all connected devices
+            Object.keys(connections).forEach(slot => {
+                if (connections[slot] && connections[slot].open) {
+                    connections[slot].send({ type: 'START_GAME_SHUFFLE' });
+                }
+            });
+
+            runSynchronizedStartSequence();
+        }
+
+        function runSynchronizedStartSequence() {
             document.getElementById('start-game-btn').style.display = 'none';
             updateTrumpMakerHighlight();
-            triggerShuffleAnimation('slot-A', () => {
+            triggerShuffleAnimation('slot-bottom', () => {
                 dealInitialNineCards();
             });
         }
 
         function updateTrumpMakerHighlight() {
-            PLAYERS_ORDER.forEach(p => {
-                document.getElementById(`badge-${p}`).classList.remove('trump-maker');
-            });
+            const seats = SEAT_MAPS[mySlot];
             const makerSlot = PLAYERS_ORDER[currentTrumpMakerIndex];
-            document.getElementById(`badge-${makerSlot}`).classList.add('trump-maker');
-            showBubble(`badge-${makerSlot}`, `🎺 ${makerSlot} is Trump Maker`);
+
+            ['bottom', 'left', 'top', 'right'].forEach(pos => {
+                document.getElementById(`badge-${pos}`).classList.remove('trump-maker');
+                if (seats[pos] === makerSlot) {
+                    document.getElementById(`badge-${pos}`).classList.add('trump-maker');
+                    showBubble(`badge-${pos}`, `🎺 ${makerSlot} is Trump Maker`);
+                }
+            });
         }
 
         function triggerShuffleAnimation(shufflerSlotId, callback) {
@@ -632,12 +692,12 @@
             deckEl.style.display = 'block';
             deckEl.classList.add('shuffling');
 
-            document.getElementById('status-A').innerText = 'Shuffling...';
+            document.getElementById('status-bottom').innerText = 'Shuffling...';
 
             setTimeout(() => {
                 deckEl.classList.remove('shuffling');
                 deckEl.style.display = 'none';
-                document.getElementById('status-A').innerText = 'Your Turn';
+                document.getElementById('status-bottom').innerText = 'Your Turn';
                 if(callback) callback();
             }, 2000);
         }
@@ -661,7 +721,7 @@
             if (PLAYERS_ORDER[currentTrumpMakerIndex] === mySlot) {
                 document.getElementById('trump-panel').style.display = 'flex';
             } else {
-                showBubble(`badge-${PLAYERS_ORDER[currentTrumpMakerIndex]}`, 'Selecting Trump...');
+                showBubble(`badge-top`, 'Selecting Trump...');
             }
         }
 
@@ -677,10 +737,10 @@
 
             if ((card12.suit === 'H' && card12.rank === '2') || (card12.suit === 'S' && card12.rank === '2')) {
                 chosenTrump = "ବେରଙ୍ଗ";
-                showBubble('badge-A', `12th card is ${SUITS_SYMBOL[card12.suit]}2 ➡️ ବେରଙ୍ଗ!`);
+                showBubble('badge-bottom', `12th card is ${SUITS_SYMBOL[card12.suit]}2 ➡️ ବେରଙ୍ଗ!`);
             } else {
                 chosenTrump = SUITS_FULL[card12.suit];
-                showBubble('badge-A', `12th card (${card12.rank}${SUITS_SYMBOL[card12.suit]}) sets ରଙ୍ଗ: ${chosenTrump}`);
+                showBubble('badge-bottom', `12th card (${card12.rank}${SUITS_SYMBOL[card12.suit]}) sets ରଙ୍ଗ: ${chosenTrump}`);
             }
 
             setTrump(chosenTrump);
@@ -731,15 +791,15 @@
                     } else {
                         cardEl.onclick = () => {
                             if (isPaused) {
-                                showBubble('badge-A', '⏸️ Game is paused!');
+                                showBubble('badge-bottom', '⏸️ Game is paused!');
                                 return;
                             }
                             const isH2orS2 = (card.suit === 'H' && card.rank === '2') || (card.suit === 'S' && card.rank === '2');
                             if (isH2orS2) {
                                 if (currentGandaRound === 1 || currentGandaRound === 13) {
-                                    showBubble('badge-A', '❌ H2 & S2 blocked in 1st/13th ଗଣ୍ଡା!');
+                                    showBubble('badge-bottom', '❌ H2 & S2 blocked in 1st/13th ଗଣ୍ଡା!');
                                 } else if (isFirstMoveOfGanda) {
-                                    showBubble('badge-A', '❌ Cannot drop H2/S2 as first card!');
+                                    showBubble('badge-bottom', '❌ Cannot drop H2/S2 as first card!');
                                 }
                             }
                         };
@@ -771,7 +831,7 @@
             renderHand();
         }
 
-        function renderCenterTable(player, card) {
+        function renderCenterTable(playerSlot, card) {
             const center = document.getElementById('center-area');
             
             const wrapper = document.createElement('div');
@@ -782,7 +842,7 @@
             const pLabel = document.createElement('span');
             pLabel.style.fontSize = '0.65rem';
             pLabel.style.fontWeight = 'bold';
-            pLabel.innerText = player;
+            pLabel.innerText = playerSlot;
 
             const cardEl = createCardDOM(card, true);
             cardEl.style.margin = '0';
@@ -792,15 +852,15 @@
             center.appendChild(wrapper);
         }
 
-        function toggleMic(playerSlot) {
-            micStates[playerSlot] = !micStates[playerSlot];
-            const micBtn = document.getElementById(`mic-${playerSlot}`);
-            if (micStates[playerSlot]) {
+        function toggleMicByPosition(pos) {
+            micStates[pos] = !micStates[pos];
+            const micBtn = document.getElementById(`mic-${pos}`);
+            if (micStates[pos]) {
                 micBtn.classList.add('active');
-                showBubble(`badge-${playerSlot}`, 'Mute Mic');
+                showBubble(`badge-${pos}`, 'Mute Mic');
             } else {
                 micBtn.classList.remove('active');
-                showBubble(`badge-${playerSlot}`, 'Unmute Mic');
+                showBubble(`badge-${pos}`, 'Unmute Mic');
             }
         }
 
@@ -810,13 +870,13 @@
         }
 
         function sendQuickMsg(txt) {
-            showBubble('badge-A', txt);
+            showBubble('badge-bottom', txt);
             toggleChatMenu();
         }
 
-        function openStickerMenu(e, slot) {
+        function openStickerMenuByPos(e, pos) {
             e.stopPropagation();
-            activeTargetSlot = slot;
+            activeTargetPosition = pos;
             const pop = document.getElementById('sticker-popover');
             pop.style.top = e.clientY + 'px';
             pop.style.left = e.clientX + 'px';
@@ -824,7 +884,7 @@
         }
 
         function sendSticker(emoji) {
-            if(activeTargetSlot) showBubble(`badge-${activeTargetSlot}`, emoji);
+            if(activeTargetPosition) showBubble(`badge-${activeTargetPosition}`, emoji);
             document.getElementById('sticker-popover').style.display = 'none';
         }
 
