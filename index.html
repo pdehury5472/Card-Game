@@ -19,6 +19,19 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; touch-action: manipulation; }
         body { background-color: var(--bg-light); height: 100vh; overflow: hidden; -webkit-user-select: none; user-select: none; }
 
+        /* ENFORCE LANDSCAPE VIEW ON PORTRAIT DEVICES */
+        @media screen and (orientation: portrait) {
+            #game-screen {
+                transform: rotate(-90deg);
+                transform-origin: left top;
+                width: 100vh;
+                height: 100vw;
+                position: absolute;
+                top: 100%;
+                left: 0;
+            }
+        }
+
         /* LOBBY SCREEN */
         #lobby-screen { display: flex; flex-direction: column; height: 100vh; background: #ffffff; }
         .top-bar-lobby { background: var(--primary); color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; }
@@ -42,6 +55,7 @@
             display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem; font-weight: bold;
         }
         .top-bar-info { display: flex; gap: 8px; align-items: center; background: #e8f5e9; padding: 4px 8px; border-radius: 20px; flex-wrap: wrap; }
+        .room-code-badge { background: #2196f3; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; letter-spacing: 0.5px; }
         .share-btn { background: #0288d1; color: white; border: none; padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; cursor: pointer; font-weight: bold; }
         
         /* TOP BAR CONTROLS */
@@ -198,6 +212,7 @@
         <div class="game-top-bar">
             <span>ଦଶ ଗଣ୍ଡିଆ</span>
             <div class="top-bar-info">
+                <span class="room-code-badge">ID: <b id="top-room-id">-----</b></span>
                 <span>ଗଣ୍ଡା: <b id="ganda-count">1/13</b></span>
                 <span>Score - A: <b id="score-A">0</b> | B: <b id="score-B">0</b></span>
                 <span>Targets - A: <b id="target-A">0</b> | B: <b id="target-B">0</b></span>
@@ -291,7 +306,7 @@
             </div>
 
             <div class="bidding-panel" id="bidding-panel">
-                <h3>Enter Your Bid (ଗଣ୍ដା)</h3>
+                <h3>Enter Your Bid (ଗଣ୍ଡା)</h3>
                 <input type="number" id="bid-input" min="0" max="13" value="0" style="padding:8px; width:80px; margin:auto;">
                 <button class="action-btn" onclick="submitBid()">Submit Bid</button>
             </div>
@@ -347,12 +362,10 @@
         let isFirstMoveOfGanda = true;
         let isPaused = false;
         
-        // Joined players management
-        let joinedPlayersCount = 1; // Room creator (A) starts as 1
+        let joinedPlayersCount = 1;
         const PLAYERS_ORDER = ['A', 'B', 'C', 'D'];
-        let currentTrumpMakerIndex = 0; // Starts with A
+        let currentTrumpMakerIndex = 0;
 
-        /* FILE UPLOAD TO BASE64 HANDLER */
         function handleImageUpload(e) {
             const file = e.target.files[0];
             if (file) {
@@ -364,7 +377,6 @@
             }
         }
 
-        /* MOBILE FULLSCREEN & SWIPE BACK PROTECTION */
         let backSwipeCount = 0, swipeTimer = null;
         history.pushState(null, null, location.href);
         window.onpopstate = function () {
@@ -381,14 +393,19 @@
         function exitGame() {
             if (confirm("Are you sure you want to exit to lobby?")) {
                 if (document.exitFullscreen) { document.exitFullscreen().catch(()=>{}); }
+                if (screen.orientation && screen.orientation.unlock) { screen.orientation.unlock(); }
                 location.reload();
             }
         }
 
-        function requestFullScreen() {
+        function requestLandscapeAndFullScreen() {
             let elem = document.documentElement;
             if (elem.requestFullscreen) { elem.requestFullscreen(); }
             else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); }
+
+            if (screen.orientation && screen.orientation.lock) {
+                screen.orientation.lock('landscape').catch(() => {});
+            }
         }
 
         function selectTeam(team) {
@@ -402,6 +419,7 @@
             peer.on('open', id => {
                 currentRoomId = id;
                 document.getElementById('peer-status').innerText = "Room ID: " + id;
+                document.getElementById('top-room-id').innerText = id;
                 checkUrlRoomId();
             });
             peer.on('connection', conn => setupConn(conn));
@@ -430,7 +448,6 @@
             connections[conn.peer] = conn;
             conn.on('data', data => handleNetworkData(data));
             
-            // Player Joined Simulation Logic
             joinedPlayersCount++;
             updateJoinedPlayerSlots();
         }
@@ -460,11 +477,9 @@
         }
 
         function createRoom() { 
-            requestFullScreen(); 
+            requestLandscapeAndFullScreen(); 
             switchToTable();
-            // Simulate/Allow testing option to fill room if playing solo/testing
             setTimeout(() => {
-                // Auto fill slot status for demonstration if alone
                 if(joinedPlayersCount < 4) {
                     showBubble('badge-A', 'Waiting for players to join link...');
                 }
@@ -475,7 +490,8 @@
             const id = document.getElementById('join-id').value;
             if(id) { 
                 peer.connect(id); 
-                requestFullScreen(); 
+                document.getElementById('top-room-id').innerText = id;
+                requestLandscapeAndFullScreen(); 
                 switchToTable(); 
             }
         }
@@ -508,10 +524,7 @@
 
         function startGameProcess() {
             document.getElementById('start-game-btn').style.display = 'none';
-            
-            // Set initial trump maker highlight
             updateTrumpMakerHighlight();
-
             triggerShuffleAnimation('slot-A', () => {
                 dealInitialNineCards();
             });
@@ -563,12 +576,10 @@
             myHand = fullDealtHand.slice(0, 9);
             renderHand();
 
-            // Check if current player (A) is the Trump Maker
             if (PLAYERS_ORDER[currentTrumpMakerIndex] === 'A') {
                 document.getElementById('trump-panel').style.display = 'flex';
             } else {
                 showBubble(`badge-${PLAYERS_ORDER[currentTrumpMakerIndex]}`, 'Selecting Trump...');
-                // Simulated auto trump selection for other players in rotation
                 setTimeout(() => {
                     setTrump('♥️ Hearts');
                 }, 2500);
@@ -577,10 +588,7 @@
 
         function setTrump(trumpStr) {
             document.getElementById('trump-val').innerText = trumpStr;
-            
-            // Increment Trump Maker for next round (Rotates A -> B -> C -> D)
             currentTrumpMakerIndex = (currentTrumpMakerIndex + 1) % 4;
-
             finalizeFullHandAndProceed();
         }
 
