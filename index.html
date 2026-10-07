@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="or">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Dasa Gandia" />
+  <title>Dasa Gandia — Odia Card Game (Web &amp; iOS Safari)</title>
+  <link rel="manifest" href="manifest.json" />
+  <style>
+    :root { --gold:#FFD700; --gold-dark:#D4AF37; --wood-dark:#1E100A; --wood-mid:#2C1810; --wood-border:#5D3A1A; }
+    * { box-sizing:border-box; margin:0; padding:0; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; -webkit-tap-highlight-color:transparent; }
+    html, body { width:100%; height:100%; height:100dvh; overflow:hidden; background:#072312; font-family:-apple-system,BlinkMacSystemFont,"Noto Sans Oriya","Segoe UI",Roboto,sans-serif; color:#FFF; overscroll-behavior:none; }
+    #app-root { position:relative; width:100vw; height:100vh; height:100dvh; padding:env(safe-area-inset-top,4px) env(safe-area-inset-right,8px) env(safe-area-inset-bottom,4px) env(safe-area-inset-left,8px); display:flex; flex-direction:column; justify-content:space-between; background:radial-gradient(circle at center,#165B33 0%,#09331B 74%,#04190C 100%); }
+    #lobby-screen { position:fixed; inset:0; z-index:90; background:radial-gradient(circle at center,#3A1F12 0%,#1B0D06 80%,#0D0502 100%); display:flex; flex-direction:column; align-items:center; justify-content:space-between; padding:calc(env(safe-area-inset-top,8px)+8px) 14px calc(env(safe-area-inset-bottom,8px)+8px) 14px; overflow-y:auto; }
+    #lobby-screen.hidden { display:none !important; }
+    .lobby-top-bar { width:100%; max-width:520px; display:flex; justify-content:space-between; align-items:center; }
+    .lobby-pill { background:var(--wood-mid); border:1.5px solid var(--wood-border); border-radius:20px; padding:6px 14px; font-size:12px; font-weight:800; color:#FFF4D2; letter-spacing:0.8px; box-shadow:0 3px 8px rgba(0,0,0,0.45); }
+    .lobby-card { width:100%; max-width:480px; background:rgba(44,24,16,0.95); border:2px solid rgba(212,175,55,0.78); border-radius:18px; padding:16px; box-shadow:0 10px 28px rgba(0,0,0,0.65); display:flex; flex-direction:column; gap:12px; }
+    .host-only-notice { background:rgba(255,193,7,0.14); border:1px solid #FFB300; border-radius:10px; padding:7px 10px; font-size:11px; color:#FFE082; text-align:center; font-weight:700; }
+    .input-row { display:flex; gap:8px; align-items:center; }
+    .room-code-input { flex:1; height:52px; background:#160A05; border:1.5px solid var(--gold-dark); border-radius:12px; color:#FFF; font-size:24px; font-weight:900; text-align:center; letter-spacing:8px; outline:none; -webkit-user-select:text; user-select:text; }
+    .name-input { width:100%; height:40px; background:#160A05; border:1px solid var(--wood-border); border-radius:10px; color:#FFF; font-size:14px; font-weight:700; padding:0 12px; outline:none; -webkit-user-select:text; user-select:text; }
+    .gold-btn { background:linear-gradient(180deg,#FFE066 0%,#D4AF37 100%); color:#111; border:none; border-radius:12px; height:48px; padding:0 18px; font-size:14px; font-weight:900; letter-spacing:0.8px; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.45); }
+    .team-box { border-radius:12px; padding:8px 10px; display:flex; flex-direction:column; gap:6px; }
+    .team-a-box { background:rgba(13,33,58,0.85); border:1.5px solid #1E88E5; }
+    .team-b-box { background:rgba(45,16,20,0.85); border:1.5px solid #E53935; }
+    .team-header { display:flex; justify-content:space-between; font-size:12px; font-weight:900; }
+    .slot-row { display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.16); border-radius:8px; padding:6px 10px; font-size:12px; }
+    .slot-dot { width:9px; height:9px; border-radius:50%; display:inline-block; }
+    .top-bar { display:flex; justify-content:space-between; align-items:center; background:rgba(15,10,8,0.9); border:1px solid rgba(212,175,55,0.6); border-radius:10px; padding:3px 8px; height:36px; z-index:30; gap:5px; }
+    .hud-group { display:flex; align-items:center; gap:5px; overflow:hidden; }
+    .badge { background:rgba(212,175,55,0.18); border:1px solid #D4AF37; color:#FFD700; padding:2px 6px; border-radius:6px; font-size:10px; font-weight:800; white-space:nowrap; }
+    .badge-score { background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.35); color:#FFF; }
+    .conn-pill { display:inline-flex; align-items:center; gap:4px; padding:2px 7px; border-radius:999px; font-size:9.5px; font-weight:800; cursor:pointer; border:1px solid #00E676; background:rgba(0,230,118,0.14); color:#B9F6CA; white-space:nowrap; }
+    .conn-pill.connecting { border-color:#FFD740; color:#FFE57F; background:rgba(255,215,64,0.15); }
+    .conn-pill.disconnected { border-color:#FF5252; color:#FF8A80; background:rgba(255,82,82,0.16); }
+    .icon-btn { background:#2C1810; color:#FFD700; border:1px solid #D4AF37; border-radius:6px; padding:2px 6px; font-size:10px; font-weight:800; cursor:pointer; }
+    .felt-table { position:relative; flex:1; width:100%; margin:3px 0; border-radius:18px; border:2px solid rgba(212,175,55,0.5); background:radial-gradient(ellipse at center,rgba(24,98,54,0.94) 0%,rgba(8,42,22,0.97) 100%); box-shadow:inset 0 0 28px rgba(0,0,0,0.7); overflow:hidden; }
+    .seat { position:absolute; background:rgba(20,14,10,0.9); border:1.5px solid rgba(212,175,55,0.6); border-radius:10px; padding:3px 8px; text-align:center; font-size:10px; min-width:92px; z-index:12; transition:box-shadow 0.2s,border-color 0.2s; }
+    .seat.active-turn, .self-seat-pill.active-turn { border-color:#00E676 !important; box-shadow:0 0 12px rgba(0,230,118,0.9); }
+    .seat-top { top:5px; left:50%; transform:translateX(-50%); }
+    .seat-left { left:5px; top:48%; transform:translateY(-50%); }
+    .seat-right { right:5px; top:48%; transform:translateY(-50%); }
+    .role-tags { display:inline-flex; gap:3px; margin-top:1px; }
+    .role-tag { font-size:8px; font-weight:900; padding:0 4px; border-radius:4px; background:rgba(255,215,0,0.22); color:#FFD700; border:0.5px solid #FFD700; }
+    .center-arena { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:56%; height:54%; border:1.5px dashed rgba(212,175,55,0.42); border-radius:14px; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:4px; }
+    #trick-cards-slot { position:relative; width:190px; height:102px; display:flex; justify-content:center; align-items:center; gap:6px; }
+    .trick-card { width:44px; height:64px; background:#FFF; border-radius:5px; border:1.5px solid #D4AF37; box-shadow:0 3px 8px rgba(0,0,0,0.6); display:flex; flex-direction:column; align-items:center; justify-content:space-between; padding:2px; font-weight:900; }
+    .trick-card.red { color:#C62828; }
+    .trick-card.black { color:#111; }
+    .trick-owner-tag { font-size:8px; background:#1E100A; color:#FFD700; padding:0 4px; border-radius:3px; }
+    #shuffle-delivery-layer { position:absolute; inset:0; pointer-events:none; z-index:22; }
+    .dealer-deck-badge { position:absolute; transform:translate(-50%,-50%); background:rgba(20,10,5,0.94); border:1.5px solid #FFD700; color:#FFD700; padding:3px 8px; border-radius:999px; font-size:9.5px; font-weight:900; white-space:nowrap; z-index:25; }
+    .flying-deck-card { position:absolute; width:28px; height:40px; border-radius:4px; background:linear-gradient(135deg,#8B0000 0%,#3E0000 100%); border:1.5px solid #FFD700; box-shadow:0 3px 8px rgba(0,0,0,0.65); transition:all 0.25s cubic-bezier(0.22,1,0.36,1); }
+    .playing-card { position:relative; width:58px; height:88px; background:#FFF; border-radius:6px; box-shadow:0 2px 6px rgba(0,0,0,0.55); color:#111; display:inline-flex; flex-direction:column; justify-content:space-between; align-items:center; padding:4px 3px; font-family:"Georgia",serif; cursor:pointer; touch-action:manipulation; transition:transform 0.16s,opacity 0.15s; }
+    .playing-card:hover { transform:translateY(-6px); }
+    .playing-card.red { color:#C62828; }
+    .playing-card.black { color:#111; }
+    .playing-card.joker { border:1.5px solid #FFD700; box-shadow:0 0 8px rgba(255,215,0,0.55); }
+    .playing-card.disabled { opacity:0.48; filter:grayscale(35%); }
+    .card-rank { font-size:14px; font-weight:900; align-self:flex-start; line-height:1; }
+    .card-suit { font-size:20px; line-height:1; }
+    .joker-badge { font-size:7.5px; font-weight:900; color:#E65100; white-space:nowrap; }
+    .seat-bottom-dock { display:flex; justify-content:space-between; align-items:center; padding:0 6px; z-index:20; }
+    .self-seat-pill { display:inline-flex; align-items:center; gap:7px; background:rgba(20,14,10,0.92); border:1.5px solid #D4AF37; border-radius:8px; padding:2px 9px; font-size:10.5px; }
+    .hand-container { width:100%; display:flex; justify-content:center; align-items:flex-end; height:96px; padding-bottom:2px; z-index:18; }
+    .hand-cards { display:flex; justify-content:center; align-items:flex-end; }
+    .hand-cards .playing-card:not(:first-child) { margin-left:-14px; }
+    .bidding-overlay { position:absolute; bottom:112px; left:50%; transform:translateX(-50%); width:196px; height:58px; background:rgba(0,0,0,0.86); border:1px solid #FFF; border-radius:6px; padding:4px 8px; display:none; flex-direction:column; justify-content:space-between; z-index:35; backdrop-filter:blur(4px); }
+    .bidding-header { width:100%; display:flex; justify-content:space-between; align-items:center; font-size:10.5px; font-weight:800; }
+    .bid-slider-wrap { width:100%; display:flex; align-items:center; gap:6px; }
+    .bid-range-slider { flex:1; accent-color:#FFD700; height:6px; cursor:pointer; }
+    .call-btn { background:#FFF; color:#000; border:none; border-radius:3px; font-weight:900; font-size:10px; padding:2px 8px; cursor:pointer; }
+    .colour-overlay { position:absolute; bottom:112px; left:50%; transform:translateX(-50%); background:rgba(18,10,6,0.94); border:1.5px solid #FFD700; border-radius:10px; padding:7px 10px; display:none; flex-direction:column; align-items:center; gap:6px; z-index:35; min-width:260px; }
+    .trump-grid { display:flex; gap:5px; flex-wrap:wrap; justify-content:center; }
+    .trump-btn { background:#2C1810; border:1px solid #FFD700; color:#FFF; border-radius:6px; padding:4px 8px; font-size:10.5px; font-weight:800; cursor:pointer; }
+    #fireworks-canvas { position:fixed; inset:0; pointer-events:none; z-index:120; display:none; }
+    .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.82); z-index:130; justify-content:center; align-items:center; }
+    .modal-content { background:#1E100A; border:2px solid #FFD700; border-radius:14px; width:90%; max-width:380px; padding:16px; display:flex; flex-direction:column; gap:10px; text-align:center; }
+    #webrtc-log-overlay { display:none; position:fixed; bottom:8px; right:8px; width:min(94vw,410px); max-height:58vh; background:rgba(10,14,20,0.96); border:1.5px solid #00E5FF; border-radius:10px; z-index:250; flex-direction:column; overflow:hidden; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; }
+    #webrtc-log-list { flex:1; overflow-y:auto; padding:6px 8px; max-height:40vh; font-size:9.5px; display:flex; flex-direction:column; gap:2px; text-align:left; }
+  </style>
+</head>
+<body>
+<canvas id="fireworks-canvas"></canvas>
+
+<!-- LOBBY / JOIN ROOM OVERLAY -->
+<div id="lobby-screen">
+  <div class="lobby-top-bar">
+    <div class="lobby-pill">🃏 DASA GANDIA • WEB &amp; iOS SAFARI</div>
+    <div class="lobby-pill" id="lobby-target-pill">50 PTS</div>
+  </div>
+  <div class="lobby-card">
+    <div style="text-align:center;">
+      <div style="font-size:18px;font-weight:900;color:#FFD700;letter-spacing:1px;">JOIN APK HOST ROOM</div>
+      <div style="font-size:11px;color:#D7CCC8;margin-top:2px;">Zero-Server WebRTC + Cloud Relay • Same UI &amp; Rules</div>
+    </div>
+    <div class="host-only-notice">👑 Only APK Players can Host a Room. Enter the 4-digit Room Code created on the Android APK to join!</div>
+    <div>
+      <label style="font-size:10px;font-weight:800;color:#FFD700;">YOUR PLAYER NAME</label>
+      <input type="text" id="player-name-input" class="name-input" maxlength="16" placeholder="Your Name" />
+    </div>
+    <div>
+      <label style="font-size:10px;font-weight:800;color:#FFD700;">4-DIGIT APK ROOM CODE</label>
+      <div class="input-row">
+        <input type="tel" id="room-code-input" class="room-code-input" maxlength="4" placeholder="4821" pattern="[0-9]*" inputmode="numeric" />
+        <button class="gold-btn" id="join-room-btn" onclick="joinApkHostedRoom()">JOIN</button>
+      </div>
+      <div id="lobby-status-msg" style="font-size:11px;color:#69F0AE;font-weight:700;margin-top:4px;text-align:center;">Enter the 4-digit Room Code from the APK Host</div>
+    </div>
+
+    <div class="team-box team-a-box">
+      <div class="team-header" style="color:#90CAF9;"><span>🔵 Team A (Blue)</span><span>Player A (Host) &amp; Player C</span></div>
+      <div class="slot-row"><span id="lobby-slot-SEAT_0">👑 Player A (APK Host): Waiting...</span><span class="slot-dot" id="dot-SEAT_0" style="background:#E53935;"></span></div>
+      <div class="slot-row"><span id="lobby-slot-SEAT_2">🦁 Player C: Waiting...</span><span class="slot-dot" id="dot-SEAT_2" style="background:#E53935;"></span></div>
+    </div>
+
+    <div class="team-box team-b-box">
+      <div class="team-header" style="color:#FF8A80;"><span>🔴 Team B (Red)</span><span>Player B &amp; Player D</span></div>
+      <div class="slot-row"><span id="lobby-slot-SEAT_1">🐯 Player B: Waiting...</span><span class="slot-dot" id="dot-SEAT_1" style="background:#E53935;"></span></div>
+      <div class="slot-row"><span id="lobby-slot-SEAT_3">🦅 Player D: Waiting...</span><span class="slot-dot" id="dot-SEAT_3" style="background:#E53935;"></span></div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+      <span style="font-size:10px;color:#BCAAA4;">Round 1: Shuffle D • Trump A</span>
+      <button class="icon-btn" onclick="enterTableManually()" id="enter-table-btn" style="padding:5px 10px;">Open Table View</button>
+    </div>
+  </div>
+  <div style="font-size:10px;color:#FFE082;opacity:0.85;">Works on iOS Safari, Chrome, Android Web &amp; GitHub Pages via WebRTC P2P</div>
+</div>
+
+<!-- MAIN GAME TABLE SCREEN -->
+<div id="app-root">
+  <div class="top-bar">
+    <div class="hud-group">
+      <span class="badge" id="room-code-badge" onclick="showLobbyOverlay()" style="cursor:pointer;">ROOM: ----</span>
+      <span class="badge badge-score" id="score-badge">A: 0 | B: 0 (50)</span>
+      <div id="conn-status-pill" class="conn-pill connecting" onclick="toggleLogConsole()"><span id="conn-status-text">Connecting...</span></div>
+      <span id="trump-indicator" style="font-size:10.5px;font-weight:900;color:#FFD700;white-space:nowrap;">ରଙ୍ଗ: --</span>
+    </div>
+    <div class="hud-group">
+      <span id="round-role-badge" class="badge" style="border-color:#80D8FF;color:#80D8FF;">R1 • Shuf: D | ରଙ୍ଗ: A</span>
+      <button class="icon-btn" onclick="toggleWebAudioMute()" id="sfx-toggle-btn">🔊</button>
+      <button class="icon-btn" onclick="toggleScoreboard()">📊</button>
+      <button class="icon-btn" onclick="toggleRules()">📖</button>
+      <button class="icon-btn" onclick="toggleLogConsole()" id="log-toggle-btn">🐞</button>
+    </div>
+  </div>
+
+  <div class="felt-table" id="felt-table">
+    <div id="shuffle-delivery-layer"></div>
+    <div class="seat seat-top" id="seat-top">
+      <div style="font-weight:900;" id="seat-top-name">🦁 Player C</div>
+      <div style="color:#FFD700;font-size:9px;" id="seat-top-bid">Bid: -- | Won: 0</div>
+      <div class="role-tags" id="seat-top-roles"></div>
+    </div>
+    <div class="seat seat-left" id="seat-left">
+      <div style="font-weight:900;" id="seat-left-name">🦅 Player D</div>
+      <div style="color:#FFD700;font-size:9px;" id="seat-left-bid">Bid: -- | Won: 0</div>
+      <div class="role-tags" id="seat-left-roles"></div>
+    </div>
+    <div class="center-arena" id="center-arena">
+      <div id="center-status-banner" style="font-size:10px;font-weight:800;color:#FFE082;text-align:center;">Waiting for APK Host to start match...</div>
+      <div id="trick-cards-slot"></div>
+      <div id="team-bids-bar" style="font-size:9.5px;color:#B9F6CA;font-weight:800;">Team A Bid: -- (0) | Team B Bid: -- (0)</div>
+    </div>
+    <div class="seat seat-right" id="seat-right">
+      <div style="font-weight:900;" id="seat-right-name">🐯 Player B</div>
+      <div style="color:#FFD700;font-size:9px;" id="seat-right-bid">Bid: -- | Won: 0</div>
+      <div class="role-tags" id="seat-right-roles"></div>
+    </div>
+  </div>
+
+  <div class="seat-bottom-dock">
+    <div class="self-seat-pill" id="seat-self">
+      <span style="font-weight:900;color:#FFF;" id="local-player-name">🌐 You (B)</span>
+      <span style="color:#FFD700;font-weight:800;" id="local-player-bid">Bid: --</span>
+      <span style="color:#80D8FF;font-weight:800;" id="local-player-won">Won: 0</span>
+      <span id="seat-self-roles" class="role-tags"></span>
+    </div>
+    <div style="display:flex;gap:5px;align-items:center;">
+      <button class="icon-btn" id="undo-card-btn" onclick="undoLastPlayedCard()" style="display:none;background:#E65100;color:#FFF;">↩ Undo</button>
+      <button class="icon-btn" onclick="sendEmoji('🔥')">🔥</button>
+      <button class="icon-btn" onclick="sendEmoji('👏')">👏</button>
+      <button class="icon-btn" onclick="sendEmoji('😂')">😂</button>
+      <button class="icon-btn" onclick="sendEmoji('👑')">👑</button>
+    </div>
+  </div>
+
+  <div class="hand-container" id="hand-container"><div class="hand-cards" id="hand-cards-container"></div></div>
+
+  <div class="colour-overlay" id="colour-popup">
+    <div style="font-size:11px;font-weight:900;color:#FFD700;">Select ରଙ୍ଗ (Trump) — 9 Cards Dealt</div>
+    <div class="trump-grid">
+      <button class="trump-btn" onclick="chooseColourFromWeb('SPADES',false,false)">♠ ଇସିକା</button>
+      <button class="trump-btn" onclick="chooseColourFromWeb('HEARTS',false,false)" style="color:#FF8A80;">♥ ପାନ</button>
+      <button class="trump-btn" onclick="chooseColourFromWeb('DIAMONDS',false,false)" style="color:#FF8A80;">♦ ଠିକିରି</button>
+      <button class="trump-btn" onclick="chooseColourFromWeb('CLUBS',false,false)">♣ ଚିଡିଆ</button>
+    </div>
+    <div class="trump-grid">
+      <button class="trump-btn" onclick="chooseColourFromWeb('NONE',true,false)" style="border-color:#00E5FF;color:#80D8FF;">🃏 ବେରଙ୍ଗ (No ରଙ୍ଗ)</button>
+      <button class="trump-btn" onclick="chooseColourFromWeb('NONE',false,true)" style="border-color:#00E676;color:#B9F6CA;">🎴 12th Card (Board ରଙ୍ଗ)</button>
+    </div>
+  </div>
+
+  <div class="bidding-overlay" id="bidding-popup">
+    <div class="bidding-header">
+      <span id="bid-label" style="color:#FFD700;">Bid: 2</span>
+      <button class="call-btn" id="bid-call-btn" onclick="confirmBidFromWeb()">Call 2</button>
+    </div>
+    <div class="bid-slider-wrap">
+      <span id="bid-min-label" style="font-size:9px;color:#BDBDBD;">0</span>
+      <input type="range" id="bid-scroll-bar" class="bid-range-slider" min="0" max="13" step="1" value="2" oninput="onBidSliderInput(this.value)" />
+      <span style="font-size:9px;color:#BDBDBD;">13</span>
+    </div>
+  </div>
+</div>
+
+<div id="webrtc-log-overlay">
+  <div style="display:flex;justify-content:space-between;padding:5px 8px;background:rgba(0,229,255,0.15);font-size:10px;font-weight:800;color:#80D8FF;">
+    <span>📡 Zero-Server WebRTC + P2P Console</span>
+    <div style="display:flex;gap:4px;"><button class="icon-btn" onclick="copyWebRtcLogs()">Copy</button><button class="icon-btn" onclick="toggleLogConsole()">✕</button></div>
+  </div>
+  <div id="webrtc-log-meta" style="padding:3px 8px;font-size:9px;color:#B0BEC5;border-bottom:1px solid rgba(255,255,255,0.1);"></div>
+  <div id="webrtc-log-list"></div>
+</div>
+
+<div class="modal" id="score-modal" onclick="toggleScoreboard()">
+  <div class="modal-content" onclick="event.stopPropagation()">
+    <h3 style="color:#FFD700;" id="score-modal-title">📊 Match Scoreboard</h3>
+    <div style="display:flex;justify-content:space-around;margin:8px 0;">
+      <div><div style="color:#64B5F6;font-weight:800;font-size:12px;">Team A (A &amp; C)</div><div style="font-size:24px;font-weight:900;" id="team-a-score">0 Pts</div></div>
+      <div><div style="color:#FF8A80;font-weight:800;font-size:12px;">Team B (B &amp; D)</div><div style="font-size:24px;font-weight:900;" id="team-b-score">0 Pts</div></div>
+    </div>
+    <div id="round-summary-note" style="font-size:11px;color:#FFE082;"></div>
+    <button class="gold-btn" style="height:38px;" onclick="toggleScoreboard()">Close</button>
+  </div>
+</div>
+
+<div class="modal" id="rules-modal" onclick="toggleRules()">
+  <div class="modal-content" onclick="event.stopPropagation()">
+    <h3 style="color:#FFD700;">📖 Dasa Gandia Official Rules</h3>
+    <div style="font-size:11px;line-height:1.45;color:#E0E0E0;text-align:left;max-height:240px;overflow-y:auto;">
+      <p>👑 <b>Joker #1:</b> Heart 2 (♥2) — Highest Card (Active from Trick 2)</p>
+      <p>⭐ <b>Joker #2:</b> Spade 2 (♠2) — 2nd Highest Card (Active from Trick 2)</p>
+      <p>🔄 <b>Round 1 Roles:</b> Player D (SEAT_3) Shuffles &amp; Deals; Player A (SEAT_0) selects ରଙ୍ଗ (Trump) &amp; leads Trick 1. Subsequent rounds rotate from the previous Trump maker.</p>
+      <p>🔟 <b>Compulsory Key Card Bidding:</b> 10 Key Cards (4 Aces + 4 Kings + ♥2 + ♠2). Minimum mandatory bid equals Key Cards in hand.</p>
+      <p>⚠️ <b>13th Trick Joker Penalty:</b> Holding or playing ♥2 or ♠2 in the 13th Trick incurs a -25 Point penalty.</p>
+    </div>
+    <button class="gold-btn" style="height:38px;" onclick="toggleRules()">OK</button>
+  </div>
+</div>
+
+<script>
+  const params = new URLSearchParams(window.location.search);
+  let roomCode = (params.get('room') || params.get('code') || '').replace(/[^0-9]/g, '').slice(0, 4);
+  let targetPoints = parseInt(params.get('pts') || '50', 10) || 50;
+  let localSeat = params.get('seat') || 'SEAT_1';
+  let localPlayerName = localStorage.getItem('dg_web_player_name') || ('WebPlayer_' + Math.floor(100 + Math.random() * 899));
+  const localPeerId = 'web_' + Math.random().toString(36).substring(2, 10);
+
+  let audioCtx = null, sfxMuted = false;
+  function ensureAudioUnlocked() {
+    if (sfxMuted) return null;
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      if (!audioCtx) audioCtx = new AC();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      return audioCtx;
+    } catch (e) { return null; }
+  }
+  ['touchstart', 'touchend', 'click', 'keydown'].forEach(evt => window.addEventListener(evt, () => ensureAudioUnlocked(), { passive: true }));
+
+  function toggleWebAudioMute() {
+    sfxMuted = !sfxMuted;
+    const btn = document.getElementById('sfx-toggle-btn');
+    if (btn) btn.textContent = sfxMuted ? '🔇' : '🔊';
+  }
+
+  function playWebSound(type) {
+    const ctx = ensureAudioUnlocked();
+    if (!ctx) return;
+    try {
+      const now = ctx.currentTime;
+      if (type === 'SHUFFLE') {
+        for (let i = 0; i < 6; i++) {
+          const osc = ctx.createOscillator(), g = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(220 + i * 55, now + i * 0.055);
+          g.gain.setValueAtTime(0.08, now + i * 0.055);
+          g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.055 + 0.045);
+          osc.connect(g); g.connect(ctx.destination);
+          osc.start(now + i * 0.055); osc.stop(now + i * 0.055 + 0.05);
+        }
+      } else if (type === 'CARD_PLAY') {
+        const osc = ctx.createOscillator(), g = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(520, now);
+        osc.frequency.exponentialRampToValueAtTime(260, now + 0.07);
+        g.gain.setValueAtTime(0.14, now);
+        g.gain.exponentialRampToValueAtTime(0.001, now + 0.075);
+        osc.connect(g); g.connect(ctx.destination);
+        osc.start(now); osc.stop(now + 0.08);
+      } else if (type === 'TRICK_COLLECT') {
+        [440, 554.37, 659.25].forEach((freq, idx) => {
+          const osc = ctx.createOscillator(), g = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.06);
+          g.gain.setValueAtTime(0.11, now + idx * 0.06);
+          g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.06 + 0.14);
+          osc.connect(g); g.connect(ctx.destination);
+          osc.start(now + idx * 0.06); osc.stop(now + idx * 0.06 + 0.15);
+        });
+      } else if (type === 'FIRECRACKERS') {
+        [523.25, 659.25, 783.99, 1046.5, 783.99, 1046.5].forEach((freq, idx) => {
+          const osc = ctx.createOscillator(), g = ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.14);
+          g.gain.setValueAtTime(0.12, now + idx * 0.14);
+          g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.14 + 0.22);
+          osc.connect(g); g.connect(ctx.destination);
+          osc.start(now + idx * 0.14); osc.stop(now + idx * 0.14 + 0.24);
+        });
+      }
+    } catch (e) {}
+  }
+
+  let fireworksActive = false, fireworkParticles = [];
+  function triggerFirecrackersCelebration(winningTeamText) {
+    playWebSound('FIRECRACKERS');
+    const canvas = document.getElementById('fireworks-canvas');
+    if (!canvas) return;
+    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+    canvas.style.display = 'block';
+    fireworksActive = true; fireworkParticles = [];
+    const colors = ['#FFD700', '#FF5252', '#00E676', '#00E5FF', '#FF4081', '#FFAB00'];
+    for (let burst = 0; burst < 7; burst++) {
+      setTimeout(() => {
+        if (!fireworksActive) return;
+        playWebSound('CARD_PLAY');
+        const cx = (0.15 + Math.random() * 0.7) * canvas.width, cy = (0.15 + Math.random() * 0.55) * canvas.height;
+        for (let i = 0; i < 38; i++) {
+          const angle = (Math.PI * 2 * i) / 38 + (Math.random() - 0.5) * 0.2, speed = 1.8 + Math.random() * 4.8;
+          fireworkParticles.push({ x: cx, y: cy, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, alpha: 1, color: colors[Math.floor(Math.random() * colors.length)], size: 2.5 + Math.random() * 3 });
+        }
+      }, burst * 450);
+    }
+    const ctx = canvas.getContext('2d');
+    function step() {
+      if (!fireworksActive) { ctx.clearRect(0, 0, canvas.width, canvas.height); canvas.style.display = 'none'; return; }
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let i = fireworkParticles.length - 1; i >= 0; i--) {
+        const p = fireworkParticles[i];
+        p.x += p.vx; p.y += p.vy; p.vy += 0.065; p.alpha -= 0.014;
+        if (p.alpha <= 0) { fireworkParticles.splice(i, 1); continue; }
+        ctx.globalAlpha = Math.max(0, p.alpha); ctx.fillStyle = p.color;
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill();
+      }
+      requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+    if (winningTeamText) {
+      document.getElementById('score-modal-title').textContent = '🎆 ' + winningTeamText + ' WINS! 🎆';
+      document.getElementById('round-summary-note').textContent = 'Target (' + targetPoints + ' Pts) Reached!';
+      document.getElementById('score-modal').style.display = 'flex';
+    }
+    setTimeout(() => { fireworksActive = false; }, 5200);
+  }
+
+  const webRtcLogs = [];
+  function addWebRtcLog(tag, message, level = 'INFO') {
+    const now = new Date();
+    const ts = now.toTimeString().split(' ')[0] + '.' + String(now.getMilliseconds()).padStart(3, '0');
+    webRtcLogs.push({ ts, tag, message, level });
+    if (webRtcLogs.length > 200) webRtcLogs.shift();
+    const listEl = document.getElementById('webrtc-log-list'), metaEl = document.getElementById('webrtc-log-meta');
+    if (metaEl) metaEl.textContent = `Room: ${roomCode || '----'} | Seat: ${localSeat} | Transport: ${activeTransportName}`;
+    if (listEl) {
+      const div = document.createElement('div');
+      div.style.color = level === 'ERROR' ? '#FF8A80' : (level === 'SUCCESS' ? '#69F0AE' : '#CFD8DC');
+      div.textContent = `[${ts}] [${tag}] ${message}`;
+      listEl.appendChild(div); listEl.scrollTop = listEl.scrollHeight;
+    }
+  }
+  function toggleLogConsole() { const el = document.getElementById('webrtc-log-overlay'); if (el) el.style.display = el.style.display === 'flex' ? 'none' : 'flex'; }
+  function copyWebRtcLogs() { const txt = webRtcLogs.map(l => `[${l.ts}] [${l.tag}] ${l.message}`).join('\n'); if (navigator.clipboard) navigator.clipboard.writeText(txt); }
+
+  const SUITS = ['SPADES', 'HEARTS', 'DIAMONDS', 'CLUBS'];
+  const SUIT_SYMBOLS = { SPADES: '♠', HEARTS: '♥', DIAMONDS: '♦', CLUBS: '♣', NONE: '🃏' };
+  const SUIT_ODIA = { SPADES: '♠ ଇସିକା', HEARTS: '♥ ପାନ', DIAMONDS: '♦ ଠିକିରି', CLUBS: '♣ ଚିଡିଆ', NONE: '🃏 ବେରଙ୍ଗ' };
+  const RANKS = [
+    { name: 'TWO', sym: '2', power: 2 }, { name: 'THREE', sym: '3', power: 3 }, { name: 'FOUR', sym: '4', power: 4 },
+    { name: 'FIVE', sym: '5', power: 5 }, { name: 'SIX', sym: '6', power: 6 }, { name: 'SEVEN', sym: '7', power: 7 },
+    { name: 'EIGHT', sym: '8', power: 8 }, { name: 'NINE', sym: '9', power: 9 }, { name: 'TEN', sym: '10', power: 10 },
+    { name: 'JACK', sym: 'J', power: 11 }, { name: 'QUEEN', sym: 'Q', power: 12 }, { name: 'KING', sym: 'K', power: 13 },
+    { name: 'ACE', sym: 'A', power: 14 }
+  ];
+  const RANK_MAP = {}; RANKS.forEach(r => { RANK_MAP[r.name] = r; });
+  const SEATS = ['SEAT_0', 'SEAT_1', 'SEAT_2', 'SEAT_3'];
+  const SEAT_LABELS = { SEAT_0: 'Player A', SEAT_1: 'Player B', SEAT_2: 'Player C', SEAT_3: 'Player D' };
+  const SEAT_SHORT = { SEAT_0: 'A', SEAT_1: 'B', SEAT_2: 'C', SEAT_3: 'D' };
+
+  function nextSeatAntiClockwise(seat) { return SEATS[(SEATS.indexOf(seat) + 1) % 4]; }
+  function getDealerSeatForRound(roundNum) { return ['SEAT_3', 'SEAT_0', 'SEAT_1', 'SEAT_2'][(Math.max(1, roundNum) - 1) % 4]; }
+  function getColourChooserSeatForRound(roundNum) { return nextSeatAntiClockwise(getDealerSeatForRound(roundNum)); }
+  function getDealOrderFromDealer(dealerSeat) {
+    const first = nextSeatAntiClockwise(dealerSeat), second = nextSeatAntiClockwise(first), third = nextSeatAntiClockwise(second);
+    return [first, second, third, dealerSeat];
+  }
+  function isJokerCard(card) { return Boolean(card && ((card.suit === 'HEARTS' && card.rank === 'TWO') || (card.suit === 'SPADES' && card.rank === 'TWO'))); }
+  function isKeyCard(card) { return Boolean(card && (card.rank === 'ACE' || card.rank === 'KING' || isJokerCard(card))); }
+  function countKeyCards(hand) { return (hand || []).filter(isKeyCard).length; }
+
+  function createDeterministicDeck(roundNum, codeStr) {
+    const all = [];
+    SUITS.forEach(s => RANKS.forEach(r => all.push({ suit: s, rank: r.name, sym: r.sym, power: r.power, id: s + ':' + r.name })));
+    let seed = (parseInt(codeStr || '1234', 10) * 1009) + (roundNum * 7919);
+    for (let i = all.length - 1; i > 0; i--) {
+      seed = (seed * 1664525 + 1013904223) >>> 0;
+      const j = seed % (i + 1), tmp = all[i]; all[i] = all[j]; all[j] = tmp;
+    }
+    return all;
+  }
+
+  function parseDeckCsv(csv) {
+    if (!csv) return [];
+    return csv.split(',').map(token => {
+      const parts = token.trim().split(':');
+      if (parts.length !== 2) return null;
+      const suit = parts[0].trim(), rankName = parts[1].trim(), r = RANK_MAP[rankName];
+      if (!SUIT_SYMBOLS[suit] || !r) return null;
+      return { suit, rank: rankName, sym: r.sym, power: r.power, id: suit + ':' + rankName };
+    }).filter(Boolean);
+  }
+
+  function sortHandCards(hand) {
+    const suitOrder = { SPADES: 0, HEARTS: 1, CLUBS: 2, DIAMONDS: 3 };
+    return [...hand].sort((a, b) => {
+      const aJ = a.suit === 'HEARTS' && a.rank === 'TWO' ? -2 : (a.suit === 'SPADES' && a.rank === 'TWO' ? -1 : 0);
+      const bJ = b.suit === 'HEARTS' && b.rank === 'TWO' ? -2 : (b.suit === 'SPADES' && b.rank === 'TWO' ? -1 : 0);
+      if (aJ !== bJ) return aJ - bJ;
+      if (suitOrder[a.suit] !== suitOrder[b.suit]) return suitOrder[a.suit] - suitOrder[b.suit];
+      return b.power - a.power;
+    });
+  }
+
+  let gameState = {
+    phase: 'LOBBY', roundNumber: 1, dealerSeat: 'SEAT_3', chooserSeat: 'SEAT_0', currentTurnSeat: 'SEAT_0',
+    trumpSuit: 'NONE', isNoTrump: false, isBoardTrump: false, boardTrumpCard: null, fullDeck: [],
+    hands: { SEAT_0: [], SEAT_1: [], SEAT_2: [], SEAT_3: [] },
+    bids: { SEAT_0: null, SEAT_1: null, SEAT_2: null, SEAT_3: null },
+    tricksWon: { SEAT_0: 0, SEAT_1: 0, SEAT_2: 0, SEAT_3: 0 },
+    currentTrick: [], leadSuit: null, trickNumber: 1, teamAScore: 0, teamBScore: 0,
+    seatPlayers: {
+      SEAT_0: { name: 'Player A (Host)', connected: false, isBot: false, platform: 'APK' },
+      SEAT_1: { name: 'Waiting...', connected: false, isBot: true, platform: 'APK' },
+      SEAT_2: { name: 'Waiting...', connected: false, isBot: true, platform: 'APK' },
+      SEAT_3: { name: 'Waiting...', connected: false, isBot: true, platform: 'APK' }
+    },
+    pendingDeckByRound: {}, selectedBidValue: 2, minBidValue: 0, celebratedGameOverRound: 0
+  };
+  const processedFrameIds = new Set();
+
+  function getRelativeSeats() {
+    const selfIdx = SEATS.indexOf(localSeat);
+    return { self: localSeat, right: SEATS[(selfIdx + 1) % 4], top: SEATS[(selfIdx + 2) % 4], left: SEATS[(selfIdx + 3) % 4] };
+  }
+  function getSeatAnchorPercent(seat) {
+    const rel = getRelativeSeats();
+    if (seat === rel.self) return { x: 50, y: 86 };
+    if (seat === rel.right) return { x: 86, y: 50 };
+    if (seat === rel.top) return { x: 50, y: 15 };
+    return { x: 14, y: 50 };
+  }
+
+  function animateShuffleAndDelivery(dealerSeat, chooserSeat, onComplete) {
+    const layer = document.getElementById('shuffle-delivery-layer');
+    if (!layer) { if (onComplete) onComplete(); return; }
+    layer.innerHTML = ''; playWebSound('SHUFFLE');
+    const dealerPos = getSeatAnchorPercent(dealerSeat), dealOrder = getDealOrderFromDealer(dealerSeat);
+    const badge = document.createElement('div');
+    badge.className = 'dealer-deck-badge';
+    badge.style.left = dealerPos.x + '%'; badge.style.top = dealerPos.y + '%';
+    badge.textContent = `🎴 ${SEAT_SHORT[dealerSeat]} Shuffling → ରଙ୍ଗ: ${SEAT_SHORT[chooserSeat]}`;
+    layer.appendChild(badge);
+    for (let i = 0; i < 16; i++) {
+      const targetPos = getSeatAnchorPercent(dealOrder[i % 4]);
+      const cardEl = document.createElement('div');
+      cardEl.className = 'flying-deck-card';
+      cardEl.style.left = `calc(${dealerPos.x}% - 13px)`; cardEl.style.top = `calc(${dealerPos.y}% - 19px)`;
+      layer.appendChild(cardEl);
+      setTimeout(() => {
+        if (i % 4 === 0) playWebSound('CARD_PLAY');
+        cardEl.style.left = `calc(${targetPos.x}% - 13px)`; cardEl.style.top = `calc(${targetPos.y}% - 19px)`;
+        cardEl.style.transform = `rotate(${(i * 25) % 360}deg) scale(0.92)`;
+      }, 120 + i * 55);
+    }
+    setTimeout(() => { layer.innerHTML = ''; if (onComplete) onComplete(); }, 120 + 16 * 55 + 260);
+  }
+
+  function startWebRound(roundNum, deckList) {
+    gameState.roundNumber = roundNum;
+    gameState.dealerSeat = getDealerSeatForRound(roundNum);
+    gameState.chooserSeat = getColourChooserSeatForRound(roundNum);
+    gameState.currentTurnSeat = gameState.chooserSeat;
+    gameState.trumpSuit = 'NONE'; gameState.isNoTrump = false; gameState.isBoardTrump = false; gameState.boardTrumpCard = null;
+    gameState.bids = { SEAT_0: null, SEAT_1: null, SEAT_2: null, SEAT_3: null };
+    gameState.tricksWon = { SEAT_0: 0, SEAT_1: 0, SEAT_2: 0, SEAT_3: 0 };
+    gameState.currentTrick = []; gameState.leadSuit = null; gameState.trickNumber = 1;
+
+    const deck = (deckList && deckList.length === 52) ? deckList : (gameState.pendingDeckByRound[roundNum] || createDeterministicDeck(roundNum, roomCode));
+    gameState.fullDeck = deck;
+
+    const dealOrder = getDealOrderFromDealer(gameState.dealerSeat);
+    const hands9 = { SEAT_0: [], SEAT_1: [], SEAT_2: [], SEAT_3: [] };
+    let cursor = 0;
+    dealOrder.forEach(seat => { for (let c = 0; c < 5; c++) hands9[seat].push(deck[cursor++]); });
+    dealOrder.forEach(seat => { for (let c = 0; c < 4; c++) hands9[seat].push(deck[cursor++]); });
+    SEATS.forEach(s => { gameState.hands[s] = sortHandCards(hands9[s]); });
+
+    gameState.phase = 'COLOUR_SELECTION';
+    hideLobbyOverlay(); renderAllUI();
+    animateShuffleAndDelivery(gameState.dealerSeat, gameState.chooserSeat, () => {
+      const chooserHand9 = gameState.hands[gameState.chooserSeat] || [];
+      if (countKeyCards(chooserHand9) === 0) {
+        setCenterBanner(`⚠️ ${SEAT_LABELS[gameState.chooserSeat]} has 0 Key Cards in 9 cards! Waiting for Reshuffle...`);
+      } else { updatePhasePrompt(); }
+      renderAllUI();
+    });
+  }
+
+  function applyColourChoice(seat, suit, isNoTrump, isBoardTrump) {
+    if (gameState.fullDeck.length < 52) gameState.fullDeck = gameState.pendingDeckByRound[gameState.roundNumber] || createDeterministicDeck(gameState.roundNumber, roomCode);
+    const dealOrder = getDealOrderFromDealer(gameState.dealerSeat);
+    const hands13 = { SEAT_0: [], SEAT_1: [], SEAT_2: [], SEAT_3: [] };
+    let cursor = 0;
+    dealOrder.forEach(s => { for (let c = 0; c < 5; c++) hands13[s].push(gameState.fullDeck[cursor++]); });
+    dealOrder.forEach(s => { for (let c = 0; c < 4; c++) hands13[s].push(gameState.fullDeck[cursor++]); });
+    dealOrder.forEach(s => { for (let c = 0; c < 4; c++) hands13[s].push(gameState.fullDeck[cursor++]); });
+
+    if (isBoardTrump) {
+      const card12 = hands13[gameState.chooserSeat][11];
+      gameState.boardTrumpCard = card12; gameState.isBoardTrump = true;
+      if (card12 && isJokerCard(card12)) { gameState.trumpSuit = 'NONE'; gameState.isNoTrump = true; }
+      else if (card12) { gameState.trumpSuit = card12.suit; gameState.isNoTrump = false; }
+    } else if (isNoTrump) {
+      gameState.trumpSuit = 'NONE'; gameState.isNoTrump = true; gameState.isBoardTrump = false;
+    } else {
+      gameState.trumpSuit = suit; gameState.isNoTrump = false; gameState.isBoardTrump = false;
+    }
+
+    SEATS.forEach(s => { gameState.hands[s] = sortHandCards(hands13[s]); });
+    gameState.phase = 'BIDDING'; gameState.currentTurnSeat = gameState.chooserSeat;
+    playWebSound('SHUFFLE'); updatePhasePrompt(); renderAllUI();
+  }
+
+  function applyBidPlaced(seat, bid) {
+    gameState.bids[seat] = bid; playWebSound('CARD_PLAY');
+    const allBidDone = SEATS.every(s => gameState.bids[s] !== null && gameState.bids[s] !== undefined);
+    if (allBidDone) {
+      const totalBids = SEATS.reduce((acc, s) => acc + (gameState.bids[s] || 0), 0);
+      if (totalBids < 10) {
+        setCenterBanner(`⚠️ Total Bid (${totalBids}) < 10! Reshuffling with same Shuffle & Trump player...`);
+        return;
+      }
+      gameState.phase = 'PLAYING'; gameState.trickNumber = 1; gameState.currentTrick = []; gameState.leadSuit = null;
+      gameState.currentTurnSeat = gameState.chooserSeat;
+    } else {
+      gameState.currentTurnSeat = nextSeatAntiClockwise(seat);
+    }
+    updatePhasePrompt(); renderAllUI();
+  }
+
+  function evaluateTrickWinner(trickCards) {
+    if (!trickCards || trickCards.length === 0) return null;
+    const isFirstTrick = gameState.trickNumber === 1, leadSuit = trickCards[0].card.suit;
+    function cardStrength(entry) {
+      const c = entry.card;
+      if (!isFirstTrick) {
+        if (c.suit === 'HEARTS' && c.rank === 'TWO') return 1000;
+        if (c.suit === 'SPADES' && c.rank === 'TWO') return 900;
+      }
+      if (!gameState.isNoTrump && gameState.trumpSuit !== 'NONE' && c.suit === gameState.trumpSuit) return 500 + c.power;
+      if (c.suit === leadSuit) return 100 + c.power;
+      return c.power;
+    }
+    let best = trickCards[0], bestScore = cardStrength(best);
+    for (let i = 1; i < trickCards.length; i++) {
+      const sc = cardStrength(trickCards[i]);
+      if (sc > bestScore) { best = trickCards[i]; bestScore = sc; }
+    }
+    return best.seat;
+  }
+
+  function applyCardPlayed(seat, suit, rankName) {
+    if (gameState.currentTrick.some(t => t.seat === seat)) return;
+    const hand = gameState.hands[seat] || [];
+    const idx = hand.findIndex(c => c.suit === suit && c.rank === rankName);
+    let playedCard = null;
+    if (idx >= 0) playedCard = hand.splice(idx, 1)[0];
+    else {
+      const r = RANK_MAP[rankName] || { name: rankName, sym: rankName[0], power: 2 };
+      playedCard = { suit, rank: rankName, sym: r.sym, power: r.power, id: suit + ':' + rankName };
+    }
+    if (gameState.currentTrick.length === 0) gameState.leadSuit = playedCard.suit;
+    gameState.currentTrick.push({ seat, card: playedCard });
+    playWebSound('CARD_PLAY');
+
+    if (gameState.currentTrick.length < 4) {
+      gameState.currentTurnSeat = nextSeatAntiClockwise(seat);
+      updatePhasePrompt(); renderAllUI();
+    } else {
+      const winnerSeat = evaluateTrickWinner([...gameState.currentTrick]);
+      gameState.currentTurnSeat = winnerSeat;
+      setCenterBanner(`✨ ${SEAT_LABELS[winnerSeat]} wins Trick #${gameState.trickNumber}!`);
+      renderAllUI();
+      setTimeout(() => {
+        playWebSound('TRICK_COLLECT');
+        gameState.tricksWon[winnerSeat] = (gameState.tricksWon[winnerSeat] || 0) + 1;
+        gameState.currentTrick = []; gameState.leadSuit = null;
+        if (gameState.trickNumber >= 13) completeRoundScoring();
+        else { gameState.trickNumber += 1; gameState.currentTurnSeat = winnerSeat; updatePhasePrompt(); renderAllUI(); }
+      }, 1150);
+    }
+  }
+
+  function applyUndoLastCard(seat) {
+    if (gameState.currentTrick.length !== 1 || gameState.currentTrick[0].seat !== seat) return;
+    const removed = gameState.currentTrick.pop();
+    if (removed && removed.card) gameState.hands[seat] = sortHandCards([...(gameState.hands[seat] || []), removed.card]);
+    gameState.leadSuit = null; gameState.currentTurnSeat = seat;
+    updatePhasePrompt(); renderAllUI();
+  }
+
+  function calculateTeamRoundDelta(teamBid, teamTricks) {
+    if (teamBid >= 7) { const base = teamBid * 2; return teamTricks >= teamBid ? base + (teamTricks - teamBid) : -base; }
+    if (teamBid === 0) return 0;
+    return teamTricks >= teamBid ? teamBid + (teamTricks - teamBid) : -teamBid;
+  }
+
+  function completeRoundScoring() {
+    const bidA = (gameState.bids.SEAT_0 || 0) + (gameState.bids.SEAT_2 || 0);
+    const bidB = (gameState.bids.SEAT_1 || 0) + (gameState.bids.SEAT_3 || 0);
+    const wonA = (gameState.tricksWon.SEAT_0 || 0) + (gameState.tricksWon.SEAT_2 || 0);
+    const wonB = (gameState.tricksWon.SEAT_1 || 0) + (gameState.tricksWon.SEAT_3 || 0);
+    gameState.teamAScore += calculateTeamRoundDelta(bidA, wonA);
+    gameState.teamBScore += calculateTeamRoundDelta(bidB, wonB);
+    checkAndTriggerMatchWinFirecrackers();
+    renderAllUI();
+    if (gameState.phase !== 'GAME_OVER') {
+      gameState.phase = 'ROUND_SUMMARY';
+      const nextR = gameState.roundNumber + 1;
+      setCenterBanner(`Round ${gameState.roundNumber} Complete! Next R${nextR}: Shuffle ${SEAT_SHORT[getDealerSeatForRound(nextR)]} → ରଙ୍ଗ ${SEAT_SHORT[getColourChooserSeatForRound(nextR)]}`);
+      setTimeout(() => { if (gameState.phase === 'ROUND_SUMMARY') startWebRound(nextR, gameState.pendingDeckByRound[nextR]); }, 3600);
+    }
+  }
+
+  function checkAndTriggerMatchWinFirecrackers() {
+    if (gameState.teamAScore >= targetPoints || gameState.teamBScore >= targetPoints) {
+      if (gameState.celebratedGameOverRound !== gameState.roundNumber) {
+        gameState.celebratedGameOverRound = gameState.roundNumber;
+        gameState.phase = 'GAME_OVER';
+        triggerFirecrackersCelebration(gameState.teamAScore >= gameState.teamBScore ? 'Team A (Blue: Player A & C)' : 'Team B (Red: Player B & D)');
+      }
+    }
+  }
+
+  function isCardPlayableByLocal(card) {
+    if (gameState.phase !== 'PLAYING' || gameState.currentTurnSeat !== localSeat || gameState.currentTrick.some(t => t.seat === localSeat)) return false;
+    if (gameState.currentTrick.length === 0) return true;
+    const leadSuit = gameState.currentTrick[0].card.suit;
+    if (gameState.trickNumber > 1 && isJokerCard(card)) return true;
+    const hand = gameState.hands[localSeat] || [];
+    const hasLeadSuit = hand.some(c => c.suit === leadSuit && !(gameState.trickNumber > 1 && isJokerCard(c)));
+    return hasLeadSuit ? card.suit === leadSuit : true;
+  }
+
+  function chooseColourFromWeb(suit, isNoTrump, isBoardTrump) {
+    if (gameState.phase !== 'COLOUR_SELECTION' || gameState.chooserSeat !== localSeat) return;
+    sendGameAction({ actionType: 'CHOOSE_COLOUR', seat: localSeat, chosenSuit: suit, suit: suit, isBeranga: isNoTrump, isNoTrump: isNoTrump, isBoardColour: isBoardTrump, isBoardTrump: isBoardTrump });
+    applyColourChoice(localSeat, suit, isNoTrump, isBoardTrump);
+  }
+
+  function onBidSliderInput(val) {
+    const num = Math.max(gameState.minBidValue, parseInt(val, 10) || 0);
+    gameState.selectedBidValue = num;
+    const slider = document.getElementById('bid-scroll-bar');
+    if (slider && parseInt(slider.value, 10) < gameState.minBidValue) slider.value = gameState.minBidValue;
+    document.getElementById('bid-label').textContent = 'Bid: ' + num;
+    document.getElementById('bid-call-btn').textContent = 'Call ' + num;
+  }
+
+  function confirmBidFromWeb() {
+    if (gameState.phase !== 'BIDDING' || gameState.currentTurnSeat !== localSeat) return;
+    const bidVal = Math.max(gameState.minBidValue, gameState.selectedBidValue);
+    sendGameAction({ actionType: 'SUBMIT_BID', seat: localSeat, bid: bidVal });
+    applyBidPlaced(localSeat, bidVal);
+  }
+
+  function playCardFromWeb(card) {
+    if (!isCardPlayableByLocal(card)) return;
+    sendGameAction({ actionType: 'PLAY_CARD', seat: localSeat, suit: card.suit, rank: card.rank });
+    applyCardPlayed(localSeat, card.suit, card.rank);
+  }
+
+  function undoLastPlayedCard() {
+    if (gameState.currentTrick.length === 1 && gameState.currentTrick[0].seat === localSeat) {
+      sendGameAction({ actionType: 'UNDO_CARD', seat: localSeat });
+      applyUndoLastCard(localSeat);
+    }
+  }
+
+  function setCenterBanner(txt) { const el = document.getElementById('center-status-banner'); if (el) el.textContent = txt; }
+
+  function updatePhasePrompt() {
+    const dealerLbl = SEAT_SHORT[gameState.dealerSeat], chooserLbl = SEAT_SHORT[gameState.chooserSeat];
+    if (gameState.phase === 'COLOUR_SELECTION') {
+      setCenterBanner(gameState.chooserSeat === localSeat ? `🎨 Your Turn (${chooserLbl}): Select ରଙ୍ଗ (Trump) from your 9 cards!` : `🎨 Waiting for ${SEAT_LABELS[gameState.chooserSeat]} to select ରଙ୍ଗ (Trump)...`);
+    } else if (gameState.phase === 'BIDDING') {
+      setCenterBanner(gameState.currentTurnSeat === localSeat ? `📢 Your Turn: Scroll & Call your Bid (Min Key Cards: ${gameState.minBidValue})` : `📢 Waiting for ${SEAT_LABELS[gameState.currentTurnSeat]} to Bid...`);
+    } else if (gameState.phase === 'PLAYING') {
+      setCenterBanner(gameState.currentTurnSeat === localSeat ? `🃏 Trick #${gameState.trickNumber}/13 — Your Turn to Play a Card!` : `🃏 Trick #${gameState.trickNumber}/13 — ${SEAT_LABELS[gameState.currentTurnSeat]}'s Turn`);
+    }
+    const roleBadge = document.getElementById('round-role-badge');
+    if (roleBadge) roleBadge.textContent = `R${gameState.roundNumber} • Shuf: ${dealerLbl} | ରଙ୍ଗ: ${chooserLbl}`;
+  }
+
+  function renderRoleBadgesHtml(seat) {
+    let html = '';
+    if (gameState.dealerSeat === seat) html += `<span class="role-tag">🎴 SHUFFLE</span>`;
+    if (gameState.chooserSeat === seat) html += `<span class="role-tag">🎨 ରଙ୍ଗ (TRUMP)</span>`;
+    return html;
+  }
+
+  function renderAllUI() {
+    document.getElementById('room-code-badge').textContent = `ROOM: ${roomCode || '----'}`;
+    document.getElementById('score-badge').textContent = `A: ${gameState.teamAScore} | B: ${gameState.teamBScore} (${targetPoints})`;
+    document.getElementById('team-a-score').textContent = `${gameState.teamAScore} Pts`;
+    document.getElementById('team-b-score').textContent = `${gameState.teamBScore} Pts`;
+
+    const trumpEl = document.getElementById('trump-indicator');
+    trumpEl.textContent = gameState.isNoTrump ? 'ରଙ୍ଗ: 🃏 ବେରଙ୍ଗ' : (gameState.trumpSuit && gameState.trumpSuit !== 'NONE' ? 'ରଙ୍ଗ: ' + (SUIT_ODIA[gameState.trumpSuit] || gameState.trumpSuit) : 'ରଙ୍ଗ: --');
+
+    const rel = getRelativeSeats();
+    [
+      { seat: rel.top, nameEl: 'seat-top-name', bidEl: 'seat-top-bid', roleEl: 'seat-top-roles', boxEl: 'seat-top' },
+      { seat: rel.left, nameEl: 'seat-left-name', bidEl: 'seat-left-bid', roleEl: 'seat-left-roles', boxEl: 'seat-left' },
+      { seat: rel.right, nameEl: 'seat-right-name', bidEl: 'seat-right-bid', roleEl: 'seat-right-roles', boxEl: 'seat-right' }
+    ].forEach(item => {
+      const pInfo = gameState.seatPlayers[item.seat] || { name: SEAT_LABELS[item.seat], platform: 'APK' };
+      const platIcon = (pInfo.platform === 'WEB' || (pInfo.peerId && String(pInfo.peerId).startsWith('web_'))) ? '🌐 ' : '📱 ';
+      document.getElementById(item.nameEl).textContent = (pInfo.name && pInfo.name !== 'Waiting...') ? `${platIcon}${SEAT_SHORT[item.seat]}: ${pInfo.name}` : SEAT_LABELS[item.seat];
+      const b = gameState.bids[item.seat], w = gameState.tricksWon[item.seat] || 0;
+      document.getElementById(item.bidEl).textContent = `Bid: ${b !== null && b !== undefined ? b : '--'} | Won: ${w}`;
+      document.getElementById(item.roleEl).innerHTML = renderRoleBadgesHtml(item.seat);
+      const box = document.getElementById(item.boxEl);
+      if (box) box.classList.toggle('active-turn', gameState.currentTurnSeat === item.seat);
+    });
+
+    const selfBox = document.getElementById('seat-self');
+    if (selfBox) selfBox.classList.toggle('active-turn', gameState.currentTurnSeat === localSeat);
+    document.getElementById('local-player-name').textContent = `🌐 ${localPlayerName} (${SEAT_SHORT[localSeat]} • WEB)`;
+    const selfBid = gameState.bids[localSeat];
+    document.getElementById('local-player-bid').textContent = `Bid: ${selfBid !== null && selfBid !== undefined ? selfBid : '--'}`;
+    document.getElementById('local-player-won').textContent = `Won: ${gameState.tricksWon[localSeat] || 0}`;
+    document.getElementById('seat-self-roles').innerHTML = renderRoleBadgesHtml(localSeat);
+
+    const bidA = (gameState.bids.SEAT_0 || 0) + (gameState.bids.SEAT_2 || 0), bidB = (gameState.bids.SEAT_1 || 0) + (gameState.bids.SEAT_3 || 0);
+    const wonA = (gameState.tricksWon.SEAT_0 || 0) + (gameState.tricksWon.SEAT_2 || 0), wonB = (gameState.tricksWon.SEAT_1 || 0) + (gameState.tricksWon.SEAT_3 || 0);
+    document.getElementById('team-bids-bar').textContent = `Team A (A&C): ${wonA}/${bidA || '--'} | Team B (B&D): ${wonB}/${bidB || '--'}`;
+
+    const trickSlot = document.getElementById('trick-cards-slot');
+    trickSlot.innerHTML = '';
+    gameState.currentTrick.forEach(entry => {
+      const c = entry.card, isRed = c.suit === 'HEARTS' || c.suit === 'DIAMONDS';
+      const div = document.createElement('div');
+      div.className = 'trick-card ' + (isRed ? 'red' : 'black');
+      div.innerHTML = `<div style="font-size:10px;">${c.sym}${SUIT_SYMBOLS[c.suit]}</div><div style="font-size:14px;">${SUIT_SYMBOLS[c.suit]}</div><div class="trick-owner-tag">${SEAT_SHORT[entry.seat]}</div>`;
+      trickSlot.appendChild(div);
+    });
+
+    const undoBtn = document.getElementById('undo-card-btn');
+    if (undoBtn) undoBtn.style.display = (gameState.phase === 'PLAYING' && gameState.currentTrick.length === 1 && gameState.currentTrick[0].seat === localSeat) ? 'inline-flex' : 'none';
+
+    const colourPopup = document.getElementById('colour-popup');
+    if (colourPopup) colourPopup.style.display = (gameState.phase === 'COLOUR_SELECTION' && gameState.chooserSeat === localSeat) ? 'flex' : 'none';
+
+    const bidPopup = document.getElementById('bidding-popup');
+    if (bidPopup) {
+      const showBid = (gameState.phase === 'BIDDING' && gameState.currentTurnSeat === localSeat && gameState.bids[localSeat] === null);
+      bidPopup.style.display = showBid ? 'flex' : 'none';
+      if (showBid) {
+        const minK = countKeyCards(gameState.hands[localSeat] || []);
+        gameState.minBidValue = minK;
+        const slider = document.getElementById('bid-scroll-bar');
+        document.getElementById('bid-min-label').textContent = String(minK);
+        if (slider) {
+          slider.min = String(minK);
+          if (gameState.selectedBidValue < minK) gameState.selectedBidValue = minK;
+          slider.value = String(gameState.selectedBidValue);
+        }
+        document.getElementById('bid-label').textContent = 'Bid: ' + gameState.selectedBidValue;
+        document.getElementById('bid-call-btn').textContent = 'Call ' + gameState.selectedBidValue;
+      }
+    }
+
+    const handContainer = document.getElementById('hand-cards-container');
+    handContainer.innerHTML = '';
+    (gameState.hands[localSeat] || []).forEach(card => {
+      const isRed = card.suit === 'HEARTS' || card.suit === 'DIAMONDS', jkr = isJokerCard(card), playable = isCardPlayableByLocal(card);
+      const cardDiv = document.createElement('div');
+      cardDiv.className = 'playing-card ' + (isRed ? 'red' : 'black') + (jkr ? ' joker' : '') + (gameState.phase === 'PLAYING' && gameState.currentTurnSeat === localSeat && !playable ? ' disabled' : '');
+      cardDiv.innerHTML = `<div class="card-rank">${card.sym}</div><div class="card-suit">${SUIT_SYMBOLS[card.suit]}</div>${jkr ? '<div class="joker-badge">JOKER</div>' : ''}`;
+      cardDiv.onclick = () => playCardFromWeb(card);
+      handContainer.appendChild(cardDiv);
+    });
+  }
+
+  function showLobbyOverlay() { document.getElementById('lobby-screen').classList.remove('hidden'); }
+  function hideLobbyOverlay() { document.getElementById('lobby-screen').classList.add('hidden'); }
+  function enterTableManually() { hideLobbyOverlay(); renderAllUI(); }
+
+  function updateLobbySlotsUI() {
+    SEATS.forEach(seat => {
+      const slotEl = document.getElementById('lobby-slot-' + seat), dotEl = document.getElementById('dot-' + seat), info = gameState.seatPlayers[seat];
+      const rolePrefix = seat === 'SEAT_0' ? '👑 Player A: ' : (seat === 'SEAT_1' ? 'Player B: ' : (seat === 'SEAT_2' ? 'Player C: ' : 'Player D: '));
+      if (slotEl && info) {
+        const isWebUser = (seat === localSeat) || info.platform === 'WEB' || (info.peerId && String(info.peerId).startsWith('web_'));
+        const isConnected = Boolean(info.connected) && info.name && info.name !== 'Waiting...';
+        const platformBadge = isConnected
+          ? (isWebUser
+              ? `<span style="display:inline-flex;align-items:center;gap:2px;background:rgba(0,229,255,0.2);border:1px solid #00E5FF;color:#80D8FF;border-radius:4px;padding:1px 5px;font-size:9px;font-weight:900;margin-left:5px;">🌐 WEB</span>`
+              : `<span style="display:inline-flex;align-items:center;gap:2px;background:rgba(0,230,118,0.2);border:1px solid #00E676;color:#69F0AE;border-radius:4px;padding:1px 5px;font-size:9px;font-weight:900;margin-left:5px;">📱 APK${info.isHost ? ' HOST' : ''}</span>`)
+          : '';
+        const userIcon = isConnected ? (isWebUser ? '🌐 ' : '📱 ') : '⏳ ';
+        const youTag = seat === localSeat && isConnected ? `<span style="background:#FFD700;color:#000;border-radius:4px;padding:1px 4px;font-size:8.5px;font-weight:900;margin-left:4px;">YOU</span>` : '';
+        slotEl.innerHTML = `${userIcon}<b>${rolePrefix}</b><span>${info.name || 'Waiting...'}</span>${platformBadge}${youTag}`;
+      }
+      if (dotEl && info) dotEl.style.background = info.connected ? '#00E676' : '#E53935';
+    });
+  }
+
+  const RTDB_BASE_URL = 'https://dasa-gandia-p2p-default-rtdb.firebaseio.com';
+  const MQTT_WSS_BROKERS = ['wss://broker.emqx.io:8084/mqtt', 'wss://broker.hivemq.com:8884/mqtt', 'wss://test.mosquitto.org:8081/mqtt'];
+  const WEBRTC_ICE_CONFIG = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] };
+
+  let activeTransportName = 'Searching...', activeMqttWsMap = {}, webRtcPeersMap = {}, bcChannel = null, rtdbPollTimer = null, heartbeatTimer = null;
+  let localJoinedAtMs = Date.now(), seatConfirmedByHost = false;
+
+  function setConnStatus(state, label) {
+    activeTransportName = label;
+    const pill = document.getElementById('conn-status-pill'), txt = document.getElementById('conn-status-text');
+    if (pill) pill.className = 'conn-pill ' + state;
+    if (txt) txt.textContent = label;
+  }
+  function randomMsgId() { return Math.random().toString(36).substring(2, 10); }
+
+  function ensureWebRtcPeerConnection(remotePeerId, isInitiator) {
+    if (!remotePeerId || remotePeerId === localPeerId || !window.RTCPeerConnection) return null;
+    if (webRtcPeersMap[remotePeerId] && webRtcPeersMap[remotePeerId].pc) return webRtcPeersMap[remotePeerId];
+    try {
+      const pc = new RTCPeerConnection(WEBRTC_ICE_CONFIG), entry = { pc, dc: null };
+      webRtcPeersMap[remotePeerId] = entry;
+      function attachDataChannel(channel) {
+        entry.dc = channel;
+        channel.onopen = () => {
+          addWebRtcLog('WEBRTC-DC', `Direct WebRTC DataChannel open with ${remotePeerId}`, 'SUCCESS');
+          setConnStatus('connected', 'WebRTC P2P + APK Mesh');
+          try { channel.send(`DG0|PRESENCE|${roomCode}|${localPeerId}|${randomMsgId()}|${buildWebPresenceJson()}`); } catch (e) {}
+        };
+        channel.onmessage = (ev) => { if (ev && typeof ev.data === 'string') handleIncomingDg0Frame(ev.data, 'WebRTC-DC'); };
+      }
+      pc.onicecandidate = (ev) => { if (ev.candidate && roomCode) sendWebRtcSignal(remotePeerId, 'webrtc_ice', JSON.stringify(ev.candidate)); };
+      pc.ondatachannel = (ev) => { if (ev.channel) attachDataChannel(ev.channel); };
+      if (isInitiator) {
+        attachDataChannel(pc.createDataChannel('dg_p2p_mesh'));
+        pc.createOffer().then(offer => pc.setLocalDescription(offer).then(() => sendWebRtcSignal(remotePeerId, 'webrtc_offer', JSON.stringify(offer)))).catch(() => {});
+      }
+      return entry;
+    } catch (e) { return null; }
+  }
+
+  function sendWebRtcSignal(targetPeerId, sigType, sdpOrCandStr) {
+    if (!roomCode) return;
+    const msgId = randomMsgId(); recordProcessedId('SIG_' + msgId);
+    const sigPayload = JSON.stringify({ type: sigType, targetPeerId, senderPeerId: localPeerId, senderSeat: localSeat, sdpOrCandidate: sdpOrCandStr, timestamp: Date.now() });
+    publishToMqttWss('dg_room_v2/' + roomCode, `DG0|SIGNAL|${roomCode}|${localPeerId}|${msgId}|${sigPayload}`, false);
+  }
+
+  function handleIncomingWebRtcSignal(sig, senderPeerId) {
+    const fromPeer = sig.senderPeerId || senderPeerId;
+    if (!fromPeer || fromPeer === localPeerId || (sig.targetPeerId && sig.targetPeerId !== localPeerId)) return;
+    if (sig.type === 'webrtc_offer') {
+      const entry = ensureWebRtcPeerConnection(fromPeer, false);
+      if (!entry || !entry.pc) return;
+      try {
+        entry.pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(sig.sdpOrCandidate)))
+          .then(() => entry.pc.createAnswer())
+          .then(ans => entry.pc.setLocalDescription(ans).then(() => sendWebRtcSignal(fromPeer, 'webrtc_answer', JSON.stringify(ans))))
+          .catch(() => {});
+      } catch (e) {}
+    } else if (sig.type === 'webrtc_answer' && webRtcPeersMap[fromPeer]) {
+      try { webRtcPeersMap[fromPeer].pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(sig.sdpOrCandidate))).catch(() => {}); } catch (e) {}
+    } else if (sig.type === 'webrtc_ice' && webRtcPeersMap[fromPeer]) {
+      try { webRtcPeersMap[fromPeer].pc.addIceCandidate(new RTCIceCandidate(JSON.parse(sig.sdpOrCandidate))).catch(() => {}); } catch (e) {}
+    }
+  }
+
+  function encodeMqttRemainingLength(len) {
+    const bytes = [];
+    do { let enc = len % 128; len = Math.floor(len / 128); if (len > 0) enc |= 128; bytes.push(enc); } while (len > 0);
+    return bytes;
+  }
+  function encodeUtf8Bytes(str) { return Array.from(new TextEncoder().encode(str)); }
+  function encodeMqttString(str) { const u = encodeUtf8Bytes(str); return [(u.length >> 8) & 0xff, u.length & 0xff, ...u]; }
+  function buildMqttConnectPacket(clientId) {
+    const vh = [0x00, 0x04, 0x4d, 0x51, 0x54, 0x54, 0x04, 0x02, 0x00, 0x2d], pl = encodeMqttString(clientId);
+    return new Uint8Array([0x10, ...encodeMqttRemainingLength(vh.length + pl.length), ...vh, ...pl]);
+  }
+  function buildMqttSubscribePacket(topic, packetId) {
+    const vh = [(packetId >> 8) & 0xff, packetId & 0xff], pl = [...encodeMqttString(topic), 0x00];
+    return new Uint8Array([0x82, ...encodeMqttRemainingLength(vh.length + pl.length), ...vh, ...pl]);
+  }
+  function buildMqttPublishPacket(topic, messageStr, retain = false) {
+    const tb = encodeMqttString(topic), mb = encodeUtf8Bytes(messageStr);
+    return new Uint8Array([0x30 | (retain ? 0x01 : 0x00), ...encodeMqttRemainingLength(tb.length + mb.length), ...tb, ...mb]);
+  }
+  function parseIncomingMqttPackets(uint8Buf, onPublishPayload) {
+    let offset = 0;
+    while (offset < uint8Buf.length) {
+      const header = uint8Buf[offset++];
+      let mult = 1, remLen = 0;
+      while (offset < uint8Buf.length) {
+        const b = uint8Buf[offset++]; remLen += (b & 127) * mult;
+        if ((b & 128) === 0) break;
+        mult *= 128;
+      }
+      if (offset + remLen > uint8Buf.length) break;
+      if (((header & 0xf0) >> 4) === 3 && remLen >= 2) {
+        const topicLen = (uint8Buf[offset] << 8) | uint8Buf[offset + 1];
+        const qos = (header & 0x06) >> 1;
+        const ps = offset + 2 + topicLen + (qos > 0 ? 2 : 0), pe = offset + remLen;
+        if (ps <= pe) onPublishPayload(new TextDecoder().decode(uint8Buf.subarray(ps, pe)));
+      }
+      offset += remLen;
+    }
+  }
+
+  function connectMqttWssBrokers(code) {
+    Object.values(activeMqttWsMap).forEach(ws => { try { ws.close(); } catch (e) {} });
+    activeMqttWsMap = {};
+    MQTT_WSS_BROKERS.forEach((brokerUrl, idx) => {
+      try {
+        const ws = new WebSocket(brokerUrl, 'mqtt');
+        ws.binaryType = 'arraybuffer';
+        let pingInterval = null;
+        ws.onopen = () => ws.send(buildMqttConnectPacket('dg_web_' + localPeerId + '_' + Math.floor(100 + Math.random() * 899)));
+        ws.onmessage = (evt) => {
+          const bytes = new Uint8Array(evt.data);
+          if (bytes.length >= 2 && (bytes[0] & 0xf0) === 0x20) {
+            activeMqttWsMap[brokerUrl] = ws;
+            setConnStatus('connected', 'MQTT WSS + RTDB P2P');
+            addWebRtcLog('MQTT-WSS', 'Connected to ' + brokerUrl, 'SUCCESS');
+            const baseTopic = 'dg_room_v2/' + code;
+            ws.send(buildMqttSubscribePacket(baseTopic, 1));
+            ws.send(buildMqttSubscribePacket(baseTopic + '/state', 2));
+            ws.send(buildMqttSubscribePacket(baseTopic + '/roundDeck', 3));
+            ws.send(buildMqttPublishPacket(baseTopic, `DG0|WHO_IS_HERE|${code}|${localPeerId}|${randomMsgId()}|?`, false));
+            sendPresenceNow();
+            pingInterval = setInterval(() => { if (ws.readyState === WebSocket.OPEN) ws.send(new Uint8Array([0xc0, 0x00])); }, 18000);
+            return;
+          }
+          parseIncomingMqttPackets(bytes, (rawFrame) => handleIncomingDg0Frame(rawFrame, 'MQTT-' + (idx + 1)));
+        };
+        ws.onclose = () => { if (pingInterval) clearInterval(pingInterval); delete activeMqttWsMap[brokerUrl]; };
+      } catch (e) {}
+    });
+  }
+
+  function publishToMqttWss(topic, rawFrame, retain = false) {
+    const packet = buildMqttPublishPacket(topic, rawFrame, retain);
+    Object.values(activeMqttWsMap).forEach(ws => { if (ws && ws.readyState === WebSocket.OPEN) { try { ws.send(packet); } catch (e) {} } });
+  }
+
+  function buildWebPresenceJson() {
+    return JSON.stringify({
+      peerId: localPeerId, seat: localSeat, playerName: localPlayerName, avatarId: SEATS.indexOf(localSeat) + 1,
+      avatarHash: '', isHost: false, targetPoints: targetPoints, platform: 'WEB',
+      gameStarted: gameState.phase !== 'LOBBY', countdown: -1, joinedAt: localJoinedAtMs, isReady: true, lastSeen: Date.now()
+    });
+  }
+
+  function sendDg0FrameToAllTransports(rawFrame, subTopic = null, retain = false) {
+    if (!roomCode) return;
+    const baseTopic = 'dg_room_v2/' + roomCode;
+    publishToMqttWss(subTopic ? `${baseTopic}/${subTopic}` : baseTopic, rawFrame, retain);
+    Object.values(webRtcPeersMap).forEach(entry => { if (entry && entry.dc && entry.dc.readyState === 'open') { try { entry.dc.send(rawFrame); } catch (e) {} } });
+    if (bcChannel) { try { bcChannel.postMessage(rawFrame); } catch (e) {} }
+    syncWithLocalApkGateway(roomCode, rawFrame);
+  }
+
+  function sendPresenceNow() {
+    if (!roomCode) return;
+    const presenceJson = buildWebPresenceJson(), msgId = randomMsgId();
+    recordProcessedId(msgId);
+    sendDg0FrameToAllTransports(`DG0|PRESENCE|${roomCode}|${localPeerId}|${msgId}|${presenceJson}`, null, false);
+    rtdbPutRawJson(`rooms/${roomCode}/presence/${localPeerId}`, presenceJson);
+  }
+
+  function sendGameAction(payloadObj) {
+    if (!roomCode) return;
+    const msgId = randomMsgId(); recordProcessedId(msgId);
+    const jsonStr = JSON.stringify(Object.assign({}, payloadObj, { senderSeat: localSeat, msgId, timestamp: Date.now() }));
+    const frame = `DG0|ACTION|${roomCode}|${localPeerId}|${msgId}|${jsonStr}`;
+    sendDg0FrameToAllTransports(frame, null, false);
+    rtdbPutObj(`rooms/${roomCode}/latestAction`, { frame, timestamp: Date.now() });
+  }
+
+  function recordProcessedId(id) {
+    if (!id || processedFrameIds.has(id)) return false;
+    processedFrameIds.add(id);
+    if (processedFrameIds.size > 800) processedFrameIds.delete(processedFrameIds.values().next().value);
+    return true;
+  }
+
+  async function rtdbPutRawJson(path, rawJsonStr) {
+    try { await fetch(`${RTDB_BASE_URL}/${path}.json`, { method: 'PUT', headers: { 'Content-Type': 'application/json; charset=UTF-8' }, body: rawJsonStr }); } catch (e) {}
+  }
+  async function rtdbPutObj(path, dataObj) { return rtdbPutRawJson(path, JSON.stringify(dataObj)); }
+  async function rtdbGet(path) {
+    try { const res = await fetch(`${RTDB_BASE_URL}/${path}.json`); return res.ok ? await res.json() : null; } catch (e) { return null; }
+  }
+
+  async function syncWithLocalApkGateway(code, outgoingFrame) {
+    if (!window.location.protocol.startsWith('http') || window.location.hostname.includes('github.io')) return;
+    try {
+      const res = await fetch(`/api/p2p?room=${code}`, { method: 'POST', headers: { 'Content-Type': 'text/plain; charset=UTF-8' }, body: outgoingFrame });
+      if (res.ok) { const data = await res.json(); if (data && Array.isArray(data.frames)) data.frames.forEach(f => handleIncomingDg0Frame(f, 'APK-HTTP')); }
+    } catch (e) {}
+  }
+
+  function joinApkHostedRoom() {
+    ensureAudioUnlocked();
+    const nameInput = document.getElementById('player-name-input'), codeInput = document.getElementById('room-code-input');
+    if (nameInput && nameInput.value.trim()) { localPlayerName = nameInput.value.trim(); localStorage.setItem('dg_web_player_name', localPlayerName); }
+    const entered = (codeInput ? codeInput.value : roomCode).replace(/[^0-9]/g, '').slice(0, 4);
+    if (entered.length !== 4) { document.getElementById('lobby-status-msg').textContent = '⚠️ Please enter a valid 4-digit APK Room Code!'; return; }
+    roomCode = entered; localJoinedAtMs = Date.now(); seatConfirmedByHost = false;
+    document.getElementById('lobby-status-msg').textContent = `🔄 Connecting to APK Host Room ${roomCode}...`;
+    addWebRtcLog('JOIN', `Joining APK Host Room ${roomCode} as ${localPlayerName} (${localPeerId})`, 'INFO');
+    try { window.history.replaceState({}, '', `${window.location.pathname}?room=${roomCode}&pts=${targetPoints}`); } catch (e) {}
+    startZeroServerNetworking(roomCode);
+  }
+
+  function startZeroServerNetworking(code) {
+    if (!code || code.length !== 4) return;
+    setConnStatus('connecting', 'P2P Connecting...');
+    try {
+      if (bcChannel) bcChannel.close();
+      bcChannel = new BroadcastChannel('dasa_gandia_room_' + code);
+      bcChannel.onmessage = (ev) => { if (ev.data) handleIncomingDg0Frame(ev.data, 'TabChannel'); };
+    } catch (e) {}
+    connectMqttWssBrokers(code);
+    if (rtdbPollTimer) clearInterval(rtdbPollTimer);
+    if (heartbeatTimer) clearInterval(heartbeatTimer);
+    sendPresenceNow();
+    sendDg0FrameToAllTransports(`DG0|WHO_IS_HERE|${code}|${localPeerId}|${randomMsgId()}|?`, null, false);
+    pollFirebaseRtdbRoom(code);
+    rtdbPollTimer = setInterval(() => pollFirebaseRtdbRoom(code), 900);
+    heartbeatTimer = setInterval(() => sendPresenceNow(), 2500);
+  }
+
+  async function pollFirebaseRtdbRoom(code) {
+    if (!code || roomCode !== code) return;
+    const roomSnap = await rtdbGet(`rooms/${code}`);
+    if (!roomSnap || typeof roomSnap !== 'object') return;
+    if (roomSnap.presence && typeof roomSnap.presence === 'object') {
+      const now = Date.now();
+      const items = Object.entries(roomSnap.presence)
+        .map(([k, v]) => { if (!v || typeof v !== 'object') return null; if (!v.peerId) v.peerId = k; return v; })
+        .filter(v => v && (v.isHost || (now - (v.lastSeen || v.timestamp || now) < 60000)));
+      items.sort((a, b) => {
+        if (Boolean(a.isHost) !== Boolean(b.isHost)) return a.isHost ? -1 : 1;
+        const ja = a.joinedAt || Number.MAX_SAFE_INTEGER, jb = b.joinedAt || Number.MAX_SAFE_INTEGER;
+        return ja !== jb ? ja - jb : String(a.peerId).localeCompare(String(b.peerId));
+      });
+      if (!seatConfirmedByHost) {
+        const occupied = new Set(), priority = ['SEAT_1', 'SEAT_2', 'SEAT_3', 'SEAT_0'];
+        for (const item of items) {
+          const pid = item.peerId, isH = Boolean(item.isHost), reqSeat = item.seat;
+          if (pid === localPeerId) {
+            const chosen = (reqSeat && !occupied.has(reqSeat) && reqSeat !== 'SEAT_0') ? reqSeat : priority.find(s => !occupied.has(s));
+            if (chosen && chosen !== localSeat) {
+              if (gameState.seatPlayers[localSeat] && gameState.seatPlayers[localSeat].peerId === localPeerId) {
+                gameState.seatPlayers[localSeat] = { name: 'Waiting...', connected: false, isBot: true, platform: 'APK' };
+              }
+              localSeat = chosen; sendPresenceNow();
+            }
+            break;
+          } else {
+            const theirSeat = (reqSeat && !occupied.has(reqSeat) && (isH || reqSeat !== 'SEAT_0')) ? reqSeat : (isH ? 'SEAT_0' : priority.find(s => !occupied.has(s)));
+            if (theirSeat) occupied.add(theirSeat);
+          }
+        }
+      }
+      items.forEach(item => {
+        if (item.peerId && item.peerId !== localPeerId && item.seat) {
+          const synId = `rtdb_${item.peerId}_${Math.floor((item.lastSeen || now) / 1200)}`;
+          handleIncomingDg0Frame(`DG0|PRESENCE|${code}|${item.peerId}|${synId}|${JSON.stringify(item)}`, 'RTDB-Presence');
+        }
+      });
+    }
+    ['state', 'roundDeck', 'latestAction', 'latestChat'].forEach(nodeName => {
+      const node = roomSnap[nodeName];
+      if (node && typeof node.frame === 'string' && node.frame.startsWith('DG0|')) handleIncomingDg0Frame(node.frame, 'RTDB-' + nodeName);
+    });
+  }
+
+  function handleIncomingDg0Frame(raw, sourceTag) {
+    if (typeof raw !== 'string' || !raw.startsWith('DG0|')) return;
+    const parts = raw.split('|');
+    if (parts.length < 5) return;
+    const kind = parts[1], frameRoom = parts[2], senderPeerId = parts[3], msgId = parts[4], payload = parts.slice(5).join('|');
+    if (frameRoom !== roomCode || senderPeerId === localPeerId) return;
+
+    if (kind === 'WHO_IS_HERE') {
+      if (recordProcessedId('WIH_' + senderPeerId + '_' + msgId)) sendPresenceNow();
+      return;
+    }
+    if (kind === 'PRESENCE') {
+      try {
+        const json = JSON.parse(payload), peerId = json.peerId || senderPeerId;
+        if (!peerId || peerId === localPeerId) return;
+        const isHostPeer = Boolean(json.isHost), seatStr = json.seat || (isHostPeer ? 'SEAT_0' : 'SEAT_1');
+        const pName = json.playerName || SEAT_LABELS[seatStr] || 'Player';
+        const peerPlat = (json.platform === 'WEB' || String(peerId).startsWith('web_')) ? 'WEB' : 'APK';
+        if (json.targetPoints) { targetPoints = parseInt(json.targetPoints, 10) || targetPoints; document.getElementById('lobby-target-pill').textContent = targetPoints + ' PTS'; }
+        if (peerPlat === 'WEB' && localPeerId < peerId) ensureWebRtcPeerConnection(peerId, true);
+
+        SEATS.forEach(s => {
+          if (s !== seatStr && gameState.seatPlayers[s] && gameState.seatPlayers[s].peerId === peerId) {
+            gameState.seatPlayers[s] = { name: 'Waiting...', connected: false, isBot: true, platform: 'APK' };
+          }
+        });
+
+        let targetRemoteSeat = seatStr;
+        if (seatStr === localSeat && !seatConfirmedByHost) {
+          const remoteJoined = json.joinedAt || Number.MAX_SAFE_INTEGER;
+          const remoteWins = isHostPeer || remoteJoined < localJoinedAtMs || (remoteJoined === localJoinedAtMs && String(peerId) < String(localPeerId));
+          const occupiedNow = new Set([seatStr, 'SEAT_0']);
+          SEATS.forEach(s => { const sp = gameState.seatPlayers[s]; if (sp && sp.connected && sp.peerId && sp.peerId !== localPeerId) occupiedNow.add(s); });
+          const freeSlot = ['SEAT_1', 'SEAT_2', 'SEAT_3'].find(s => !occupiedNow.has(s));
+          if (remoteWins && freeSlot) { localSeat = freeSlot; sendPresenceNow(); }
+          else if (!remoteWins && freeSlot) targetRemoteSeat = freeSlot;
+        }
+        if (SEATS.includes(targetRemoteSeat)) {
+          gameState.seatPlayers[targetRemoteSeat] = { peerId, name: pName, platform: peerPlat, connected: true, isBot: false, isHost: isHostPeer };
+        }
+        if (isHostPeer) {
+          setConnStatus('connected', 'Connected to APK Host');
+          document.getElementById('lobby-status-msg').textContent = `✅ Connected to APK Host (${pName}) as 🌐 ${SEAT_LABELS[localSeat]} (WEB) • Waiting for Host`;
+        }
+        if (isHostPeer && Array.isArray(json.roomPeers) && json.roomPeers.length > 0) applyHostRoomPeersArray(json.roomPeers);
+        gameState.seatPlayers[localSeat] = { peerId: localPeerId, name: localPlayerName, platform: 'WEB', connected: true, isBot: false, isHost: false };
+        updateLobbySlotsUI(); renderAllUI();
+        if (isHostPeer && json.gameStarted && gameState.phase === 'LOBBY') { hideLobbyOverlay(); startWebRound(1, gameState.pendingDeckByRound[1]); }
+      } catch (e) {}
+      return;
+    }
+    if (kind === 'SIGNAL') {
+      if (!recordProcessedId('SIG_' + msgId)) return;
+      try {
+        const sig = JSON.parse(payload);
+        if (sig.type === 'start_game' && gameState.phase === 'LOBBY') { hideLobbyOverlay(); startWebRound(1, gameState.pendingDeckByRound[1]); }
+        else if (sig.type && sig.type.startsWith('webrtc_')) handleIncomingWebRtcSignal(sig, senderPeerId);
+      } catch (e) {}
+      return;
+    }
+    if (kind === 'ACTION') {
+      try {
+        const map = JSON.parse(payload), actionType = map.actionType;
+        if (!actionType) return;
+        if (actionType === 'SYNC_SEATS') {
+          if (map.seatPlayersJson) applyApkSeatsSyncJson(map.seatPlayersJson);
+          recordProcessedId(msgId);
+          return;
+        }
+        if (!recordProcessedId(msgId)) return;
+        addWebRtcLog(sourceTag, `Action: ${actionType}`, 'INFO');
+        switch (actionType) {
+          case 'START_GAME':
+            if (map.targetPoints) { targetPoints = parseInt(map.targetPoints, 10) || targetPoints; document.getElementById('lobby-target-pill').textContent = targetPoints + ' PTS'; }
+            if (map.seatPlayersJson) applyApkSeatsSyncJson(map.seatPlayersJson);
+            hideLobbyOverlay();
+            if (gameState.phase === 'LOBBY') startWebRound(1, gameState.pendingDeckByRound[1]);
+            break;
+          case 'ROUND_DECK_SEED': {
+            const rNum = parseInt(map.roundNumber || '1', 10) || 1, parsed = parseDeckCsv(map.deckCardsCsv || '');
+            if (parsed.length === 52) {
+              gameState.pendingDeckByRound[rNum] = parsed;
+              if (gameState.roundNumber === rNum && (gameState.phase === 'COLOUR_SELECTION' || gameState.phase === 'LOBBY')) startWebRound(rNum, parsed);
+            }
+            break;
+          }
+          case 'CHOOSE_COLOUR':
+            applyColourChoice(map.seat || gameState.chooserSeat, map.chosenSuit || map.suit || 'NONE', Boolean(map.isBeranga || map.isNoTrump), Boolean(map.isBoardColour || map.isBoardTrump));
+            break;
+          case 'SUBMIT_BID':
+          case 'PLACE_BID': {
+            const bid = parseInt(map.bid, 10);
+            if (!isNaN(bid)) applyBidPlaced(map.seat || gameState.currentTurnSeat, bid);
+            break;
+          }
+          case 'PLAY_CARD':
+            if (map.suit && map.rank) applyCardPlayed(map.seat || gameState.currentTurnSeat, map.suit, map.rank);
+            break;
+          case 'UNDO_CARD':
+            if (map.seat) applyUndoLastCard(map.seat);
+            break;
+          case 'SWAP_TEAMS':
+            if (map.seatA && map.seatB) {
+              const tmp = gameState.seatPlayers[map.seatA];
+              gameState.seatPlayers[map.seatA] = gameState.seatPlayers[map.seatB];
+              gameState.seatPlayers[map.seatB] = tmp;
+              if (localSeat === map.seatA) localSeat = map.seatB;
+              else if (localSeat === map.seatB) localSeat = map.seatA;
+              sendPresenceNow(); updateLobbySlotsUI(); renderAllUI();
+            }
+            break;
+        }
+      } catch (e) {}
+      return;
+    }
+    if (kind === 'CHAT' && recordProcessedId('CHAT_' + msgId)) {
+      try { const chat = JSON.parse(payload); showFloatingEmoji(chat.senderSeat || 'SEAT_0', chat.senderName || 'Player', chat.text || '🔥'); } catch (e) {}
+    }
+  }
+
+  function applyHostRoomPeersArray(roomPeersArr) {
+    let foundSelf = false;
+    const occupied = new Set(), seenSeats = new Set();
+    roomPeersArr.forEach(rp => {
+      if (!rp || !rp.seat) return;
+      const pid = rp.peerId || '', seatId = rp.seat, pName = rp.playerName || SEAT_LABELS[seatId] || 'Player';
+      const rpPlat = (rp.platform === 'WEB' || String(pid).startsWith('web_')) ? 'WEB' : 'APK';
+      seenSeats.add(seatId);
+      if (pid === localPeerId) {
+        foundSelf = true; seatConfirmedByHost = true;
+        if (seatId !== localSeat) { localSeat = seatId; sendPresenceNow(); }
+      } else occupied.add(seatId);
+      if (SEATS.includes(seatId)) {
+        gameState.seatPlayers[seatId] = { peerId: pid, name: pName, platform: pid === localPeerId ? 'WEB' : rpPlat, connected: true, isBot: false, isHost: Boolean(rp.isHost) };
+      }
+    });
+    SEATS.forEach(s => { if (!seenSeats.has(s) && s !== localSeat) gameState.seatPlayers[s] = { name: 'Waiting...', connected: false, isBot: true, platform: 'APK' }; });
+    if (!foundSelf) {
+      if (occupied.has(localSeat) || localSeat === 'SEAT_0') {
+        const free = ['SEAT_1', 'SEAT_2', 'SEAT_3'].find(s => !occupied.has(s));
+        if (free && free !== localSeat) localSeat = free;
+      }
+      gameState.seatPlayers[localSeat] = { peerId: localPeerId, name: localPlayerName, platform: 'WEB', connected: true, isBot: false, isHost: false };
+      sendPresenceNow();
+    }
+  }
+
+  function applyApkSeatsSyncJson(seatPlayersJsonStr) {
+    try {
+      const root = typeof seatPlayersJsonStr === 'string' ? JSON.parse(seatPlayersJsonStr) : seatPlayersJsonStr;
+      if (!root || typeof root !== 'object' || (root.roomCode && String(root.roomCode) !== String(roomCode))) return;
+      if (root.targetPoints) { targetPoints = parseInt(root.targetPoints, 10) || targetPoints; document.getElementById('lobby-target-pill').textContent = targetPoints + ' PTS'; }
+      if (Array.isArray(root.players)) {
+        let foundSelf = false;
+        const occupied = new Set();
+        root.players.forEach(pl => {
+          if (!pl || !pl.seat) return;
+          const seatId = pl.seat, pid = pl.peerId || '', pName = pl.name || 'Waiting...';
+          const isConn = Boolean(pl.isConnected) && !pName.toLowerCase().includes('waiting'), isBot = Boolean(pl.isBot);
+          const plPlat = (pl.platform === 'WEB' || String(pid).startsWith('web_')) ? 'WEB' : 'APK';
+          if (pid && pid === localPeerId) {
+            foundSelf = true; seatConfirmedByHost = true;
+            if (seatId !== localSeat) { localSeat = seatId; sendPresenceNow(); }
+          } else if (isConn && !isBot) occupied.add(seatId);
+          if (SEATS.includes(seatId)) {
+            gameState.seatPlayers[seatId] = {
+              peerId: pid, name: pid === localPeerId ? localPlayerName : pName, platform: pid === localPeerId ? 'WEB' : plPlat,
+              connected: pid === localPeerId ? true : isConn, isBot: pid === localPeerId ? false : isBot, isHost: Boolean(pl.isHost)
+            };
+          }
+        });
+        if (!foundSelf) {
+          if (occupied.has(localSeat) || localSeat === 'SEAT_0') {
+            const free = ['SEAT_1', 'SEAT_2', 'SEAT_3'].find(s => !occupied.has(s));
+            if (free && free !== localSeat) localSeat = free;
+          }
+          gameState.seatPlayers[localSeat] = { peerId: localPeerId, name: localPlayerName, platform: 'WEB', connected: true, isBot: false, isHost: false };
+          sendPresenceNow();
+        }
+      }
+      updateLobbySlotsUI(); renderAllUI();
+      if (root.gameStarted && gameState.phase === 'LOBBY') { hideLobbyOverlay(); startWebRound(1, gameState.pendingDeckByRound[1]); }
+    } catch (e) {}
+  }
+
+  function sendEmoji(emoji) {
+    showFloatingEmoji(localSeat, localPlayerName, emoji);
+    if (!roomCode) return;
+    const msgId = randomMsgId(); recordProcessedId('CHAT_' + msgId);
+    const chatJson = JSON.stringify({ id: msgId, senderName: localPlayerName, senderSeat: localSeat, text: emoji, isEmoji: true, isSpectator: false, timestamp: Date.now() });
+    const frame = `DG0|CHAT|${roomCode}|${localPeerId}|${msgId}|${chatJson}`;
+    sendDg0FrameToAllTransports(frame, null, false);
+    rtdbPutObj(`rooms/${roomCode}/latestChat`, { frame, timestamp: Date.now() });
+  }
+
+  function showFloatingEmoji(seat, senderName, emoji) {
+    const table = document.getElementById('felt-table');
+    if (!table) return;
+    const pos = getSeatAnchorPercent(seat), bubble = document.createElement('div');
+    bubble.style.cssText = `position:absolute;left:${pos.x}%;top:${pos.y}%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.85);border:1.5px solid #FFD700;border-radius:20px;padding:4px 10px;font-size:14px;z-index:90;pointer-events:none;transition:all 1.2s ease-out;`;
+    bubble.textContent = `${emoji} ${senderName}`;
+    table.appendChild(bubble);
+    setTimeout(() => { bubble.style.top = (pos.y - 12) + '%'; bubble.style.opacity = '0'; }, 60);
+    setTimeout(() => bubble.remove(), 1300);
+  }
+
+  function toggleScoreboard() { const m = document.getElementById('score-modal'); if (m) m.style.display = m.style.display === 'flex' ? 'none' : 'flex'; }
+  function toggleRules() { const m = document.getElementById('rules-modal'); if (m) m.style.display = m.style.display === 'flex' ? 'none' : 'flex'; }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const nameInput = document.getElementById('player-name-input'), codeInput = document.getElementById('room-code-input');
+    if (nameInput) nameInput.value = localPlayerName;
+    if (codeInput && roomCode) codeInput.value = roomCode;
+    document.getElementById('lobby-target-pill').textContent = targetPoints + ' PTS';
+    updateLobbySlotsUI(); renderAllUI();
+    if (roomCode && roomCode.length === 4) joinApkHostedRoom();
+  });
+</script>
+</body>
+</html>
